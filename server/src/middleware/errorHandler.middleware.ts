@@ -1,9 +1,7 @@
-// src/middleware/errorHandler.middleware.ts
 import { Request, Response, NextFunction } from 'express';
 import { Prisma } from '@prisma/client';
 import { logError, generateCorrelationId } from '../config/logger';
 
-// Custom error class for operational errors
 export class AppError extends Error {
   public readonly statusCode: number;
   public readonly isOperational: boolean;
@@ -22,12 +20,10 @@ export class AppError extends Error {
     this.code = code;
     this.correlationId = generateCorrelationId();
 
-    // Maintains proper stack trace for where our error was thrown
     Error.captureStackTrace(this, this.constructor);
   }
 }
 
-// Error response interfaces
 interface BaseErrorResponse {
   success: false;
   error: {
@@ -48,7 +44,6 @@ interface DevErrorResponse extends BaseErrorResponse {
   };
 }
 
-// Handle Prisma errors
 const handlePrismaError = (
   error: Prisma.PrismaClientKnownRequestError
 ): AppError => {
@@ -156,7 +151,6 @@ const handlePrismaError = (
   return appError;
 };
 
-// Handle JWT errors
 const handleJWTError = (error: Error): AppError => {
   if (error.name === 'JsonWebTokenError') {
     return new AppError('Invalid token', 401, true, 'INVALID_TOKEN');
@@ -170,7 +164,6 @@ const handleJWTError = (error: Error): AppError => {
   return new AppError('Authentication failed', 401, true, 'AUTH_ERROR');
 };
 
-// Handle validation errors
 const handleValidationError = (error: any): AppError => {
   if (error.array && typeof error.array === 'function') {
     const errors = error.array();
@@ -204,12 +197,10 @@ const handleValidationError = (error: any): AppError => {
   return new AppError('Validation failed', 400, true, 'VALIDATION_ERROR');
 };
 
-// Handle cast errors (usually from invalid IDs)
 const handleCastError = (error: any): AppError => {
   return new AppError('Invalid ID format', 400, true, 'INVALID_ID');
 };
 
-// Handle syntax errors (malformed JSON, etc.)
 const handleSyntaxError = (error: SyntaxError): AppError => {
   if (error.message.includes('JSON')) {
     return new AppError('Invalid JSON format', 400, true, 'INVALID_JSON');
@@ -217,7 +208,6 @@ const handleSyntaxError = (error: SyntaxError): AppError => {
   return new AppError('Malformed request', 400, true, 'SYNTAX_ERROR');
 };
 
-// Send error response in development
 const sendErrorDev = (err: AppError, req: Request, res: Response): void => {
   const errorResponse: DevErrorResponse = {
     success: false,
@@ -240,7 +230,6 @@ const sendErrorDev = (err: AppError, req: Request, res: Response): void => {
   res.status(err.statusCode).json(errorResponse);
 };
 
-// Send error response in production
 const sendErrorProd = (err: AppError, req: Request, res: Response): void => {
   if (err.isOperational) {
     const errorResponse: BaseErrorResponse = {
@@ -280,7 +269,6 @@ const sendErrorProd = (err: AppError, req: Request, res: Response): void => {
   }
 };
 
-// Global error handler middleware
 export const errorHandler = (
   err: Error,
   req: Request,
@@ -289,7 +277,6 @@ export const errorHandler = (
 ): void => {
   let error = err;
 
-  // Handle specific error types
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
     error = handlePrismaError(error);
   } else if (
@@ -321,7 +308,6 @@ export const errorHandler = (
 
   const appError = error as AppError;
 
-  // Log error with correlation ID
   logError(
     appError,
     {
@@ -336,7 +322,6 @@ export const errorHandler = (
     appError.correlationId
   );
 
-  // Send error response
   if (process.env.NODE_ENV === 'development') {
     sendErrorDev(appError, req, res);
   } else {
@@ -344,27 +329,6 @@ export const errorHandler = (
   }
 };
 
-export const notFoundHandler = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): void => {
-  const error = new AppError(
-    `Route ${req.originalUrl} not found`,
-    404,
-    true,
-    'ROUTE_NOT_FOUND'
-  );
-  next(error);
-};
-
-export const asyncHandler = <T extends Request, U extends Response>(
-  fn: (req: T, res: U, next: NextFunction) => Promise<any>
-) => {
-  return (req: T, res: U, next: NextFunction): void => {
-    Promise.resolve(fn(req, res, next)).catch(next);
-  };
-};
 
 export const createError = {
   badRequest: (message: string = 'Bad request', code?: string) =>
@@ -391,7 +355,6 @@ export const createError = {
   ) => new AppError(message, 503, true, code),
 };
 
-// Graceful shutdown handler
 export const gracefulShutdown = (server: any) => {
   return (signal: string) => {
     logError(`Received ${signal}. Shutting down gracefully...`);
