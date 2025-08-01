@@ -344,7 +344,6 @@ export const errorHandler = (
   }
 };
 
-// 404 handler for routes that don't exist
 export const notFoundHandler = (
   req: Request,
   res: Response,
@@ -359,7 +358,6 @@ export const notFoundHandler = (
   next(error);
 };
 
-// Async error wrapper for catching errors in async route handlers
 export const asyncHandler = <T extends Request, U extends Response>(
   fn: (req: T, res: U, next: NextFunction) => Promise<any>
 ) => {
@@ -368,7 +366,6 @@ export const asyncHandler = <T extends Request, U extends Response>(
   };
 };
 
-// Utility function to create common errors
 export const createError = {
   badRequest: (message: string = 'Bad request', code?: string) =>
     new AppError(message, 400, true, code),
