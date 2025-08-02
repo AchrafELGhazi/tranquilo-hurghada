@@ -1,4 +1,3 @@
-// components/common/LanguageSelector.tsx
 import React, { useState, useRef, useEffect } from 'react';
 import { useI18n } from '@/contexts/I18nContext';
 
@@ -7,7 +6,6 @@ export const LanguageSelector: React.FC = () => {
       const [isOpen, setIsOpen] = useState(false);
       const dropdownRef = useRef<HTMLDivElement>(null);
 
-      // Close dropdown when clicking outside
       useEffect(() => {
             const handleClickOutside = (event: MouseEvent) => {
                   if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -28,7 +26,6 @@ export const LanguageSelector: React.FC = () => {
 
       return (
             <div className='relative' ref={dropdownRef}>
-                  {/* Trigger Button */}
                   <button
                         onClick={() => setIsOpen(!isOpen)}
                         className='flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors'
@@ -46,7 +43,6 @@ export const LanguageSelector: React.FC = () => {
                         </svg>
                   </button>
 
-                  {/* Dropdown Menu */}
                   {isOpen && (
                         <div className='absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50'>
                               <div className='py-1' role='menu'>

@@ -1,4 +1,3 @@
-// App.tsx
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { LoadingScreen } from '@/components/common/LoadingScreen';
@@ -16,7 +15,6 @@ const App: React.FC = () => {
 
       useEffect(() => {
             const initializeApp = async () => {
-                  // Simulate loading steps with progress updates
                   const steps = [
                         { message: 'Loading translations...', progress: 20, delay: 800 },
                         { message: 'Initializing router...', progress: 40, delay: 600 },
@@ -30,7 +28,6 @@ const App: React.FC = () => {
                         await new Promise(resolve => setTimeout(resolve, step.delay));
                   }
 
-                  // Final delay to show completion
                   await new Promise(resolve => setTimeout(resolve, 300));
                   setIsAppLoading(false);
             };
@@ -42,7 +39,7 @@ const App: React.FC = () => {
             <I18nProvider>
                   <Router>
                         {isAppLoading ? (
-                              <LoadingScreen progress={loadingProgress} showProgress={true} />
+                              <LoadingScreen progress={loadingProgress} />
                         ) : (
                               <Layout>
                                     <Routes>

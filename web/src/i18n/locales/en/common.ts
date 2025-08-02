@@ -63,4 +63,20 @@ export const common = {
      selectOption: 'Select an option',
      allOptions: 'All',
      none: 'None',
+
+     // Loading states (new additions)
+     preparing: 'Preparing application...',
+     loadingTranslations: 'Loading translations...',
+     initializingRouter: 'Initializing router...',
+     settingUpComponents: 'Setting up components...',
+     applyingTheme: 'Applying theme...',
+     almostReady: 'Almost ready...',
+     initializing: 'Initializing, this may take a moment...',
+     almostThere: 'Almost there, finishing up...',
+     ready: 'Ready to go!',
+     startingUp: 'Starting up...',
+     loadingResources: 'Loading resources...',
+     configuringApp: 'Configuring application...',
+     finalizingSetup: 'Finalizing setup...',
+     readyToLaunch: 'Ready to launch!',
 } as const;

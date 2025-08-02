@@ -1,4 +1,3 @@
-// types/i18n.types.ts
 import React from 'react';
 
 // Supported language codes

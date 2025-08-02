@@ -1,8 +1,6 @@
-// utils/translationLoader.ts
 
 import type { SupportedLanguage, TranslationNamespaces } from '@/types/i18.types';
 
-// Dynamic import function for translations
 export const loadTranslations = async (language: SupportedLanguage): Promise<TranslationNamespaces> => {
      try {
           switch (language) {
@@ -59,7 +57,6 @@ export const loadTranslations = async (language: SupportedLanguage): Promise<Tra
           }
      } catch (error) {
           console.error(`Failed to load translations for ${language}:`, error);
-          // Fallback to English
           const en = await import('@/i18n/locales/en');
           return {
                common: en.common,
@@ -70,14 +67,12 @@ export const loadTranslations = async (language: SupportedLanguage): Promise<Tra
      }
 };
 
-// Translation interpolation utility
 export const interpolate = (template: string, params: Record<string, string | number> = {}): string => {
      return template.replace(/\{\{(\w+)\}\}/g, (match, key) => {
           return params[key]?.toString() || match;
      });
 };
 
-// Pluralization utility (simple English-like rules)
 export const pluralize = (
      key: string,
      count: number,
