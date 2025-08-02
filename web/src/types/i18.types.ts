@@ -1,5 +1,8 @@
+// types/i18n.types.ts
+import React from 'react';
+
 // Supported language codes
-export type SupportedLanguage = 'en' | 'es' | 'fr';
+export type SupportedLanguage = 'en' | 'es' | 'fr' | 'de' | 'pt' | 'ar';
 
 // Language configuration
 export interface Language {

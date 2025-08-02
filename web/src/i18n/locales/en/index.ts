@@ -1,8 +1,8 @@
-import type { TranslationNamespaces } from '@/i18n/types/i18.types';
 import { common } from './common';
 import { navigation } from './navigation';
 import { pages } from './pages';
 import { errors } from './errors';
+import type { TranslationNamespaces } from '@/types/i18.types';
 
 export const en: TranslationNamespaces = {
      common,

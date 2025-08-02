@@ -1,6 +1,8 @@
-import type { Language, SupportedLanguage } from "./types/i18.types";
+// config/languages.ts
 
-export const SUPPORTED_LANGUAGES: Language[] = [
+import type { Language, SupportedLanguage } from "@/types/i18.types";
+
+export const languages: Language[] = [
      {
           code: 'en',
           name: 'English',
@@ -22,75 +24,53 @@ export const SUPPORTED_LANGUAGES: Language[] = [
           flag: '🇫🇷',
           rtl: false,
      },
+     {
+          code: 'de',
+          name: 'German',
+          nativeName: 'Deutsch',
+          flag: '🇩🇪',
+          rtl: false,
+     },
+     {
+          code: 'pt',
+          name: 'Portuguese',
+          nativeName: 'Português',
+          flag: '🇵🇹',
+          rtl: false,
+     },
+     {
+          code: 'ar',
+          name: 'Arabic',
+          nativeName: 'العربية',
+          flag: '🇸🇦',
+          rtl: true,
+     },
 ];
 
-// Default configuration
-export const I18N_CONFIG = {
-     defaultLanguage: 'en' as SupportedLanguage,
-     fallbackLanguage: 'en' as SupportedLanguage,
-     storageKey: 'preferred-language',
+export const defaultLanguage: SupportedLanguage = 'en';
+export const fallbackLanguage: SupportedLanguage = 'en';
 
-     // Interpolation settings
-     interpolation: {
-          prefix: '{{',
-          suffix: '}}',
-          escapeValue: false,
-     },
-
-     // Detection settings
-     detection: {
-          // Order of language detection
-          order: ['localStorage', 'navigator', 'htmlTag', 'path', 'subdomain'],
-
-          // Cache user language
-          caches: ['localStorage'],
-
-          // Optional: cookie settings if using cookies
-          cookieMinutes: 10080, // 7 days
-          cookieDomain: 'localhost',
-     },
-
-     // Development settings
-     debug: import.meta.env.DEV,
-     saveMissing: import.meta.env.DEV,
-
-     // Performance settings
-     load: 'languageOnly', // 'all' | 'currentOnly' | 'languageOnly'
-     preload: ['en'], // Preload specific languages
-
-     // Namespace settings
-     defaultNS: 'common',
-     fallbackNS: 'common',
-     ns: ['common', 'navigation', 'pages', 'errors'],
-} as const;
-
-// Helper functions
-export const getLanguageByCode = (code: string): Language | undefined => {
-     return SUPPORTED_LANGUAGES.find(lang => lang.code === code);
+// Get browser language preference
+export const getBrowserLanguage = (): SupportedLanguage => {
+     const browserLang = navigator.language.split('-')[0] as SupportedLanguage;
+     return languages.some(lang => lang.code === browserLang) ? browserLang : defaultLanguage;
 };
 
-export const isLanguageSupported = (code: string): code is SupportedLanguage => {
-     return SUPPORTED_LANGUAGES.some(lang => lang.code === code);
+// Get language from localStorage
+export const getStoredLanguage = (): SupportedLanguage | null => {
+     try {
+          const stored = localStorage.getItem('preferred-language') as SupportedLanguage;
+          return languages.some(lang => lang.code === stored) ? stored : null;
+     } catch {
+          return null;
+     }
 };
 
-export const getLanguageFromNavigator = (): SupportedLanguage => {
-     if (typeof navigator === 'undefined') return I18N_CONFIG.defaultLanguage;
-
-     const navigatorLanguage = navigator.language.split('-')[0];
-     return isLanguageSupported(navigatorLanguage)
-          ? navigatorLanguage
-          : I18N_CONFIG.defaultLanguage;
-};
-
-export const getLanguageFromStorage = (): SupportedLanguage | null => {
-     if (typeof localStorage === 'undefined') return null;
-
-     const stored = localStorage.getItem(I18N_CONFIG.storageKey);
-     return stored && isLanguageSupported(stored) ? stored : null;
-};
-
-export const setLanguageInStorage = (language: SupportedLanguage): void => {
-     if (typeof localStorage !== 'undefined') {
-          localStorage.setItem(I18N_CONFIG.storageKey, language);
+// Store language preference
+export const storeLanguage = (language: SupportedLanguage): void => {
+     try {
+          localStorage.setItem('preferred-language', language);
+     } catch {
+          // Silent fail for environments without localStorage
      }
 };

@@ -1,4 +1,4 @@
-import type { TranslationParams, InterpolationOptions } from '../types/i18n.types';
+import type { TranslationParams, InterpolationOptions } from '../../types/i18n.types';
 import { I18N_CONFIG } from '../config';
 
 /**
