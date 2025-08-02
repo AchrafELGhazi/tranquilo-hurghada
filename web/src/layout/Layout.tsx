@@ -1,8 +1,7 @@
-// components/layout/Layout.tsx
 import React, { type ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useI18n } from '@/contexts/I18nContext';
 import { LanguageSelector } from '@/components/common/LanguageSelector';
+import { useI18n } from '@/hooks';
 
 interface LayoutProps {
       children: ReactNode;

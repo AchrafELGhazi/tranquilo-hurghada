@@ -1,6 +1,6 @@
+import { useI18n } from '@/hooks';
 import React from 'react';
 import { PropagateLoader } from 'react-spinners';
-import { useI18n } from '@/contexts/I18nContext';
 
 export interface LoadingScreenProps {
       progress?: number;

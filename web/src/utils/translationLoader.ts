@@ -1,4 +1,3 @@
-
 import type { SupportedLanguage, TranslationNamespaces } from '@/types/i18.types';
 
 export const loadTranslations = async (language: SupportedLanguage): Promise<TranslationNamespaces> => {

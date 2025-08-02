@@ -1,4 +1,4 @@
-import { useI18n } from "@/contexts/I18nContext";
+import { useI18n } from '@/hooks';
 
 export const About: React.FC = () => {
       const { t } = useI18n();

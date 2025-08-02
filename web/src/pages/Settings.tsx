@@ -1,4 +1,4 @@
-import { useI18n } from "@/contexts/I18nContext";
+import { useI18n } from '@/hooks';
 
 export const Settings: React.FC = () => {
       const { t, language } = useI18n();

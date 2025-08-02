@@ -1,6 +1,5 @@
-// pages/Home.tsx
 import React from 'react';
-import { useI18n } from '@/contexts/I18nContext';
+import { useI18n } from '@/hooks';
 
 export const Home: React.FC = () => {
       const { t } = useI18n();

@@ -1,11 +1,11 @@
-// contexts/I18nContext.tsx
-import React, { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
-
+import React, { createContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import { loadTranslations, interpolate, pluralize } from '@/utils/translationLoader';
 import type { I18nContextType, SupportedLanguage, TranslationKey, TranslationNamespaces, TranslationParams } from '@/types/i18.types';
-import { defaultLanguage, fallbackLanguage, getBrowserLanguage, getStoredLanguage, languages, storeLanguage } from '@/i18n/config';
+import { defaultLanguage, fallbackLanguage, getBrowserLanguage, getStoredLanguage, storeLanguage } from '@/config/languages';
+import { languages } from '@/lib/constants';
+import { useI18n } from '@/hooks';
 
-const I18nContext = createContext<I18nContextType | undefined>(undefined);
+export const I18nContext = createContext<I18nContextType | undefined>(undefined);
 
 interface I18nProviderProps {
       children: ReactNode;
@@ -23,7 +23,6 @@ export const I18nProvider: React.FC<I18nProviderProps> = ({
       const [isLoading, setIsLoading] = useState(true);
       const [error, setError] = useState<string | null>(null);
 
-      // Initialize language preference
       useEffect(() => {
             const initializeLanguage = () => {
                   const storedLang = getStoredLanguage();
@@ -36,7 +35,6 @@ export const I18nProvider: React.FC<I18nProviderProps> = ({
             initializeLanguage();
       }, [propDefaultLanguage]);
 
-      // Load translations when language changes
       useEffect(() => {
             const loadLanguageTranslations = async () => {
                   setIsLoading(true);
@@ -46,7 +44,6 @@ export const I18nProvider: React.FC<I18nProviderProps> = ({
                         const newTranslations = await loadTranslations(currentLanguage);
                         setTranslations(newTranslations);
 
-                        // Apply RTL styling
                         const isRTL = languages.find(lang => lang.code === currentLanguage)?.rtl || false;
                         document.documentElement.setAttribute('dir', isRTL ? 'rtl' : 'ltr');
                         document.documentElement.setAttribute('lang', currentLanguage);
@@ -54,7 +51,6 @@ export const I18nProvider: React.FC<I18nProviderProps> = ({
                         setError('Failed to load translations');
                         console.error('Translation loading error:', err);
 
-                        // Fallback to default language
                         if (currentLanguage !== propFallbackLanguage) {
                               try {
                                     const fallbackTranslations = await loadTranslations(propFallbackLanguage);
@@ -71,7 +67,6 @@ export const I18nProvider: React.FC<I18nProviderProps> = ({
             loadLanguageTranslations();
       }, [currentLanguage, propFallbackLanguage]);
 
-      // Change language function
       const setLanguage = useCallback((language: SupportedLanguage) => {
             if (languages.some(lang => lang.code === language)) {
                   setCurrentLanguage(language);
@@ -79,7 +74,6 @@ export const I18nProvider: React.FC<I18nProviderProps> = ({
             }
       }, []);
 
-      // Translation function
       const t = useCallback(
             (key: TranslationKey, params: TranslationParams = {}): string => {
                   if (!translations) {
@@ -93,7 +87,6 @@ export const I18nProvider: React.FC<I18nProviderProps> = ({
                         return key;
                   }
 
-                  // Handle pluralization
                   if (params.count !== undefined) {
                         const pluralizedText = pluralize(translationKey, Number(params.count), namespaceTranslations);
                         return interpolate(pluralizedText, params);
@@ -121,16 +114,7 @@ export const I18nProvider: React.FC<I18nProviderProps> = ({
       return <I18nContext.Provider value={contextValue}>{children}</I18nContext.Provider>;
 };
 
-// Custom hook to use I18n context
-export const useI18n = (): I18nContextType => {
-      const context = useContext(I18nContext);
-      if (context === undefined) {
-            throw new Error('useI18n must be used within an I18nProvider');
-      }
-      return context;
-};
 
-// HOC for components that need translations
 export const withI18n = <P extends object>(Component: React.ComponentType<P & { t: I18nContextType['t'] }>) => {
       const WrappedComponent = (props: P) => {
             const { t } = useI18n();

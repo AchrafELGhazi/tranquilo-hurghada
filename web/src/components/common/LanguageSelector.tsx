@@ -1,5 +1,5 @@
+import { useI18n } from '@/hooks';
 import React, { useState, useRef, useEffect } from 'react';
-import { useI18n } from '@/contexts/I18nContext';
 
 export const LanguageSelector: React.FC = () => {
       const { language, languages, setLanguage, t } = useI18n();
