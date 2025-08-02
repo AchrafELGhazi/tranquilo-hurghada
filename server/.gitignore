@@ -1,5 +1,82 @@
+# ----------------------
+# Node.js dependencies
+# ----------------------
 node_modules/
+
+# ----------------------
+# Build outputs
+# ----------------------
 dist/
-.env
+build/
+
+# ----------------------
+# TypeScript
+# ----------------------
+*.tsbuildinfo
+
+# ----------------------
+# Logs
+# ----------------------
+logs/
 *.log
-/src/generated/prisma
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Winston / custom logs
+*.trace
+*.out
+*.err
+
+# ----------------------
+# Environment variables
+# ----------------------
+.env
+.env.*.local
+
+# ----------------------
+# Prisma
+# ----------------------
+prisma/dev.db
+prisma/dev.db-journal
+prisma/migrations/dev/
+*.sqlite
+*.db
+
+# ----------------------
+# VSCode and IDEs
+# ----------------------
+.vscode/
+.idea/
+*.sw?
+*.swo
+*.bak
+
+# ----------------------
+# MacOS & System
+# ----------------------
+.DS_Store
+Thumbs.db
+
+# ----------------------
+# Tests & Coverage
+# ----------------------
+coverage/
+*.lcov
+
+# ----------------------
+# Other temporary files
+# ----------------------
+tmp/
+temp/
+.cache/
+*.tgz
+
+# ----------------------
+# Local runtime files
+# ----------------------
+.nodemon.json
+pidfile
+*.pid
+*.seed.ts

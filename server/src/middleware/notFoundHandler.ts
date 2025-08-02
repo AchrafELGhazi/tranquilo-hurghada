@@ -1,13 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
 
 export const notFoundHandler = (
-  req: Request,
-  res: Response,
-  next: NextFunction
+    req: Request,
+    res: Response,
+    next: NextFunction
 ) => {
-  const error = new Error(`Route ${req.originalUrl} not found`) as any;
-  error.statusCode = 404;
-  error.status = 'fail';
+    const error = new Error(`Route ${req.originalUrl} not found`) as any;
+    error.statusCode = 404;
+    error.status = 'fail';
 
-  next(error);
+    next(error);
 };
