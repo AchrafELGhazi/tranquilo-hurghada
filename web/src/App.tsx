@@ -13,13 +13,13 @@ import { I18nextProvider } from 'react-i18next';
 import i18n from '@/config/i18n';
 import { LoadingScreen } from '@/components/common/LoadingScreen';
 import { Layout } from './layout/public/Layout';
-import { Home } from './pages/Home';
-import { About } from './pages/About';
-import { Profile } from './pages/Profile';
-import { Settings } from './pages/Settings';
-import { NotFound } from './pages/NotFound';
+import { Home } from './pages/public/Home';
+import { About } from './pages/public/About';
+import { Profile } from './pages/public/Profile';
+import { Settings } from './pages/public/Settings';
+import { NotFound } from './pages/public/NotFound';
 import { AdminLayout } from './layout/admin/AdminLayout';
-import { AdminDashboard } from './pages/AdminDashboard';
+import { AdminDashboard } from './pages/admin/AdminDashboard';
 
 
 const LanguageRedirect: React.FC = () => {
