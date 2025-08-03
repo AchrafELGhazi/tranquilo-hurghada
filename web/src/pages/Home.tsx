@@ -1,8 +1,7 @@
-import React from 'react';
-import { useI18n } from '@/hooks';
+import { useTranslation } from 'react-i18next';
 
 export const Home: React.FC = () => {
-      const { t } = useI18n();
+      const { t } = useTranslation();
 
       return (
             <div className='space-y-8'>

@@ -1,10 +1,12 @@
-import { useI18n } from '@/hooks';
 import React, { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import i18n, { languages } from '@/config/i18n';
 
 export const LanguageSelector: React.FC = () => {
-      const { language, languages, setLanguage, t } = useI18n();
+      const { t } = useTranslation();
       const [isOpen, setIsOpen] = useState(false);
       const dropdownRef = useRef<HTMLDivElement>(null);
+      const currentLanguage = languages.find(lang => lang.code === i18n.language);
 
       useEffect(() => {
             const handleClickOutside = (event: MouseEvent) => {
@@ -17,10 +19,8 @@ export const LanguageSelector: React.FC = () => {
             return () => document.removeEventListener('mousedown', handleClickOutside);
       }, []);
 
-      const currentLanguage = languages.find(lang => lang.code === language);
-
       const handleLanguageChange = (langCode: string) => {
-            setLanguage(langCode as any);
+            i18n.changeLanguage(langCode);
             setIsOpen(false);
       };
 
@@ -51,7 +51,7 @@ export const LanguageSelector: React.FC = () => {
                                                 key={lang.code}
                                                 onClick={() => handleLanguageChange(lang.code)}
                                                 className={`flex items-center space-x-3 w-full px-4 py-2 text-sm text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
-                                                      lang.code === language
+                                                      lang.code === i18n.language
                                                             ? 'bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
                                                             : 'text-gray-700 dark:text-gray-300'
                                                 }`}
@@ -64,7 +64,7 @@ export const LanguageSelector: React.FC = () => {
                                                             {lang.name}
                                                       </span>
                                                 </div>
-                                                {lang.code === language && (
+                                                {lang.code === i18n.language && (
                                                       <svg
                                                             className='w-4 h-4 ml-auto text-blue-600 dark:text-blue-400'
                                                             fill='currentColor'

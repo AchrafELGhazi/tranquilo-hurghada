@@ -1,7 +1,7 @@
-import { useI18n } from '@/hooks';
+import { useTranslation } from 'react-i18next';
 
 export const Profile: React.FC = () => {
-      const { t } = useI18n();
+      const { t } = useTranslation();
 
       return (
             <div className='max-w-2xl mx-auto space-y-8'>

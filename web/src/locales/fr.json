@@ -1,0 +1,50 @@
+{
+      "common": {
+            "preparing": "Préparation de votre expérience...",
+            "loadingTranslations": "Chargement des traductions...",
+            "initializingRouter": "Initialisation du routeur...",
+            "settingUpComponents": "Configuration des composants...",
+            "applyingTheme": "Application du thème...",
+            "almostReady": "Presque prêt...",
+            "startingUp": "Démarrage de l'application",
+            "loadingResources": "Chargement des ressources nécessaires",
+            "configuringApp": "Configuration des paramètres de l'application",
+            "finalizingSetup": "Finalisation de la configuration",
+            "readyToLaunch": "Prêt à lancer",
+            "language": "Langue",
+            "appName": "Votre Nom d'Application",
+            "description": "Tous droits réservés",
+            "hello": "Bonjour",
+            "searchPlaceholder": "Rechercher...",
+            "save": "Enregistrer",
+            "cancel": "Annuler",
+            "thankyou": "Merci",
+            "greeting": "Bonjour, {{name}} !",
+            "back": "Retour",
+            "currentLang": "Langue actuelle : {{lang}}",
+            "theme": "Thème",
+            "light": "Clair",
+            "dark": "Sombre",
+            "info": "Information"
+      },
+      "navigation": {
+            "home": "Accueil",
+            "about": "À propos",
+            "profile": "Profil",
+            "settings": "Paramètres"
+      },
+      "pages": {
+            "profileTitle": "Votre Profil",
+            "profileDescription": "Gérez vos paramètres de profil",
+            "aboutTitle": "À Propos de Nous",
+            "aboutDescription": "En savoir plus sur notre entreprise",
+            "homeTitle": "Bienvenue",
+            "homeSubtitle": "Découvrez nos fonctionnalités",
+            "settingsTitle": "Paramètres",
+            "settingsDescription": "Configurez vos préférences"
+      },
+      "errors": {
+            "pageNotFound": "Page Non Trouvée",
+            "resourceNotFound": "La ressource demandée est introuvable"
+      }
+}

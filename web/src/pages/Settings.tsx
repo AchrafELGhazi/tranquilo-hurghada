@@ -1,7 +1,7 @@
-import { useI18n } from '@/hooks';
+import { useTranslation } from 'react-i18next';
 
 export const Settings: React.FC = () => {
-      const { t, language } = useI18n();
+      const { t, i18n } = useTranslation();
 
       return (
             <div className='max-w-2xl mx-auto space-y-8'>
@@ -18,7 +18,7 @@ export const Settings: React.FC = () => {
                                     {t('common.language')}
                               </h3>
                               <p className='text-gray-600 dark:text-gray-400'>
-                                    {t('common.currentLang', { lang: language })}
+                                    {t('common.currentLang', { lang: i18n.language })}
                               </p>
                         </div>
 

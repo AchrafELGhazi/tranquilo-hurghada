@@ -1,0 +1,50 @@
+{
+      "common": {
+            "preparing": "جارٍ تجهيز تجربتك...",
+            "loadingTranslations": "جارٍ تحميل الترجمات...",
+            "initializingRouter": "جارٍ تهيئة الموجه...",
+            "settingUpComponents": "جارٍ إعداد المكونات...",
+            "applyingTheme": "جارٍ تطبيق السمة...",
+            "almostReady": "جاهز تقريبًا...",
+            "startingUp": "جارٍ تشغيل التطبيق",
+            "loadingResources": "جارٍ تحميل الموارد المطلوبة",
+            "configuringApp": "جارٍ تكوين إعدادات التطبيق",
+            "finalizingSetup": "جارٍ الانتهاء من الإعداد",
+            "readyToLaunch": "جاهز للإطلاق",
+            "language": "اللغة",
+            "appName": "اسم تطبيقك",
+            "description": "جميع الحقوق محفوظة",
+            "hello": "مرحبًا",
+            "searchPlaceholder": "بحث...",
+            "save": "حفظ",
+            "cancel": "إلغاء",
+            "thankyou": "شكرًا",
+            "greeting": "مرحبًا {{name}}!",
+            "back": "رجوع",
+            "currentLang": "اللغة الحالية: {{lang}}",
+            "theme": "السمة",
+            "light": "فاتح",
+            "dark": "غامق",
+            "info": "معلومات"
+      },
+      "navigation": {
+            "home": "الرئيسية",
+            "about": "معلومات عنا",
+            "profile": "الملف الشخصي",
+            "settings": "الإعدادات"
+      },
+      "pages": {
+            "profileTitle": "ملفك الشخصي",
+            "profileDescription": "إدارة إعدادات ملفك الشخصي",
+            "aboutTitle": "معلومات عنا",
+            "aboutDescription": "تعرف على شركتنا",
+            "homeTitle": "مرحبًا",
+            "homeSubtitle": "اكتشف ميزاتنا",
+            "settingsTitle": "الإعدادات",
+            "settingsDescription": "تكوين تفضيلاتك"
+      },
+      "errors": {
+            "pageNotFound": "الصفحة غير موجودة",
+            "resourceNotFound": "تعذر العثور على المورد المطلوب"
+      }
+}

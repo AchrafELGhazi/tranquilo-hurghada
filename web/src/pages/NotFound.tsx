@@ -1,7 +1,7 @@
-import { useI18n } from '@/hooks';
+import { useTranslation } from 'react-i18next';
 
 export const NotFound: React.FC = () => {
-      const { t } = useI18n();
+      const { t } = useTranslation();
 
       return (
             <div className='text-center space-y-6'>

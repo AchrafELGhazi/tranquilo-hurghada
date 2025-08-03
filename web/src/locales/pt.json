@@ -1,0 +1,50 @@
+{
+      "common": {
+            "preparing": "Preparando sua experiência...",
+            "loadingTranslations": "Carregando traduções...",
+            "initializingRouter": "Inicializando roteador...",
+            "settingUpComponents": "Configurando componentes...",
+            "applyingTheme": "Aplicando tema...",
+            "almostReady": "Quase pronto...",
+            "startingUp": "Iniciando a aplicação",
+            "loadingResources": "Carregando recursos necessários",
+            "configuringApp": "Configurando definições da aplicação",
+            "finalizingSetup": "Finalizando configuração",
+            "readyToLaunch": "Pronto para lançar",
+            "language": "Idioma",
+            "appName": "Seu Nome do App",
+            "description": "Todos os direitos reservados",
+            "hello": "Olá",
+            "searchPlaceholder": "Pesquisar...",
+            "save": "Salvar",
+            "cancel": "Cancelar",
+            "thankyou": "Obrigado",
+            "greeting": "Olá, {{name}}!",
+            "back": "Voltar",
+            "currentLang": "Idioma atual: {{lang}}",
+            "theme": "Tema",
+            "light": "Claro",
+            "dark": "Escuro",
+            "info": "Informação"
+      },
+      "navigation": {
+            "home": "Início",
+            "about": "Sobre",
+            "profile": "Perfil",
+            "settings": "Configurações"
+      },
+      "pages": {
+            "profileTitle": "Seu Perfil",
+            "profileDescription": "Gerencie suas configurações de perfil",
+            "aboutTitle": "Sobre Nós",
+            "aboutDescription": "Saiba mais sobre nossa empresa",
+            "homeTitle": "Bem-vindo",
+            "homeSubtitle": "Descubra nossos recursos",
+            "settingsTitle": "Configurações",
+            "settingsDescription": "Configure suas preferências"
+      },
+      "errors": {
+            "pageNotFound": "Página Não Encontrada",
+            "resourceNotFound": "O recurso solicitado não foi encontrado"
+      }
+}

@@ -1,0 +1,50 @@
+{
+      "common": {
+            "preparing": "Preparing your experience...",
+            "loadingTranslations": "Loading translations...",
+            "initializingRouter": "Initializing router...",
+            "settingUpComponents": "Setting up components...",
+            "applyingTheme": "Applying theme...",
+            "almostReady": "Almost ready...",
+            "startingUp": "Starting up the application",
+            "loadingResources": "Loading required resources",
+            "configuringApp": "Configuring application settings",
+            "finalizingSetup": "Finalizing setup",
+            "readyToLaunch": "Ready to launch",
+            "language": "Language",
+            "appName": "Your App Name",
+            "description": "All rights reserved",
+            "hello": "Hello",
+            "searchPlaceholder": "Search...",
+            "save": "Save",
+            "cancel": "Cancel",
+            "thankyou": "Thank you",
+            "greeting": "Hello, {{name}}!",
+            "back": "Go Back",
+            "currentLang": "Current language: {{lang}}",
+            "theme": "Theme",
+            "light": "Light",
+            "dark": "Dark",
+            "info": "Information"
+      },
+      "navigation": {
+            "home": "Home",
+            "about": "About",
+            "profile": "Profile",
+            "settings": "Settings"
+      },
+      "pages": {
+            "profileTitle": "Your Profile",
+            "profileDescription": "Manage your profile settings",
+            "aboutTitle": "About Us",
+            "aboutDescription": "Learn more about our company",
+            "homeTitle": "Welcome",
+            "homeSubtitle": "Discover our amazing features",
+            "settingsTitle": "Settings",
+            "settingsDescription": "Configure your preferences"
+      },
+      "errors": {
+            "pageNotFound": "Page Not Found",
+            "resourceNotFound": "The requested resource could not be found"
+      }
+}

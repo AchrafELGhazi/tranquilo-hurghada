@@ -1,6 +1,5 @@
-import { useI18n } from '@/hooks';
-import React from 'react';
 import { PropagateLoader } from 'react-spinners';
+import { useTranslation } from 'react-i18next';
 
 export interface LoadingScreenProps {
       progress?: number;
@@ -9,7 +8,7 @@ export interface LoadingScreenProps {
 }
 
 export const LoadingScreen: React.FC<LoadingScreenProps> = ({ progress = 0, message, className = '' }) => {
-      const { t } = useI18n();
+      const { t } = useTranslation();
 
       const getLoadingMessage = () => {
             if (message) return message;
@@ -31,27 +30,23 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ progress = 0, mess
       };
 
       return (
-            <div
-                  className={`fixed inset-0 bg-white dark:bg-gray-900 flex items-center justify-center z-50 ${className}`}
-            >
-                  <div className='text-center max-w-md mx-auto px-6'>
-                        <div className='mb-8 flex justify-center'>
-                              <PropagateLoader
-                                    color='currentColor'
-                                    className='text-black dark:text-white'
-                                    size={15}
-                                    speedMultiplier={0.8}
-                              />
-                        </div>
-
-                        <h2 className='text-xl font-medium text-gray-800 dark:text-gray-200 mb-2'>
-                              {getLoadingMessage()}
-                        </h2>
-
-                        <p className='text-sm font-mono text-gray-500 dark:text-gray-400 mb-4'>{progress}%</p>
-
-                        <p className='text-sm text-gray-500 dark:text-gray-400'>{getStepDescription()}</p>
+            <div className={`flex flex-col items-center justify-center min-h-screen ${className}`}>
+                  <div className='mb-8'>
+                        <PropagateLoader color='#3B82F6' />
                   </div>
+
+                  <div className='text-xl font-semibold mb-2'>{getLoadingMessage()}</div>
+
+                  <div className='w-64 h-2 bg-gray-200 rounded-full mb-4'>
+                        <div
+                              className='h-full bg-blue-500 rounded-full transition-all duration-300'
+                              style={{ width: `${progress}%` }}
+                        />
+                  </div>
+
+                  <div className='text-lg mb-4'>{progress}%</div>
+
+                  <div className='text-sm text-gray-500'>{getStepDescription()}</div>
             </div>
       );
 };

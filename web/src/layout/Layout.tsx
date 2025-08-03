@@ -1,14 +1,14 @@
 import React, { type ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { LanguageSelector } from '@/components/common/LanguageSelector';
-import { useI18n } from '@/hooks';
+import { useTranslation } from 'react-i18next';
 
 interface LayoutProps {
       children: ReactNode;
 }
 
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
-      const { t } = useI18n();
+      const { t } = useTranslation();
       const location = useLocation();
 
       const navigation = [

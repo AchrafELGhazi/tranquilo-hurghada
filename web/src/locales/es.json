@@ -1,0 +1,50 @@
+{
+      "common": {
+            "preparing": "Preparando tu experiencia...",
+            "loadingTranslations": "Cargando traducciones...",
+            "initializingRouter": "Inicializando enrutador...",
+            "settingUpComponents": "Configurando componentes...",
+            "applyingTheme": "Aplicando tema...",
+            "almostReady": "Casi listo...",
+            "startingUp": "Iniciando la aplicación",
+            "loadingResources": "Cargando recursos necesarios",
+            "configuringApp": "Configurando ajustes de la aplicación",
+            "finalizingSetup": "Finalizando configuración",
+            "readyToLaunch": "Listo para lanzar",
+            "language": "Idioma",
+            "appName": "Tu Nombre de App",
+            "description": "Todos los derechos reservados",
+            "hello": "Hola",
+            "searchPlaceholder": "Buscar...",
+            "save": "Guardar",
+            "cancel": "Cancelar",
+            "thankyou": "Gracias",
+            "greeting": "¡Hola, {{name}}!",
+            "back": "Regresar",
+            "currentLang": "Idioma actual: {{lang}}",
+            "theme": "Tema",
+            "light": "Claro",
+            "dark": "Oscuro",
+            "info": "Información"
+      },
+      "navigation": {
+            "home": "Inicio",
+            "about": "Acerca de",
+            "profile": "Perfil",
+            "settings": "Ajustes"
+      },
+      "pages": {
+            "profileTitle": "Tu Perfil",
+            "profileDescription": "Administra la configuración de tu perfil",
+            "aboutTitle": "Sobre Nosotros",
+            "aboutDescription": "Conoce más sobre nuestra empresa",
+            "homeTitle": "Bienvenido",
+            "homeSubtitle": "Descubre nuestras increíbles características",
+            "settingsTitle": "Ajustes",
+            "settingsDescription": "Configura tus preferencias"
+      },
+      "errors": {
+            "pageNotFound": "Página No Encontrada",
+            "resourceNotFound": "No se pudo encontrar el recurso solicitado"
+      }
+}

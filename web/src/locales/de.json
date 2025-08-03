@@ -1,0 +1,50 @@
+{
+      "common": {
+            "preparing": "Bereite dein Erlebnis vor...",
+            "loadingTranslations": "Übersetzungen werden geladen...",
+            "initializingRouter": "Router wird initialisiert...",
+            "settingUpComponents": "Komponenten werden eingerichtet...",
+            "applyingTheme": "Design wird angewendet...",
+            "almostReady": "Fast fertig...",
+            "startingUp": "Starte die Anwendung",
+            "loadingResources": "Lade benötigte Ressourcen",
+            "configuringApp": "Konfiguriere Anwendungseinstellungen",
+            "finalizingSetup": "Finalisiere Einrichtung",
+            "readyToLaunch": "Bereit zum Start",
+            "language": "Sprache",
+            "appName": "Dein App Name",
+            "description": "Alle Rechte vorbehalten",
+            "hello": "Hallo",
+            "searchPlaceholder": "Suchen...",
+            "save": "Speichern",
+            "cancel": "Abbrechen",
+            "thankyou": "Danke",
+            "greeting": "Hallo, {{name}}!",
+            "back": "Zurück",
+            "currentLang": "Aktuelle Sprache: {{lang}}",
+            "theme": "Design",
+            "light": "Hell",
+            "dark": "Dunkel",
+            "info": "Information"
+      },
+      "navigation": {
+            "home": "Startseite",
+            "about": "Über uns",
+            "profile": "Profil",
+            "settings": "Einstellungen"
+      },
+      "pages": {
+            "profileTitle": "Dein Profil",
+            "profileDescription": "Verwalte deine Profileinstellungen",
+            "aboutTitle": "Über Uns",
+            "aboutDescription": "Erfahre mehr über unser Unternehmen",
+            "homeTitle": "Willkommen",
+            "homeSubtitle": "Entdecke unsere Funktionen",
+            "settingsTitle": "Einstellungen",
+            "settingsDescription": "Konfiguriere deine Präferenzen"
+      },
+      "errors": {
+            "pageNotFound": "Seite Nicht Gefunden",
+            "resourceNotFound": "Die angeforderte Ressource wurde nicht gefunden"
+      }
+}
