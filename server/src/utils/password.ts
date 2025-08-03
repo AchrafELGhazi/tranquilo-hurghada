@@ -1,12 +1,25 @@
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
+import logger from '../config/logger';
+
+const SALT_ROUNDS = 10;
 
 export const hashPassword = async (password: string): Promise<string> => {
-  return bcrypt.hash(password, 12);
+     try {
+          return await bcrypt.hash(password, SALT_ROUNDS);
+     } catch (error) {
+          logger.error('Error hashing password:', error);
+          throw new Error('Error hashing password');
+     }
 };
 
 export const comparePasswords = async (
-  password: string,
-  hashedPassword: string
+     plainPassword: string,
+     hashedPassword: string
 ): Promise<boolean> => {
-  return bcrypt.compare(password, hashedPassword);
+     try {
+          return await bcrypt.compare(plainPassword, hashedPassword);
+     } catch (error) {
+          logger.error('Error comparing passwords:', error);
+          throw new Error('Error comparing passwords');
+     }
 };

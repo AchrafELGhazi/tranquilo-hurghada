@@ -10,12 +10,10 @@ const seed = async () => {
           await prisma.user.deleteMany();
 
           await seedUsers();
+
           logger.info('Seeding completed successfully');
-
-
      } catch (error) {
           logger.error('Seeding failed', error);
-
      } finally {
           await prisma.$disconnect;
      }
