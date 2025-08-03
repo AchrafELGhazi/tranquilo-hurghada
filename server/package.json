@@ -24,7 +24,8 @@
     "morgan": "^1.10.1",
     "prisma": "^6.13.0",
     "winston": "^3.17.0",
-    "winston-daily-rotate-file": "^5.0.0"
+    "winston-daily-rotate-file": "^5.0.0",
+    "zod": "^4.0.14"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",

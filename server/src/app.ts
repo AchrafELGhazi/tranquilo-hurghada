@@ -6,7 +6,6 @@ import {
      errorHandler,
 } from './middleware/errorHandler.middleware';
 import { notFoundHandler } from './middleware/notFoundHandler';
-import logger from './config/logger';
 
 const app = express();
 
@@ -39,7 +38,6 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 
-// Routes
 app.get('/', (req, res) => {
      res.json({ message: 'Auth API is running!' });
 });
@@ -60,7 +58,5 @@ app.get('/', (req, res) => {
 app.use(notFoundHandler);
 
 app.use(errorHandler);
-
-
 
 export default app;
