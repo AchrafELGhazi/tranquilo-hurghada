@@ -2,7 +2,7 @@ import React, { type ReactNode } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { LanguageSelector } from '@/components/common/LanguageSelector';
 import { useTranslation } from 'react-i18next';
-import { useSyncLanguage } from '@/hooks';
+import { useRTL, useSyncLanguage } from '@/hooks';
 
 interface LayoutProps {
       children: ReactNode;
@@ -10,6 +10,7 @@ interface LayoutProps {
 
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
       useSyncLanguage();
+      useRTL();
       const { t } = useTranslation();
       const location = useLocation();
       const { lang } = useParams();

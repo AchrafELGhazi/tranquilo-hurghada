@@ -7,10 +7,10 @@ export const LanguageSelector: React.FC = () => {
       const { t } = useTranslation();
       const { lang: urlLang } = useParams();
       const navigate = useNavigate();
-     const [isOpen, setIsOpen] = useState(false);
-     
+      const [isOpen, setIsOpen] = useState(false);
+
       const dropdownRef = useRef<HTMLDivElement>(null);
-  const currentLanguage = languages.find(l => l.code === urlLang);
+      const currentLanguage = languages.find(l => l.code === urlLang);
 
       useEffect(() => {
             const handleClickOutside = (event: MouseEvent) => {
@@ -23,11 +23,14 @@ export const LanguageSelector: React.FC = () => {
             return () => document.removeEventListener('mousedown', handleClickOutside);
       }, []);
 
-    const handleLanguageChange = (langCode: string) => {
-          const currentPath = window.location.pathname.replace(/^\/[a-z]{2}(\/|$)/, '');
-          navigate(`/${langCode}/${currentPath}`);
-          setIsOpen(false);
-    };
+      const handleLanguageChange = (langCode: string) => {
+            const currentPath = window.location.pathname.replace(/^\/[a-z]{2}(\/|$)/, '');
+            navigate(`/${langCode}/${currentPath}`);
+            setIsOpen(false);
+
+            const newLang = languages.find(l => l.code === langCode);
+            document.documentElement.dir = newLang?.rtl ? 'rtl' : 'ltr';
+      };
 
       return (
             <div className='relative' ref={dropdownRef}>
