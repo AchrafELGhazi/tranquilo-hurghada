@@ -5,11 +5,12 @@ import i18n, { languages } from '@/config/i18n';
 
 export const LanguageSelector: React.FC = () => {
       const { t } = useTranslation();
-      const { lang } = useParams();
+      const { lang: urlLang } = useParams();
       const navigate = useNavigate();
-      const [isOpen, setIsOpen] = useState(false);
+     const [isOpen, setIsOpen] = useState(false);
+     
       const dropdownRef = useRef<HTMLDivElement>(null);
-      const currentLanguage = languages.find(l => l.code === lang);
+  const currentLanguage = languages.find(l => l.code === urlLang);
 
       useEffect(() => {
             const handleClickOutside = (event: MouseEvent) => {
@@ -22,12 +23,11 @@ export const LanguageSelector: React.FC = () => {
             return () => document.removeEventListener('mousedown', handleClickOutside);
       }, []);
 
-      const handleLanguageChange = (langCode: string) => {
-            // Get current path without language prefix
-            const currentPath = window.location.pathname.replace(/^\/[a-z]{2}\//, '');
-            navigate(`/${langCode}/${currentPath}`);
-            setIsOpen(false);
-      };
+    const handleLanguageChange = (langCode: string) => {
+          const currentPath = window.location.pathname.replace(/^\/[a-z]{2}(\/|$)/, '');
+          navigate(`/${langCode}/${currentPath}`);
+          setIsOpen(false);
+    };
 
       return (
             <div className='relative' ref={dropdownRef}>

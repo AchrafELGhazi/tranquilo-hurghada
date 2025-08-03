@@ -76,11 +76,10 @@ i18n
                escapeValue: false, // React already protects against XSS
           },
           detection: {
-               order: ['localStorage', 'navigator'],
-               caches: ['localStorage'],
+               order: ['path', 'localStorage'],
+               lookupFromPathIndex: 0,
                lookupLocalStorage: 'preferred-language',
-               lookupFromPathIndex: 0, // Look for language code in the first path segment
-
+               caches: ['localStorage'],
           },
      });
 

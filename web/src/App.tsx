@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import {
+      BrowserRouter as Router,
+      Routes,
+      Route,
+      Navigate,
+      Outlet,
+      useParams,
+      useLocation,
+      useNavigate,
+} from 'react-router-dom';
 import { I18nextProvider } from 'react-i18next';
 import i18n from '@/config/i18n';
 import { LoadingScreen } from '@/components/common/LoadingScreen';
@@ -9,6 +18,22 @@ import { About } from './pages/About';
 import { Profile } from './pages/Profile';
 import { Settings } from './pages/Settings';
 import { NotFound } from './pages/NotFound';
+
+const LanguageRedirect: React.FC = () => {
+      const { lang } = useParams();
+      const location = useLocation();
+      const navigate = useNavigate();
+
+      useEffect(() => {
+            // If no language in URL, redirect to detected language
+            if (!lang) {
+                  const detectedLang = i18n.language || 'en';
+                  navigate(`/${detectedLang}${location.pathname}`, { replace: true });
+            }
+      }, [lang, location, navigate]);
+
+      return null;
+};
 
 const App: React.FC = () => {
       const [isAppLoading, setIsAppLoading] = useState(true);
@@ -43,6 +68,7 @@ const App: React.FC = () => {
                               <LoadingScreen progress={loadingProgress} />
                         ) : (
                               <Routes>
+                                    <Route path='/' element={<LanguageRedirect />} />
                                     <Route
                                           path='/:lang'
                                           element={
@@ -66,3 +92,4 @@ const App: React.FC = () => {
 };
 
 export default App;
+ 
