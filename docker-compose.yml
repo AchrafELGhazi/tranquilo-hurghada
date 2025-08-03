@@ -48,7 +48,6 @@ networks:
 
 
 
-# commands
 # Build and start all services
 # docker-compose up --build
 
