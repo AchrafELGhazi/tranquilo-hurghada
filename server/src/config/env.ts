@@ -9,6 +9,7 @@ const envSchema = z.object({
      PORT: z.string().regex(/^\d+$/).transform(Number).default(5000),
      DATABASE_URL: z.string().url(),
      JWT_SECRET: z.string().min(32),
+     API_VERSION: z.string().default('v1'),
      JWT_EXPIRES_IN: z.string().default('7d'),
      JWT_REFRESH_EXPIRES_IN: z.string().default('30d'),
      LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('debug'),
