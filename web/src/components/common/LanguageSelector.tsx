@@ -1,12 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate, useParams } from 'react-router-dom';
 import i18n, { languages } from '@/config/i18n';
 
 export const LanguageSelector: React.FC = () => {
       const { t } = useTranslation();
+      const { lang } = useParams();
+      const navigate = useNavigate();
       const [isOpen, setIsOpen] = useState(false);
       const dropdownRef = useRef<HTMLDivElement>(null);
-      const currentLanguage = languages.find(lang => lang.code === i18n.language);
+      const currentLanguage = languages.find(l => l.code === lang);
 
       useEffect(() => {
             const handleClickOutside = (event: MouseEvent) => {
@@ -20,7 +23,9 @@ export const LanguageSelector: React.FC = () => {
       }, []);
 
       const handleLanguageChange = (langCode: string) => {
-            i18n.changeLanguage(langCode);
+            // Get current path without language prefix
+            const currentPath = window.location.pathname.replace(/^\/[a-z]{2}\//, '');
+            navigate(`/${langCode}/${currentPath}`);
             setIsOpen(false);
       };
 

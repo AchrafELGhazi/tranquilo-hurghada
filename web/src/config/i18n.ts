@@ -79,6 +79,8 @@ i18n
                order: ['localStorage', 'navigator'],
                caches: ['localStorage'],
                lookupLocalStorage: 'preferred-language',
+               lookupFromPathIndex: 0, // Look for language code in the first path segment
+
           },
      });
 
