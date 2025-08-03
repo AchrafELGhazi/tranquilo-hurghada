@@ -1,5 +1,7 @@
 import type { Language } from "@/types/i18.types";
 
+export const supportedLanguages = ['en', 'es', 'fr', 'de', 'pt', 'ar'] as const;
+
 export const languages: Language[] = [
      {
           code: 'en',

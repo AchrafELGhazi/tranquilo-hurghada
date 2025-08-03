@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
-import i18n, { languages } from '@/config/i18n';
+import i18n from '@/config/i18n';
+import { languages } from '@/utils/constants';
 
 export const LanguageSelector: React.FC = () => {
       const { t } = useTranslation();

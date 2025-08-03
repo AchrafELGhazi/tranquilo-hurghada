@@ -25,7 +25,6 @@ const LanguageRedirect: React.FC = () => {
       const navigate = useNavigate();
 
       useEffect(() => {
-            // If no language in URL, redirect to detected language
             if (!lang) {
                   const detectedLang = i18n.language || 'en';
                   navigate(`/${detectedLang}${location.pathname}`, { replace: true });
@@ -92,4 +91,3 @@ const App: React.FC = () => {
 };
 
 export default App;
- 

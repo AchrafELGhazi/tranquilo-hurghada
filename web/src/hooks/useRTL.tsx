@@ -1,6 +1,6 @@
+import { languages } from '@/utils/constants';
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { languages } from '@/config/i18n';
 
 export const useRTL = () => {
       const { lang } = useParams();
