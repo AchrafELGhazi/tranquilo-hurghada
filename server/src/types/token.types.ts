@@ -7,6 +7,5 @@ export interface TokenPayload {
      lastName: string;
      role: Role;
      isActive: boolean;
-     createdAt: Date;
-     updatedAt: Date;
+
 }
