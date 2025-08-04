@@ -81,7 +81,7 @@ const App: React.FC = () => {
                                 <Route path='about' element={<About />} />
                                 <Route path='profile' element={<Profile />} />
                                 <Route path='settings' element={<Settings />} />
-                                <Route path='login' element={<Login />} />
+                                <Route path='signin' element={<Login />} />
                                 <Route path='register' element={<Register />} />
                                 <Route path='404' element={<NotFound />} />
                                 <Route path='unauthorized' element={<Unauthorized />} />

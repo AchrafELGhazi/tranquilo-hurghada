@@ -12,7 +12,7 @@
             "finalizingSetup": "Finalizing setup",
             "readyToLaunch": "Ready to launch",
             "language": "Language",
-            "appName": "Your App Name",
+            "appName": "",
             "description": "All rights reserved",
             "hello": "Hello",
             "searchPlaceholder": "Search...",
@@ -31,7 +31,10 @@
             "home": "Home",
             "about": "About",
             "profile": "Profile",
-            "settings": "Settings"
+            "settings": "Settings",
+            "signin": "Sign in",
+            "register": "Register",
+            "logout": "Logout"
       },
       "pages": {
             "profileTitle": "Your Profile",
