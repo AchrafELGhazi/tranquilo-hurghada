@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "public"."Role" AS ENUM ('USER', 'ADMIN');
+CREATE TYPE "public"."Role" AS ENUM ('GUEST', 'HOST', 'ADMIN');
 
 -- CreateTable
 CREATE TABLE "public"."users" (
@@ -8,7 +8,7 @@ CREATE TABLE "public"."users" (
     "password" TEXT NOT NULL,
     "firstName" TEXT NOT NULL,
     "lastName" TEXT NOT NULL,
-    "role" "public"."Role" NOT NULL DEFAULT 'USER',
+    "role" "public"."Role" NOT NULL DEFAULT 'GUEST',
     "isActive" BOOLEAN NOT NULL DEFAULT true,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,

@@ -1,6 +1,6 @@
 import { useAuth } from '../contexts/AuthContext';
 
-export function useRequireRole(role: 'USER' | 'ADMIN') {
+export function useRequireRole(role: 'GUEST' | 'HOST' | 'ADMIN') {
      const { hasRole, isAuthenticated, isLoading } = useAuth();
 
      return {

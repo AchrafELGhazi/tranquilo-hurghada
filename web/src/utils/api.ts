@@ -1,7 +1,13 @@
+// @/utils/api.ts
+import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from 'axios';
 import authApi from '@/api/authApi';
-import axios from 'axios';
-import type { AxiosInstance, AxiosRequestConfig } from 'axios';
 import i18n from 'i18next';
+
+interface ApiResponse<T = any> {
+    success: boolean;
+    message: string;
+    data?: T;
+}
 
 class ApiService {
     private api: AxiosInstance;
@@ -21,7 +27,7 @@ class ApiService {
     private initializeInterceptors(): void {
         // Request interceptor
         this.api.interceptors.request.use((config) => {
-            const token = localStorage.getItem('accessToken');
+            const token = authApi.getAccessToken();
             if (token) {
                 config.headers.Authorization = `Bearer ${token}`;
             }
@@ -39,15 +45,12 @@ class ApiService {
                     originalRequest._retry = true;
 
                     try {
-                        const refreshToken = localStorage.getItem('refreshToken');
-                        if (refreshToken) {
-                            const { accessToken } = await authApi.refreshToken();
-                            originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-                            return this.api(originalRequest);
-                        }
+                        const newToken = await authApi.refreshToken();
+                        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+                        return this.api(originalRequest);
                     } catch (refreshError) {
-                        // If refresh fails, clear tokens and redirect to login
-                        authApi.clearTokens();
+                        // If refresh fails, clear auth data
+                        authApi.clearAuthData();
                         if (!window.location.pathname.includes('/login')) {
                             const currentLang = i18n.language || 'en';
                             window.location.href = `/${currentLang}/login`;
@@ -56,9 +59,9 @@ class ApiService {
                     }
                 }
 
-                // For other errors
+                // For other 401 errors
                 if (error.response?.status === 401 && !window.location.pathname.includes('/login')) {
-                    authApi.clearTokens();
+                    authApi.clearAuthData();
                     const currentLang = i18n.language || 'en';
                     window.location.href = `/${currentLang}/login`;
                 }
@@ -69,26 +72,51 @@ class ApiService {
     }
 
     setAuthToken(token: string): void {
-        localStorage.setItem('accessToken', token);
         this.api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     }
 
     clearAuthToken(): void {
-        localStorage.removeItem('accessToken');
         delete this.api.defaults.headers.common['Authorization'];
     }
 
     async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
-        const response = await this.api.get<T>(url, config);
-        return response.data;
+        const response = await this.api.get<ApiResponse<T>>(url, config);
+        return this.handleResponse(response);
     }
 
     async post<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
-        const response = await this.api.post<T>(url, data, config);
-        return response.data;
+        const response = await this.api.post<ApiResponse<T>>(url, data, config);
+        return this.handleResponse(response);
     }
 
-    // ... rest of your methods (put, patch, delete) remain the same
+    async put<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+        const response = await this.api.put<ApiResponse<T>>(url, data, config);
+        return this.handleResponse(response);
+    }
+
+    async patch<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+        const response = await this.api.patch<ApiResponse<T>>(url, data, config);
+        return this.handleResponse(response);
+    }
+
+    async delete<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
+        const response = await this.api.delete<ApiResponse<T>>(url, config);
+        return this.handleResponse(response);
+    }
+
+    private handleResponse<T>(response: AxiosResponse<ApiResponse<T>>): T {
+        const { data } = response;
+
+        if (!data.success) {
+            throw new Error(data.message || 'Request failed');
+        }
+
+        if (!data.data) {
+            throw new Error('No data returned from server');
+        }
+
+        return data.data;
+    }
 }
 
 export const apiService = new ApiService();

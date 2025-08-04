@@ -5,7 +5,7 @@ export interface User {
     email: string;
     firstName: string;
     lastName: string;
-    role: 'USER' | 'ADMIN';
+    role: 'GUEST' | 'HOST' | 'ADMIN';
     isActive: boolean;
     createdAt: string;
     updatedAt: string;
@@ -16,6 +16,7 @@ export interface RegisterData {
     password: string;
     firstName: string;
     lastName: string;
+    role?: 'GUEST' | 'HOST';
 }
 
 export interface LoginData {
@@ -24,59 +25,121 @@ export interface LoginData {
 }
 
 export interface AuthResponse {
-    user?: User;
-    message?: string;
     success: boolean;
+    message: string;
     data: {
         accessToken: string;
-        refreshToken?: string;
-    }
+        refreshToken: string;
+        user: User;
+    };
+}
+
+export interface CurrentUserResponse {
+    success: boolean;
+    message: string;
+    data: {
+        user: User;
+    };
 }
 
 class AuthApi {
-    async register(data: RegisterData): Promise<AuthResponse> {
-        const response = await apiService.post<AuthResponse>('/auth/register', data);
-        this.storeTokens(response);
-        return response;
+    // Store user data in localStorage
+    private storeUserData(user: User): void {
+        localStorage.setItem('user', JSON.stringify(user));
     }
 
-    async login(data: LoginData): Promise<AuthResponse> {
+    // Get user data from localStorage
+    getUserFromStorage(): User | null {
+        const userData = localStorage.getItem('user');
+        return userData ? JSON.parse(userData) : null;
+    }
+
+    // Store tokens
+    private storeTokens(accessToken: string, refreshToken: string): void {
+        localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('refreshToken', refreshToken);
+        apiService.setAuthToken(accessToken);
+    }
+
+    // Clear all auth data
+    clearAuthData(): void {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+        apiService.clearAuthToken();
+    }
+
+    async register(data: RegisterData): Promise<User> {
+        const response = await apiService.post<AuthResponse>('/auth/register', data);
+
+        if (response.success && response.data) {
+            this.storeTokens(response.data.accessToken, response.data.refreshToken);
+            this.storeUserData(response.data.user);
+            return response.data.user;
+        }
+
+        throw new Error(response.message || 'Registration failed');
+    }
+
+    async login(data: LoginData): Promise<User> {
         const response = await apiService.post<AuthResponse>('/auth/login', data);
-        this.storeTokens(response);
-        return response;
+
+        if (response.success && response.data) {
+            this.storeTokens(response.data.accessToken, response.data.refreshToken);
+            this.storeUserData(response.data.user);
+            return response.data.user;
+        }
+
+        throw new Error(response.message || 'Login failed');
     }
 
     async logout(): Promise<void> {
-        await apiService.post('/auth/logout');
-        this.clearTokens();
+        try {
+            await apiService.post('/auth/logout');
+        } catch (error) {
+            // Continue with logout even if server request fails
+            console.warn('Server logout failed, clearing local data anyway');
+        } finally {
+            this.clearAuthData();
+        }
     }
 
-    async refreshToken(): Promise<AuthResponse> {
+    async refreshToken(): Promise<string> {
         const refreshToken = localStorage.getItem('refreshToken');
         if (!refreshToken) throw new Error('No refresh token available');
+
         const response = await apiService.post<AuthResponse>('/auth/refresh-token', { refreshToken });
-        this.storeTokens(response);
-        return response;
+
+        if (response.success && response.data) {
+            this.storeTokens(response.data.accessToken, response.data.refreshToken);
+            this.storeUserData(response.data.user);
+            return response.data.accessToken;
+        }
+
+        throw new Error(response.message || 'Token refresh failed');
     }
 
     async getCurrentUser(): Promise<User> {
-        return apiService.get<User>('/auth/me');
+        const response = await apiService.get<CurrentUserResponse>('/auth/me');
+
+        if (response.success && response.data) {
+            this.storeUserData(response.data.user);
+            return response.data.user;
+        }
+
+        throw new Error(response.message || 'Failed to get user');
     }
 
-    storeTokens(response: AuthResponse): void {
-        if (response.data) {
-            localStorage.setItem('accessToken', response.data.accessToken);
-            apiService.setAuthToken(response.data.accessToken);
-        }
-        if (response.data.refreshToken) {
-            localStorage.setItem('refreshToken', response.data.refreshToken);
-        }
+    // Check if user is authenticated
+    isAuthenticated(): boolean {
+        const token = localStorage.getItem('accessToken');
+        const user = this.getUserFromStorage();
+        return !!(token && user);
     }
 
-    clearTokens(): void {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        apiService.clearAuthToken();
+    // Get access token
+    getAccessToken(): string | null {
+        return localStorage.getItem('accessToken');
     }
 }
 
