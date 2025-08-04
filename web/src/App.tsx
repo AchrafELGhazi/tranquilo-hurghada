@@ -39,11 +39,11 @@ const App: React.FC = () => {
     useEffect(() => {
         const initializeApp = async () => {
             const steps = [
-                { message: 'Loading translations...', progress: 20, delay: 800 },
-                { message: 'Initializing router...', progress: 40, delay: 600 },
-                { message: 'Setting up components...', progress: 60, delay: 500 },
-                { message: 'Applying theme...', progress: 80, delay: 400 },
-                { message: 'Almost ready...', progress: 100, delay: 500 },
+                { message: 'Loading translations...', progress: 20, delay: 100 },
+                { message: 'Initializing router...', progress: 40, delay: 100 },
+                { message: 'Setting up components...', progress: 60, delay: 100 },
+                { message: 'Applying theme...', progress: 80, delay: 100 },
+                { message: 'Almost ready...', progress: 100, delay: 100 },
             ];
 
             for (const step of steps) {

@@ -34,15 +34,26 @@ export interface AuthResponse {
     };
 }
 
+export interface CurrentUserResponseData {
+    user: User;
+}
+
 export interface CurrentUserResponse {
     success: boolean;
     message: string;
-    data: {
-        user: User;
-    };
+    data: CurrentUserResponseData;
 }
 
 class AuthApi {
+    constructor() {
+        // Set up auth handlers to avoid circular dependency
+        apiService.setAuthHandlers(
+            () => this.getAccessToken(),
+            () => this.refreshToken(),
+            () => this.clearAuthData()
+        );
+    }
+
     // Store user data in localStorage
     private storeUserData(user: User): void {
         localStorage.setItem('user', JSON.stringify(user));
@@ -68,28 +79,29 @@ class AuthApi {
         localStorage.removeItem('user');
         apiService.clearAuthToken();
     }
-
     async register(data: RegisterData): Promise<User> {
-        const response = await apiService.post<AuthResponse>('/auth/register', data);
-
+        const response = await apiService.post<any>('/auth/register', data);
+        console.log('Registration response:', response);
         if (response.success && response.data) {
+            // ✅ Access nested properties correctly
             this.storeTokens(response.data.accessToken, response.data.refreshToken);
             this.storeUserData(response.data.user);
             return response.data.user;
         }
-
         throw new Error(response.message || 'Registration failed');
     }
 
     async login(data: LoginData): Promise<User> {
-        const response = await apiService.post<AuthResponse>('/auth/login', data);
-
+        const response = await apiService.post<any>('/auth/login', data);
+        console.log('Login response:', response);
+        console.log('Response data:', response.data);
+        console.log('Response success:', response.success);
+        console.log('Response message:', response.message);
         if (response.success && response.data) {
             this.storeTokens(response.data.accessToken, response.data.refreshToken);
             this.storeUserData(response.data.user);
             return response.data.user;
         }
-
         throw new Error(response.message || 'Login failed');
     }
 
@@ -97,7 +109,6 @@ class AuthApi {
         try {
             await apiService.post('/auth/logout');
         } catch (error) {
-            // Continue with logout even if server request fails
             console.warn('Server logout failed, clearing local data anyway');
         } finally {
             this.clearAuthData();
@@ -108,8 +119,8 @@ class AuthApi {
         const refreshToken = localStorage.getItem('refreshToken');
         if (!refreshToken) throw new Error('No refresh token available');
 
-        const response = await apiService.post<AuthResponse>('/auth/refresh-token', { refreshToken });
-
+        const response = await apiService.post<any>('/auth/refresh-token', { refreshToken });
+        console.log('Refresh token response:', response);
         if (response.success && response.data) {
             this.storeTokens(response.data.accessToken, response.data.refreshToken);
             this.storeUserData(response.data.user);
@@ -120,7 +131,7 @@ class AuthApi {
     }
 
     async getCurrentUser(): Promise<User> {
-        const response = await apiService.get<CurrentUserResponse>('/auth/me');
+        const response = await apiService.get<any>('/auth/me');
 
         if (response.success && response.data) {
             this.storeUserData(response.data.user);
@@ -130,14 +141,12 @@ class AuthApi {
         throw new Error(response.message || 'Failed to get user');
     }
 
-    // Check if user is authenticated
     isAuthenticated(): boolean {
         const token = localStorage.getItem('accessToken');
         const user = this.getUserFromStorage();
         return !!(token && user);
     }
 
-    // Get access token
     getAccessToken(): string | null {
         return localStorage.getItem('accessToken');
     }
