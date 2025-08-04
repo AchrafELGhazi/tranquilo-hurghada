@@ -5,6 +5,8 @@ export interface User {
     email: string;
     firstName: string;
     lastName: string;
+    dateOfBirth?: string;
+    phoneNumber?: number;
     role: 'GUEST' | 'HOST' | 'ADMIN';
     isActive: boolean;
     createdAt: string;
@@ -16,7 +18,8 @@ export interface RegisterData {
     password: string;
     firstName: string;
     lastName: string;
-    role?: 'GUEST' | 'HOST';
+    dateOfBirth?: string;
+    phoneNumber?: number;
 }
 
 export interface LoginData {
@@ -74,6 +77,7 @@ class AuthApi {
         localStorage.removeItem('user');
         apiService.clearAuthToken();
     }
+
     async register(data: RegisterData): Promise<User> {
         const response = await apiService.post<any>('/auth/register', data);
         console.log('Registration response:', response);

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { Calendar } from 'lucide-react';
 
 export const Register = () => {
     const [formData, setFormData] = useState({
@@ -8,7 +9,8 @@ export const Register = () => {
         password: '',
         firstName: '',
         lastName: '',
-        role: 'GUEST' as 'GUEST' | 'HOST',
+        phoneNumber: '',
+        dateOfBirth: '',
     });
     const [confirmPassword, setConfirmPassword] = useState('');
     const [localError, setLocalError] = useState('');
@@ -31,7 +33,7 @@ export const Register = () => {
         setLocalError('');
     }, [clearError]);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
@@ -41,7 +43,7 @@ export const Register = () => {
 
     const validateForm = (): boolean => {
         if (!formData.email || !formData.password || !formData.firstName || !formData.lastName) {
-            setLocalError('Please fill in all fields');
+            setLocalError('Please fill in all required fields');
             return false;
         }
 
@@ -61,6 +63,20 @@ export const Register = () => {
             return false;
         }
 
+        if (formData.phoneNumber && !/^\d{10,15}$/.test(formData.phoneNumber.replace(/\s/g, ''))) {
+            setLocalError('Please enter a valid phone number (10-15 digits)');
+            return false;
+        }
+
+        if (formData.dateOfBirth) {
+            const birthDate = new Date(formData.dateOfBirth);
+            const today = new Date();
+            if (birthDate > today) {
+                setLocalError('Date of birth cannot be in the future');
+                return false;
+            }
+        }
+
         return true;
     };
 
@@ -74,7 +90,14 @@ export const Register = () => {
         }
 
         try {
-            const { confirmPassword: _, ...registerData } = { ...formData, confirmPassword };
+            const registerData = {
+                email: formData.email,
+                password: formData.password,
+                firstName: formData.firstName,
+                lastName: formData.lastName,
+                phoneNumber: formData.phoneNumber ? parseInt(formData.phoneNumber.replace(/\s/g, '')) : undefined,
+                dateOfBirth: formData.dateOfBirth || undefined,
+            };
             await register(registerData);
             // Navigation will be handled by the useEffect above
         } catch (err: any) {
@@ -100,11 +123,11 @@ export const Register = () => {
                 <div className='mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded'>{displayError}</div>
             )}
 
-            <form onSubmit={handleSubmit} className='space-y-4'>
+            <div className='space-y-4'>
                 <div className='grid grid-cols-2 gap-4'>
                     <div>
                         <label htmlFor='firstName' className='block text-sm font-medium text-gray-700 mb-2'>
-                            First Name
+                            First Name *
                         </label>
                         <input
                             id='firstName'
@@ -121,7 +144,7 @@ export const Register = () => {
 
                     <div>
                         <label htmlFor='lastName' className='block text-sm font-medium text-gray-700 mb-2'>
-                            Last Name
+                            Last Name *
                         </label>
                         <input
                             id='lastName'
@@ -139,7 +162,7 @@ export const Register = () => {
 
                 <div>
                     <label htmlFor='email' className='block text-sm font-medium text-gray-700 mb-2'>
-                        Email
+                        Email *
                     </label>
                     <input
                         id='email'
@@ -155,25 +178,43 @@ export const Register = () => {
                 </div>
 
                 <div>
-                    <label htmlFor='role' className='block text-sm font-medium text-gray-700 mb-2'>
-                        Account Type
+                    <label htmlFor='phoneNumber' className='block text-sm font-medium text-gray-700 mb-2'>
+                        Phone Number
                     </label>
-                    <select
-                        id='role'
-                        name='role'
-                        value={formData.role}
+                    <input
+                        id='phoneNumber'
+                        name='phoneNumber'
+                        type='tel'
+                        value={formData.phoneNumber}
                         onChange={handleInputChange}
                         className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
                         disabled={isLoading}
-                    >
-                        <option value='GUEST'>Guest (Book properties)</option>
-                        <option value='HOST'>Host (List properties)</option>
-                    </select>
+                        placeholder='Enter your phone number'
+                    />
+                </div>
+
+                <div>
+                    <label htmlFor='dateOfBirth' className='block text-sm font-medium text-gray-700 mb-2'>
+                        Date of Birth
+                    </label>
+                    <div className='relative'>
+                        <input
+                            id='dateOfBirth'
+                            name='dateOfBirth'
+                            type='date'
+                            value={formData.dateOfBirth}
+                            onChange={handleInputChange}
+                            className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                            disabled={isLoading}
+                            max={new Date().toISOString().split('T')[0]}
+                        />
+                        <Calendar className='absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none' />
+                    </div>
                 </div>
 
                 <div>
                     <label htmlFor='password' className='block text-sm font-medium text-gray-700 mb-2'>
-                        Password
+                        Password *
                     </label>
                     <input
                         id='password'
@@ -191,7 +232,7 @@ export const Register = () => {
 
                 <div>
                     <label htmlFor='confirmPassword' className='block text-sm font-medium text-gray-700 mb-2'>
-                        Confirm Password
+                        Confirm Password *
                     </label>
                     <input
                         id='confirmPassword'
@@ -207,7 +248,7 @@ export const Register = () => {
                 </div>
 
                 <button
-                    type='submit'
+                    onClick={handleSubmit}
                     disabled={isLoading}
                     className={`w-full py-2 px-4 rounded-md font-medium transition-colors ${
                         isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 text-white'
@@ -215,7 +256,7 @@ export const Register = () => {
                 >
                     {isLoading ? 'Creating Account...' : 'Create Account'}
                 </button>
-            </form>
+            </div>
 
             <div className='mt-6 text-center'>
                 <p className='text-sm text-gray-600'>
