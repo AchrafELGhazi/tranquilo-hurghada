@@ -20,7 +20,9 @@ import { Settings } from './pages/public/Settings';
 import { NotFound } from './pages/public/NotFound';
 import { AdminLayout } from './layout/admin/AdminLayout';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
-
+import { AuthProvider } from './contexts/AuthContext';
+import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import { Unauthorized } from './pages/public/Unauthorized';
 
 const LanguageRedirect: React.FC = () => {
       const { lang } = useParams();
@@ -65,100 +67,50 @@ const App: React.FC = () => {
 
       return (
             <I18nextProvider i18n={i18n}>
-                  <Router>
-                        {isAppLoading ? (
-                              <LoadingScreen progress={loadingProgress} />
-                        ) : (
-                              <Routes>
-                                    <Route path='/' element={<LanguageRedirect />} />
+                  <AuthProvider>
+                        <Router>
+                              {isAppLoading ? (
+                                    <LoadingScreen progress={loadingProgress} />
+                              ) : (
+                                    <Routes>
+                                          <Route path='/' element={<LanguageRedirect />} />
 
-                                    {/* Public Routes */}
-                                    <Route
-                                          path='/:lang'
-                                          element={
-                                                <Layout>
-                                                      <Outlet />
-                                                </Layout>
-                                          }
-                                    >
-                                          <Route index element={<Home />} />
-                                          <Route path='about' element={<About />} />
-                                          <Route path='profile' element={<Profile />} />
-                                          <Route path='settings' element={<Settings />} />
-                                          <Route path='404' element={<NotFound />} />
-                                    </Route>
+                                          {/* Public Routes */}
+                                          <Route
+                                                path='/:lang'
+                                                element={
+                                                      <Layout>
+                                                            <Outlet />
+                                                      </Layout>
+                                                }
+                                          >
+                                                <Route index element={<Home />} />
+                                                <Route path='about' element={<About />} />
+                                                <Route path='profile' element={<Profile />} />
+                                                <Route path='settings' element={<Settings />} />
+                                                <Route path='404' element={<NotFound />} />
+                                                <Route path='unauthorized' element={<Unauthorized />} />
+                                          </Route>
 
-                                    {/* Admin Routes */}
-                                    <Route
-                                          path='/:lang/admin'
-                                          element={
-                                                <AdminLayout>
-                                                      <Outlet />
-                                                </AdminLayout>
-                                          }
-                                    >
-                                          <Route index element={<AdminDashboard />} />
+                                          {/* Protected Admin Routes */}
                                           <Route
-                                                path='users'
+                                                path='/:lang/admin'
                                                 element={
-                                                      <div className='p-6'>
-                                                            <h1 className='text-2xl font-bold'>Users Management</h1>
-                                                            <p className='text-gray-600 mt-2'>
-                                                                  Users management page coming soon...
-                                                            </p>
-                                                      </div>
+                                                      <ProtectedRoute requireAdmin>
+                                                            <AdminLayout>
+                                                                  <Outlet />
+                                                            </AdminLayout>
+                                                      </ProtectedRoute>
                                                 }
-                                          />
-                                          <Route
-                                                path='content'
-                                                element={
-                                                      <div className='p-6'>
-                                                            <h1 className='text-2xl font-bold'>Content Management</h1>
-                                                            <p className='text-gray-600 mt-2'>
-                                                                  Content management page coming soon...
-                                                            </p>
-                                                      </div>
-                                                }
-                                          />
-                                          <Route
-                                                path='analytics'
-                                                element={
-                                                      <div className='p-6'>
-                                                            <h1 className='text-2xl font-bold'>Analytics</h1>
-                                                            <p className='text-gray-600 mt-2'>
-                                                                  Analytics page coming soon...
-                                                            </p>
-                                                      </div>
-                                                }
-                                          />
-                                          <Route
-                                                path='settings'
-                                                element={
-                                                      <div className='p-6'>
-                                                            <h1 className='text-2xl font-bold'>Admin Settings</h1>
-                                                            <p className='text-gray-600 mt-2'>
-                                                                  Admin settings page coming soon...
-                                                            </p>
-                                                      </div>
-                                                }
-                                          />
-                                          <Route
-                                                path='logs'
-                                                element={
-                                                      <div className='p-6'>
-                                                            <h1 className='text-2xl font-bold'>System Logs</h1>
-                                                            <p className='text-gray-600 mt-2'>
-                                                                  System logs page coming soon...
-                                                            </p>
-                                                      </div>
-                                                }
-                                          />
-                                    </Route>
+                                          >
+                                                <Route index element={<AdminDashboard />} />
+                                          </Route>
 
-                                    <Route path='*' element={<Navigate to='/en' replace />} />
-                              </Routes>
-                        )}
-                  </Router>
+                                          <Route path='*' element={<Navigate to='/en' replace />} />
+                                    </Routes>
+                              )}
+                        </Router>
+                  </AuthProvider>
             </I18nextProvider>
       );
 };
