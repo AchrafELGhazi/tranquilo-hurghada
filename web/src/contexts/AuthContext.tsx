@@ -90,6 +90,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const refreshToken = async (): Promise<void> => {
         try {
             await authApi.refreshToken();
+            console.log('refreshToken triggered')
             const user = await authApi.getCurrentUser();
             setUser(user);
         } catch (error) {

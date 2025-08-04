@@ -24,10 +24,13 @@ export interface LoginData {
 }
 
 export interface AuthResponse {
-    accessToken: string;
-    refreshToken?: string;
     user?: User;
     message?: string;
+    success: boolean;
+    data: {
+        accessToken: string;
+        refreshToken?: string;
+    }
 }
 
 class AuthApi {
@@ -51,7 +54,6 @@ class AuthApi {
     async refreshToken(): Promise<AuthResponse> {
         const refreshToken = localStorage.getItem('refreshToken');
         if (!refreshToken) throw new Error('No refresh token available');
-
         const response = await apiService.post<AuthResponse>('/auth/refresh-token', { refreshToken });
         this.storeTokens(response);
         return response;
@@ -62,12 +64,12 @@ class AuthApi {
     }
 
     storeTokens(response: AuthResponse): void {
-        if (response.accessToken) {
-            localStorage.setItem('accessToken', response.accessToken);
-            apiService.setAuthToken(response.accessToken);
+        if (response.data) {
+            localStorage.setItem('accessToken', response.data.accessToken);
+            apiService.setAuthToken(response.data.accessToken);
         }
-        if (response.refreshToken) {
-            localStorage.setItem('refreshToken', response.refreshToken);
+        if (response.data.refreshToken) {
+            localStorage.setItem('refreshToken', response.data.refreshToken);
         }
     }
 

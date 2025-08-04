@@ -2,7 +2,6 @@ import { User, Role } from '@prisma/client';
 import prisma from '../config/database';
 import { generateTokens, verifyToken } from '../utils/jwt';
 import { hashPassword, comparePasswords } from '../utils/password';
-import logger from '../config/logger';
 
 interface RegisterParams {
      email: string;
