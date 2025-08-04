@@ -13,6 +13,20 @@ enum Role {
     ADMIN
 }
 
+enum BookingStatus {
+    PENDING
+    CONFIRMED
+    CANCELLED
+    REJECTED
+    COMPLETED
+}
+
+enum VillaStatus {
+    AVAILABLE
+    UNAVAILABLE
+    MAINTENANCE
+}
+
 model User {
     id          String    @id @default(cuid())
     email       String    @unique
@@ -26,5 +40,67 @@ model User {
     createdAt   DateTime  @default(now())
     updatedAt   DateTime  @updatedAt
 
+    ownedVillas       Villa[]   @relation("VillaOwner")
+    guestBookings     Booking[] @relation("BookingGuest")
+    confirmedBookings Booking[] @relation("BookingConfirmedBy")
+    cancelledBookings Booking[] @relation("BookingCancelledBy")
+
     @@map("users")
+}
+
+model Villa {
+    id            String      @id @default(cuid())
+    title         String
+    description   String?
+    address       String
+    city          String
+    country       String      @default("Morocco")
+    pricePerNight Decimal     @db.Decimal(10, 2)
+    maxGuests     Int
+    bedrooms      Int
+    bathrooms     Int
+    amenities     String[]
+    images        String[]
+    status        VillaStatus @default(AVAILABLE)
+    isActive      Boolean     @default(true)
+    createdAt     DateTime    @default(now())
+    updatedAt     DateTime    @updatedAt
+
+    ownerId  String
+    owner    User      @relation("VillaOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+    bookings Booking[]
+
+    @@map("villas")
+}
+
+model Booking {
+    id                 String        @id @default(cuid())
+    checkIn            DateTime
+    checkOut           DateTime
+    totalGuests        Int
+    totalPrice         Decimal       @db.Decimal(10, 2)
+    status             BookingStatus @default(PENDING)
+    notes              String?
+    confirmedAt        DateTime?
+    cancelledAt        DateTime?
+    rejectedAt         DateTime?
+    completedAt        DateTime?
+    cancellationReason String?
+    rejectionReason    String?
+    createdAt          DateTime      @default(now())
+    updatedAt          DateTime      @updatedAt
+
+    guestId String
+    guest   User   @relation("BookingGuest", fields: [guestId], references: [id], onDelete: Cascade)
+
+    villaId String
+    villa   Villa  @relation(fields: [villaId], references: [id], onDelete: Cascade)
+
+    confirmedById String?
+    confirmedBy   User?   @relation("BookingConfirmedBy", fields: [confirmedById], references: [id])
+
+    cancelledById String?
+    cancelledBy   User?   @relation("BookingCancelledBy", fields: [cancelledById], references: [id])
+
+    @@map("bookings")
 }
