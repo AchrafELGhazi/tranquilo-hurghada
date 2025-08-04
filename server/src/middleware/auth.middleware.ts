@@ -3,7 +3,6 @@ import { verifyToken, getTokenFromRequest } from '../utils/jwt';
 import { getCurrentUser } from '../services/auth.service';
 import logger from '../config/logger';
 import { Role } from '@prisma/client';
-import { TokenPayload } from '../types/token.types';
 
 export interface AuthenticatedRequest extends Request {
     user?: Omit<import('@prisma/client').User, 'password'>;
@@ -33,7 +32,6 @@ export const authenticate = async (
             return;
         }
 
-        // Get fresh user data from database
         const user = await getCurrentUser(payload.id);
         if (!user.isActive) {
             res.status(403).json({
@@ -44,6 +42,7 @@ export const authenticate = async (
         }
 
         req.user = user;
+        logger.info(`User authenticated: ${user}`);
         next();
     } catch (error) {
         logger.error('Authentication error:', error);
@@ -76,7 +75,6 @@ export const authorize = (allowedRoles: Role[]) => {
     };
 };
 
-// Convenience middleware for specific roles
 export const requireGuest = authorize([Role.GUEST, Role.HOST, Role.ADMIN]);
 export const requireHost = authorize([Role.HOST, Role.ADMIN]);
 export const requireAdmin = authorize([Role.ADMIN]);

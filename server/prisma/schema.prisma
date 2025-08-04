@@ -8,94 +8,23 @@ datasource db {
 }
 
 enum Role {
+    GUEST
     HOST
     ADMIN
 }
 
-enum BookingStatus {
-    PENDING
-    CONFIRMED
-    CANCELLED
-    COMPLETED
-}
-
-enum VillaStatus {
-    AVAILABLE
-    UNAVAILABLE
-    MAINTENANCE
-}
-
 model User {
-    id        String   @id @default(cuid())
-    email     String   @unique
-    password  String
-    firstName String
-    lastName  String
-    role      Role     @default(HOST)
-    isActive  Boolean  @default(true)
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    ownedVillas Villa[] @relation("VillaOwner")
-
-    @@map("users")
-}
-
-model Guest {
     id          String    @id @default(cuid())
-    email       String
+    email       String    @unique
+    password    String
     firstName   String
     lastName    String
-    phoneNumber String?
     dateOfBirth DateTime?
+    phoneNumber Int?
+    role        Role      @default(GUEST)
+    isActive    Boolean   @default(true)
     createdAt   DateTime  @default(now())
     updatedAt   DateTime  @updatedAt
 
-    bookings Booking[]
-
-    @@map("guests")
-}
-
-model Villa {
-    id            String      @id @default(cuid())
-    name          String
-    description   String?
-    address       String
-    city          String
-    country       String
-    pricePerNight Decimal     @db.Decimal(10, 2)
-    maxGuests     Int
-    bedrooms      Int
-    bathrooms     Int
-    amenities     String[]
-    images        String[]
-    status        VillaStatus @default(AVAILABLE)
-    createdAt     DateTime    @default(now())
-    updatedAt     DateTime    @updatedAt
-
-    ownerId  String
-    owner    User      @relation("VillaOwner", fields: [ownerId], references: [id], onDelete: Cascade)
-    bookings Booking[]
-
-    @@map("villas")
-}
-
-model Booking {
-    id         String        @id @default(cuid())
-    checkIn    DateTime
-    checkOut   DateTime
-    totalPrice Decimal       @db.Decimal(10, 2)
-    guestCount Int
-    status     BookingStatus @default(PENDING)
-    notes      String?
-    createdAt  DateTime      @default(now())
-    updatedAt  DateTime      @updatedAt
-
-    guestId String
-    guest   Guest  @relation(fields: [guestId], references: [id], onDelete: Cascade)
-
-    villaId String
-    villa   Villa  @relation(fields: [villaId], references: [id], onDelete: Cascade)
-
-    @@map("bookings")
+    @@map("users")
 }

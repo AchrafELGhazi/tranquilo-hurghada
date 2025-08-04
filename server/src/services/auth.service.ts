@@ -1,14 +1,16 @@
-import { User, Role } from '@prisma/client';
+import { User } from '@prisma/client';
 import prisma from '../config/database';
 import { generateTokens, verifyToken } from '../utils/jwt';
 import { hashPassword, comparePasswords } from '../utils/password';
+import { determineUserRole } from '../utils/determinUserRole';
 
 interface RegisterParams {
     email: string;
     password: string;
     firstName: string;
     lastName: string;
-    role?: Role;
+    dateOfBirth?: string | Date;
+    phoneNumber?: number;
 }
 
 interface AuthResponse {
@@ -22,7 +24,8 @@ export const registerUser = async ({
     password,
     firstName,
     lastName,
-    role = Role.GUEST,
+    dateOfBirth,
+    phoneNumber,
 }: RegisterParams): Promise<AuthResponse> => {
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
@@ -30,6 +33,11 @@ export const registerUser = async ({
     }
 
     const hashedPassword = await hashPassword(password);
+    const role = determineUserRole(email);
+
+    const parsedDateOfBirth = dateOfBirth
+        ? (typeof dateOfBirth === 'string' ? new Date(dateOfBirth) : dateOfBirth)
+        : undefined;
 
     const user = await prisma.user.create({
         data: {
@@ -37,6 +45,8 @@ export const registerUser = async ({
             password: hashedPassword,
             firstName,
             lastName,
+            dateOfBirth: parsedDateOfBirth,
+            phoneNumber,
             role,
         },
     });
@@ -107,6 +117,8 @@ export const getCurrentUser = async (userId: string): Promise<Omit<User, 'passwo
             email: true,
             firstName: true,
             lastName: true,
+            dateOfBirth: true,
+            phoneNumber: true,
             role: true,
             isActive: true,
             createdAt: true,

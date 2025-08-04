@@ -6,9 +6,8 @@ import { AuthenticatedRequest } from '../middleware/auth.middleware';
 
 export const register = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { email, password, firstName, lastName, role } = req.body;
+        const { email, password, firstName, lastName, dateOfBirth, phoneNumber } = req.body;
 
-        // Basic validation
         if (!email || !password || !firstName || !lastName) {
             ApiResponse.badRequest(res, 'Missing required fields');
             return;
@@ -19,7 +18,8 @@ export const register = async (req: Request, res: Response): Promise<void> => {
             password,
             firstName,
             lastName,
-            role
+            dateOfBirth,
+            phoneNumber
         });
 
         ApiResponse.created(res, authData, 'User registered successfully');
@@ -68,7 +68,6 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
 
 export const logout = (req: Request, res: Response): void => {
     try {
-        // In a more complex setup, you might want to blacklist the token here
         ApiResponse.success(res, { message: 'Logged out successfully' }, 'Logout successful');
     } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Logout failed';
