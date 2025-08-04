@@ -1,9 +1,5 @@
 import { Request, Response } from 'express';
-import {
-    registerUser,
-    loginUser,
-    refreshUserToken,
-} from '../services/auth.service';
+import { registerUser, loginUser, refreshUserToken } from '../services/auth.service';
 import { ApiResponse } from '../utils/apiResponse';
 import logger from '../config/logger';
 import { AuthenticatedRequest } from '../middleware/auth.middleware';
@@ -12,7 +8,6 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     try {
         const { email, password, firstName, lastName } = req.body;
         const tokens = await registerUser({ email, password, firstName, lastName });
-
         ApiResponse.created(res, tokens, 'User registered successfully');
     } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Registration failed';
@@ -40,7 +35,6 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
             ApiResponse.unauthorized(res, 'Refresh token required');
             return;
         }
-
         const tokens = await refreshUserToken(refreshToken);
         ApiResponse.success(res, tokens, 'Token refreshed successfully');
     } catch (error: unknown) {
