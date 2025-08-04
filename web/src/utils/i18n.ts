@@ -26,7 +26,7 @@ i18n
                escapeValue: false, // React already protects against XSS
           },
           detection: {
-               order: ['path', 'localStorage'],
+              order: ['path', 'localStorage', 'navigator'],
                lookupFromPathIndex: 0,
                lookupLocalStorage: 'preferred-language',
                caches: ['localStorage'],
