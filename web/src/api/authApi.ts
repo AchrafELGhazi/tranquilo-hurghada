@@ -46,7 +46,6 @@ export interface CurrentUserResponse {
 
 class AuthApi {
     constructor() {
-        // Set up auth handlers to avoid circular dependency
         apiService.setAuthHandlers(
             () => this.getAccessToken(),
             () => this.refreshToken(),
@@ -54,25 +53,21 @@ class AuthApi {
         );
     }
 
-    // Store user data in localStorage
     private storeUserData(user: User): void {
         localStorage.setItem('user', JSON.stringify(user));
     }
 
-    // Get user data from localStorage
     getUserFromStorage(): User | null {
         const userData = localStorage.getItem('user');
         return userData ? JSON.parse(userData) : null;
     }
 
-    // Store tokens
     private storeTokens(accessToken: string, refreshToken: string): void {
         localStorage.setItem('accessToken', accessToken);
         localStorage.setItem('refreshToken', refreshToken);
         apiService.setAuthToken(accessToken);
     }
 
-    // Clear all auth data
     clearAuthData(): void {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
@@ -83,7 +78,6 @@ class AuthApi {
         const response = await apiService.post<any>('/auth/register', data);
         console.log('Registration response:', response);
         if (response.success && response.data) {
-            // ✅ Access nested properties correctly
             this.storeTokens(response.data.accessToken, response.data.refreshToken);
             this.storeUserData(response.data.user);
             return response.data.user;
