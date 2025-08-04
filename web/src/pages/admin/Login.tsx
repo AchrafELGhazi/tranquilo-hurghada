@@ -14,8 +14,7 @@ export const Login = () => {
         try {
             await login({ email, password });
             setError('');
-            // Navigate to the home page or dashboard after successful login
-            //   navigate('/');
+              navigate('/');
             console.log('user hna', user);
         } catch (err) {
             setError('Login failed. Please check your credentials.');

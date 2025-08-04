@@ -61,7 +61,6 @@ class AuthApi {
         return apiService.get<User>('/auth/me');
     }
 
-    // Make these methods public since they're needed by the ApiService
     storeTokens(response: AuthResponse): void {
         if (response.accessToken) {
             localStorage.setItem('accessToken', response.accessToken);
