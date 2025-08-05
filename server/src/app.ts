@@ -23,7 +23,7 @@ if (env.NODE_ENV === "production") {
      allowedOrigins.push('https://tranquilo-hurghada.combine');
 }
 app.use(cors({
-    // origin: allowedOrigins,
+    origin: allowedOrigins,
     credentials: true,
     // methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     // allowedHeaders: ['Content-Type', 'Authorization']

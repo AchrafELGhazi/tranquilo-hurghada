@@ -18,7 +18,8 @@ const envSchema = z.object({
     PROD_URL: z.string().url(),
     SALT_ROUNDS: z.string().regex(/^\d+$/).transform(Number).default(10),
     ADMIN_EMAIL: z.string().email(),
-    ADMIN_PASSWORD: z.string().min(8)
+    ADMIN_PASSWORD: z.string().min(8),
+    ADMIN_NAME: z.string().default('Tranquilo Hurghada'),
 });
 
 const _env = envSchema.safeParse(process.env);
