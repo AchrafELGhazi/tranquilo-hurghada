@@ -13,14 +13,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        const authData = await registerUser({
-            email,
-            password,
-            firstName,
-            lastName,
-            dateOfBirth,
-            phoneNumber
-        });
+        const authData = await registerUser({ email, password, firstName, lastName, dateOfBirth, phoneNumber });
 
         ApiResponse.created(res, authData, 'User registered successfully');
     } catch (error: unknown) {

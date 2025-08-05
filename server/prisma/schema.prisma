@@ -13,6 +13,11 @@ enum Role {
     ADMIN
 }
 
+enum PaymenyMethod {
+    BANK_TRANSFER
+    PAYMENT_ON_ARRIVAL
+}
+
 enum BookingStatus {
     PENDING
     CONFIRMED
@@ -80,6 +85,7 @@ model Booking {
     totalGuests        Int
     totalPrice         Decimal       @db.Decimal(10, 2)
     status             BookingStatus @default(PENDING)
+    paymentMethod      PaymenyMethod
     notes              String?
     confirmedAt        DateTime?
     cancelledAt        DateTime?
