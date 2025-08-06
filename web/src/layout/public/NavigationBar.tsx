@@ -30,13 +30,18 @@ export const NavigationBar: React.FC = () => {
             icon: <Info className='w-5 h-5' />,
         },
         {
-            name: t('navigation.profile'),
-            href: `/${lang}/profile`,
+            name: t('navigation.services'),
+            href: `/${lang}/services`,
             icon: <User className='w-5 h-5' />,
         },
         {
-            name: t('navigation.settings'),
-            href: `/${lang}/settings`,
+            name: t('navigation.visitorInfo'),
+            href: `/${lang}/visitorInfo`,
+            icon: <Settings className='w-5 h-5' />,
+        },
+        {
+            name: t('navigation.contact'),
+            href: `/${lang}/contact`,
             icon: <Settings className='w-5 h-5' />,
         },
     ];

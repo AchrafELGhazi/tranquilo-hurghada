@@ -6,8 +6,8 @@ import { LoadingScreen } from '@/components/common/LoadingScreen';
 import { Layout } from './layout/public/Layout';
 import { Home } from './pages/public/Home';
 import { About } from './pages/public/About';
-import { Profile } from './pages/public/Profile';
-import { Settings } from './pages/public/Settings';
+import { Services } from './pages/public/Services';
+import { Contact } from './pages/public/Contact';
 import { NotFound } from './pages/public/NotFound';
 import { AdminLayout } from './layout/admin/AdminLayout';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
@@ -16,6 +16,7 @@ import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { Unauthorized } from './pages/public/Unauthorized';
 import { Login } from './pages/admin/Login';
 import { Register } from './pages/admin/Register';
+import { VisitorInfo } from './pages/public/VisitorInfo';
 
 const LanguageRedirect: React.FC = () => {
     const { lang } = useParams();
@@ -79,8 +80,9 @@ const App: React.FC = () => {
                             >
                                 <Route index element={<Home />} />
                                 <Route path='about' element={<About />} />
-                                <Route path='profile' element={<Profile />} />
-                                <Route path='settings' element={<Settings />} />
+                                <Route path='services' element={<Services />} />
+                                <Route path='visitorInfo' element={<VisitorInfo />} />
+                                <Route path='contact' element={<Contact />} />
                                 <Route path='signin' element={<Login />} />
                                 <Route path='register' element={<Register />} />
                                 <Route path='404' element={<NotFound />} />

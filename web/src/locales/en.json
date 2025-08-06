@@ -34,7 +34,10 @@
             "settings": "Settings",
             "signin": "Sign in",
             "register": "Register",
-            "logout": "Logout"
+            "logout": "Logout",
+            "services": "Services",
+            "visitorInfo": "Visitor Info",
+            "contact": "Contact"
       },
       "pages": {
             "profileTitle": "Your Profile",
