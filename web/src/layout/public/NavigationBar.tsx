@@ -147,17 +147,38 @@ export const NavigationBar: React.FC = () => {
                             {/* Auth Buttons */}
                             <div className='flex items-center space-x-2'>
                                 {authNavigation.map((item, index) => {
-                                    const isPrimary = index === 0;
+                                    const isSignIn = !isAuthenticated && index === 0;
+                                    // const isLogout = isAuthenticated && index === 0;
+
+                                    if (isSignIn) {
+                                        return (
+                                            <Link
+                                                key={item.href}
+                                                to={item.href}
+                                                onClick={item.onClick}
+                                                className='group relative flex items-center space-x-2 px-6 py-3 rounded-full font-semibold text-sm transition-all duration-500 overflow-hidden bg-gradient-to-r from-[#D96F32] via-[#C75D2C] to-[#D96F32] bg-size-200 bg-pos-0 hover:bg-pos-100 text-cream border-2 border-[#f8b359aa] hover:border-golden-yellow shadow-lg shadow-terracotta-30 hover:shadow-xl hover:shadow-golden-yellow/40 hover:-translate-y-0.5 active:scale-95'
+                                            >
+                                                {/* Magic shine effect */}
+                                                <div className='absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700'>
+                                                    <div className='absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out'></div>
+                                                </div>
+
+                                                <span className='relative z-10 transition-all duration-300 group-hover:scale-110 group-hover:drop-shadow-sm'>
+                                                    {item.icon}
+                                                </span>
+                                                <span className='relative z-10 tracking-wide font-semibold group-hover:text-shadow'>
+                                                    {item.name}
+                                                </span>
+                                            </Link>
+                                        );
+                                    }
+
                                     return (
                                         <Link
                                             key={item.href}
                                             to={item.href}
                                             onClick={item.onClick}
-                                            className={`group relative flex items-center space-x-2 px-6 py-3 rounded-full font-semibold text-sm transition-all duration-400 overflow-hidden ${
-                                                isPrimary
-                                                    ? 'bg-terracotta text-cream shadow-lg shadow-terracotta-30 hover:bg-burnt-orange hover:shadow-xl hover:shadow-terracotta/40 hover:-translate-y-0.5'
-                                                    : 'bg-golden-yellow-60 text-burnt-orange shadow-lg shadow-golden-yellow-30 hover:bg-golden-yellow-90 hover:shadow-xl hover:shadow-golden-yellow/40 hover:-translate-y-0.5'
-                                            }`}
+                                            className='group relative flex items-center space-x-2 px-6 py-3 rounded-full font-semibold text-sm transition-all duration-400 overflow-hidden bg-golden-yellow-60 text-burnt-orange shadow-lg shadow-golden-yellow-30 hover:bg-golden-yellow-90 hover:shadow-xl hover:shadow-golden-yellow/40 hover:-translate-y-0.5'
                                         >
                                             {/* Subtle shine effect */}
                                             <div className='absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 -translate-x-full group-hover:translate-x-full transition-all duration-1000'></div>
@@ -211,6 +232,7 @@ export const NavigationBar: React.FC = () => {
                                 {allNavigation.map((item, index) => {
                                     const isActive = location.pathname === item.href;
                                     const isAuthItem = index >= baseNavigation.length;
+                                    const isSignInMobile = !isAuthenticated && isAuthItem;
 
                                     return (
                                         <Link
@@ -220,32 +242,45 @@ export const NavigationBar: React.FC = () => {
                                                 item.onClick?.(e);
                                                 setIsMobileMenuOpen(false);
                                             }}
-                                            className={`group relative flex items-center space-x-4 p-4 rounded-2xl font-medium text-base transition-all duration-400 border ${
+                                            className={`group relative flex items-center space-x-4 p-4 rounded-2xl font-medium text-base transition-all duration-400 border overflow-hidden ${
                                                 isActive
                                                     ? 'text-cream bg-terracotta border-terracotta shadow-lg shadow-terracotta/30'
+                                                    : isSignInMobile
+                                                    ? 'text-cream bg-gradient-to-r from-terracotta to-burnt-orange border-2 border-golden-yellow shadow-lg shadow-terracotta/30 hover:shadow-xl hover:shadow-golden-yellow/40'
                                                     : isAuthItem
                                                     ? 'text-burnt-orange bg-golden-yellow/20 border-golden-yellow/30 hover:bg-golden-yellow/30 hover:border-golden-yellow/50 hover:shadow-md'
                                                     : 'text-terracotta bg-white/50 border-white/50 hover:bg-terracotta/10 hover:border-terracotta/30 hover:shadow-md'
                                             }`}
                                         >
+                                            {/* Mobile shine effect for sign in */}
+                                            {isSignInMobile && (
+                                                <div className='absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 -translate-x-full group-hover:translate-x-full transition-all duration-1000'></div>
+                                            )}
+
                                             <span
-                                                className={`transition-all duration-300 group-hover:scale-110 ${
+                                                className={`relative z-10 transition-all duration-300 group-hover:scale-110 ${
                                                     isActive
                                                         ? 'text-cream'
                                                         : isAuthItem
-                                                        ? 'text-burnt-orange'
+                                                        ? isSignInMobile
+                                                            ? 'text-cream'
+                                                            : 'text-burnt-orange'
                                                         : 'text-terracotta'
                                                 }`}
                                             >
                                                 {item.icon}
                                             </span>
-                                            <span className='tracking-wide font-medium flex-1'>{item.name}</span>
+                                            <span className='relative z-10 tracking-wide font-medium flex-1'>
+                                                {item.name}
+                                            </span>
 
                                             {/* Arrow indicator */}
                                             <div
-                                                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                                                className={`relative z-10 w-2 h-2 rounded-full transition-all duration-300 ${
                                                     isActive
                                                         ? 'bg-cream scale-100'
+                                                        : isSignInMobile
+                                                        ? 'bg-cream group-hover:scale-100 scale-0'
                                                         : 'bg-transparent group-hover:bg-terracotta group-hover:scale-100 scale-0'
                                                 }`}
                                             ></div>
@@ -284,6 +319,18 @@ export const NavigationBar: React.FC = () => {
 
                 .animate-slide-down {
                     animation: slide-down 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                }
+
+                .bg-size-200 {
+                    background-size: 200%;
+                }
+
+                .bg-pos-0 {
+                    background-position: 0% 50%;
+                }
+
+                .bg-pos-100 {
+                    background-position: 100% 50%;
                 }
             `}</style>
         </>
