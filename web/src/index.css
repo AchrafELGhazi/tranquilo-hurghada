@@ -1,2 +1,200 @@
 @import "tailwindcss";
-@import "tw-animate-css";
+/* Import Google Fonts - Roboto and Butler */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Butler:wght@300;400;700;900&display=swap');
+
+/* CSS Custom Properties for Tranquilo Hurghada Color Palette */
+:root {
+  --cream: #F3E9DC;
+  --terracotta: #D96F32;
+  --burnt-orange: #C75D2C;
+  --golden-yellow: #F8B259;
+  
+  /* Font families */
+  --font-roboto: 'Roboto', sans-serif;
+  --font-butler: 'Butler', serif;
+}
+
+body {
+  font-family: var(--font-roboto);
+  background-color: var(--cream);
+}
+
+/* Custom Scrollbar for all browsers */
+/* Webkit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--cream);
+  border-radius: 10px;
+  margin: 20px 0;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--terracotta) 0%, var(--burnt-orange) 100%);
+  border-radius: 10px;
+  border: 2px solid var(--cream);
+  transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--burnt-orange) 0%, var(--terracotta) 100%);
+  transform: scale(1.05);
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--cream);
+}
+
+/* Custom scrollbar buttons (arrows) */
+::-webkit-scrollbar-button {
+  height: 20px;
+  background: var(--golden-yellow);
+  border-radius: 10px;
+  margin: 2px 0;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+::-webkit-scrollbar-button:hover {
+  background: var(--terracotta);
+}
+
+/* Arrow styling for scrollbar buttons */
+::-webkit-scrollbar-button:single-button:vertical:decrement {
+  border-bottom: 6px solid var(--burnt-orange);
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+}
+
+::-webkit-scrollbar-button:single-button:vertical:increment {
+  border-top: 6px solid var(--burnt-orange);
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+}
+
+::-webkit-scrollbar-button:single-button:vertical:decrement:before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 0;
+  height: 0;
+  border-bottom: 4px solid var(--burnt-orange);
+  border-left: 3px solid transparent;
+  border-right: 3px solid transparent;
+}
+
+::-webkit-scrollbar-button:single-button:vertical:increment:before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 0;
+  height: 0;
+  border-top: 4px solid var(--burnt-orange);
+  border-left: 3px solid transparent;
+  border-right: 3px solid transparent;
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--terracotta) var(--cream);
+}
+
+/* Utility classes for fonts */
+.font-roboto {
+  font-family: var(--font-roboto);
+}
+
+.font-butler {
+  font-family: var(--font-butler);
+}
+
+/* Butler font weight utilities */
+.font-butler-300 {
+  font-family: var(--font-butler);
+  font-weight: 300;
+}
+
+.font-butler-400 {
+  font-family: var(--font-butler);
+  font-weight: 400;
+}
+
+.font-butler-700 {
+  font-family: var(--font-butler);
+  font-weight: 700;
+}
+.font-butler-900 {
+  font-family: var(--font-butler);
+  font-weight: 900;
+}
+
+/* Roboto font weight utilities */
+.font-roboto-100 {
+  font-family: var(--font-roboto);
+  font-weight: 100;
+}
+
+.font-roboto-300 {
+  font-family: var(--font-roboto);
+  font-weight: 300;
+}
+
+.font-roboto-400 {
+  font-family: var(--font-roboto);
+  font-weight: 400;
+}
+
+.font-roboto-500 {
+  font-family: var(--font-roboto);
+  font-weight: 500;
+}
+
+.font-roboto-700 {
+  font-family: var(--font-roboto);
+  font-weight: 700;
+}
+
+.font-roboto-900 {
+  font-family: var(--font-roboto);
+  font-weight: 900;
+}
+
+/* Color utility classes */
+.text-cream { color: var(--cream); }
+.text-terracotta { color: var(--terracotta); }
+.text-burnt-orange { color: var(--burnt-orange); }
+.text-golden-yellow { color: var(--golden-yellow); }
+
+.bg-cream { background-color: var(--cream); }
+.bg-terracotta { background-color: var(--terracotta); }
+.bg-burnt-orange { background-color: var(--burnt-orange); }
+.bg-golden-yellow { background-color: var(--golden-yellow); }
+
+.border-cream { border-color: var(--cream); }
+.border-terracotta { border-color: var(--terracotta); }
+.border-burnt-orange { border-color: var(--burnt-orange); }
+.border-golden-yellow { border-color: var(--golden-yellow); }
+
+/* Smooth scrolling for the entire page */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom selection colors */
+::selection {
+  background-color: var(--golden-yellow);
+  color: var(--burnt-orange);
+}
+
+::-moz-selection {
+  background-color: var(--golden-yellow);
+  color: var(--burnt-orange);
+}
