@@ -43,7 +43,7 @@ export const LanguageSelector: React.FC = () => {
                 aria-expanded={isOpen}
                 aria-haspopup='true'
             >
-                <Globe className='w-4 h-4' />
+                {/* <Globe className='w-4 h-4' /> */}
 
                 {currentLanguage && (
                     <div className='w-5 h-4 rounded-sm overflow-hidden shadow-sm '>
@@ -73,15 +73,13 @@ export const LanguageSelector: React.FC = () => {
 
             {isOpen && (
                 <div className='absolute right-0 mt-2 w-56 bg-white/95 backdrop-blur-xl rounded-xl shadow-2xl shadow-black/10 border border-terracotta-20 overflow-hidden z-50 animate-in slide-in-from-top-2 duration-200'>
-                    {/* Header */}
                     <div className='px-3 py-2 bg-gradient-to-r from-terracotta-10 to-golden-yellow-10 border-b border-terracotta-20'>
                         <div className='flex items-center gap-2'>
                             <Globe className='w-3 h-3 text-terracotta' />
-                            <span className='text-xs font-semibold text-terracotta'>{t('common.chooseLanguage') }</span>
+                            <span className='text-xs font-semibold text-terracotta'>{t('common.chooseLanguage')}</span>
                         </div>
                     </div>
 
-                    {/* Language Options */}
                     <div className='py-1'>
                         {languages.map(lang => {
                             const isActive = lang.code === i18n.language;
@@ -89,16 +87,17 @@ export const LanguageSelector: React.FC = () => {
                                 <button
                                     key={lang.code}
                                     onClick={() => handleLanguageChange(lang.code)}
-                                    className={`relative w-full flex cursor-pointer items-center gap-3 px-3 py-2.5 text-left transition-all duration-200 hover:translate-x-1 hover:bg-terracotta-10 group ${
+                                    className={`relative w-full flex cursor-pointer items-center gap-3 px-3 py-2.5 text-left transition-all duration-200 group ${
                                         isActive
                                             ? 'bg-terracotta-10 text-burnt-orange font-medium border-l-2 border-terracotta'
-                                            : 'text-gray-700 hover:text-burnt-orange'
+                                            : 'text-gray-700 hover:text-burnt-orange hover:bg-terracotta-10'
                                     }`}
                                 >
-                                    {/* Hover gradient effect */}
-                                    <div className='absolute inset-0 bg-gradient-to-r from-terracotta-10 to-golden-yellow-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10' />
+                                    {!isActive && (
+                                        <div className='absolute inset-0 bg-gradient-to-r from-terracotta-10 to-golden-yellow-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10' />
+                                    )}
 
-                                    <div className='w-6 h-4 rounded-sm overflow-hidden shadow-sm border border-white/50 flex-shrink-0'>
+                                    <div className='w-6 h-4 rounded-sm overflow-hidden shadow-sm border border-white/50 flex-shrink-0 transition-transform duration-200 group-hover:translate-x-1'>
                                         <img
                                             src={getFlagImage(lang.code)}
                                             alt={`${lang.name} flag`}
@@ -115,7 +114,7 @@ export const LanguageSelector: React.FC = () => {
                                         />
                                     </div>
 
-                                    <div className='flex-1 min-w-0'>
+                                    <div className='flex-1 min-w-0 transition-transform duration-200 group-hover:translate-x-1'>
                                         <div className='font-medium text-sm truncate'>{lang.nativeName}</div>
                                         <div className='text-xs text-gray-500 truncate'>{lang.name}</div>
                                     </div>

@@ -3,7 +3,7 @@ import { Link, useLocation, useParams } from 'react-router-dom';
 import { LanguageSelector } from '@/components/common/LanguageSelector';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
-import { Home, Info, User, Settings, LogIn, UserPlus, LogOut, Menu, X } from 'lucide-react';
+import { Home, Info, User, Settings, LogIn, LogOut, Menu, X } from 'lucide-react';
 
 interface NavigationItem {
     name: string;
@@ -20,7 +20,6 @@ export const NavigationBar: React.FC = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
 
-    // Handle scroll effect
     useEffect(() => {
         const handleScroll = () => {
             setScrolled(window.scrollY > 20);
@@ -75,11 +74,11 @@ export const NavigationBar: React.FC = () => {
                   href: `/${lang}/signin`,
                   icon: <LogIn className='w-4 h-4' />,
               },
-              {
-                  name: t('navigation.register'),
-                  href: `/${lang}/register`,
-                  icon: <UserPlus className='w-4 h-4' />,
-              },
+              //   {
+              //       name: t('navigation.register'),
+              //       href: `/${lang}/register`,
+              //       icon: <UserPlus className='w-4 h-4' />,
+              //   },
           ];
 
     const allNavigation = [...baseNavigation, ...authNavigation];
@@ -100,14 +99,14 @@ export const NavigationBar: React.FC = () => {
                         <div className='flex justify-start'>
                             <div className='group cursor-pointer'>
                                 <Link to={`/${lang}`}>
-                                <img
-                                    src='/images/tranquilo-hurghada-logo.png'
-                                    alt='Tranquilo Hurghada Logo'
-                                    className='h-12 w-auto object-contain '
-                                    onError={e => {
-                                        const target = e.target as HTMLImageElement;
-                                        target.style.display = 'none';
-                                    }}
+                                    <img
+                                        src='/images/tranquilo-hurghada-logo.png'
+                                        alt='Tranquilo Hurghada Logo'
+                                        className='h-12 w-auto object-contain '
+                                        onError={e => {
+                                            const target = e.target as HTMLImageElement;
+                                            target.style.display = 'none';
+                                        }}
                                     />
                                 </Link>
                             </div>
@@ -135,8 +134,6 @@ export const NavigationBar: React.FC = () => {
                                             <span className='tracking-wide font-medium text-sm whitespace-nowrap'>
                                                 {item.name}
                                             </span>
-
-                                          
                                         </Link>
                                     );
                                 })}
@@ -145,7 +142,7 @@ export const NavigationBar: React.FC = () => {
 
                         {/* Right: Auth & Language */}
                         <div className='flex justify-end items-center space-x-4'>
-                                <LanguageSelector />
+                            <LanguageSelector />
 
                             {/* Auth Buttons */}
                             <div className='flex items-center space-x-2'>
