@@ -5,5 +5,5 @@ interface MainBodyProps {
 }
 
 export const MainBody: React.FC<MainBodyProps> = ({ children }) => {
-      return <main className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>{children}</main>;
+      return <main className='max-w-12xl mx-auto  bg-cream'>{children}</main>;
 };

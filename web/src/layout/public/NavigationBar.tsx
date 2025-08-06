@@ -190,7 +190,7 @@ export const NavigationBar: React.FC = () => {
                             <div className='logo-glow transition-all duration-300'>
                                 {/* Use your existing logo or fallback to gradient */}
                                 <img
-                                    src='/logo.png'
+                                    src='/images/tranquilo-hurghada-logo.png'
                                     alt='Tranquilo Hurghada Logo'
                                     className='h-14 w-auto object-contain'
                                     onError={e => {
@@ -200,7 +200,6 @@ export const NavigationBar: React.FC = () => {
                                         if (fallback) fallback.style.display = 'flex';
                                     }}
                                 />
-                              
                             </div>
                         </div>
 

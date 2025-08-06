@@ -4,7 +4,6 @@ import { I18nextProvider } from 'react-i18next';
 import i18n from '@/utils/i18n';
 import { LoadingScreen } from '@/components/common/LoadingScreen';
 import { Layout } from './layout/public/Layout';
-import { Home } from './pages/public/Home';
 import { About } from './pages/public/About';
 import { Services } from './pages/public/Services';
 import { Contact } from './pages/public/Contact';
@@ -17,6 +16,7 @@ import { Unauthorized } from './pages/public/Unauthorized';
 import { Login } from './pages/admin/Login';
 import { Register } from './pages/admin/Register';
 import { VisitorInfo } from './pages/public/VisitorInfo';
+import Home from './pages/public/Home';
 
 const LanguageRedirect: React.FC = () => {
     const { lang } = useParams();
@@ -60,67 +60,69 @@ const App: React.FC = () => {
     }, []);
 
     return (
-        <I18nextProvider i18n={i18n}>
-            <AuthProvider>
-                <Router>
-                    {isAppLoading ? (
-                        <LoadingScreen progress={loadingProgress} />
-                    ) : (
-                        <Routes>
-                            <Route path='/' element={<LanguageRedirect />} />
+        <div className='min-h-screen bg-cream'>
+            <I18nextProvider i18n={i18n}>
+                <AuthProvider>
+                    <Router>
+                        {isAppLoading ? (
+                            <LoadingScreen progress={loadingProgress} />
+                        ) : (
+                            <Routes>
+                                <Route path='/' element={<LanguageRedirect />} />
 
-                            {/* Public Routes */}
-                            <Route
-                                path='/:lang'
-                                element={
-                                    <Layout>
-                                        <Outlet />
-                                    </Layout>
-                                }
-                            >
-                                <Route index element={<Home />} />
-                                <Route path='about' element={<About />} />
-                                <Route path='services' element={<Services />} />
-                                <Route path='visitorInfo' element={<VisitorInfo />} />
-                                <Route path='contact' element={<Contact />} />
-                                <Route path='signin' element={<Login />} />
-                                <Route path='register' element={<Register />} />
-                                <Route path='404' element={<NotFound />} />
-                                <Route path='unauthorized' element={<Unauthorized />} />
-                            </Route>
-
-                            <Route
-                                path='/:lang/auth'
-                                element={
-                                    <Layout>
-                                        <Outlet />
-                                    </Layout>
-                                }
-                            >
-                                <Route path='login' element={<Login />} />
-                                <Route path='register' element={<Register />} />{' '}
-                            </Route>
-
-                            {/* Protected Admin Routes */}
-                            <Route
-                                path='/:lang/admin'
-                                element={
-                                    <ProtectedRoute requireAdmin>
-                                        <AdminLayout>
+                                {/* Public Routes */}
+                                <Route
+                                    path='/:lang'
+                                    element={
+                                        <Layout>
                                             <Outlet />
-                                        </AdminLayout>
-                                    </ProtectedRoute>
-                                }
-                            >
-                                <Route index element={<AdminDashboard />} />
-                            </Route>
+                                        </Layout>
+                                    }
+                                >
+                                    <Route index element={<Home />} />
+                                    <Route path='about' element={<About />} />
+                                    <Route path='services' element={<Services />} />
+                                    <Route path='visitorInfo' element={<VisitorInfo />} />
+                                    <Route path='contact' element={<Contact />} />
+                                    <Route path='signin' element={<Login />} />
+                                    <Route path='register' element={<Register />} />
+                                    <Route path='404' element={<NotFound />} />
+                                    <Route path='unauthorized' element={<Unauthorized />} />
+                                </Route>
 
-                            <Route path='*' element={<NotFound />} />
-                        </Routes>
-                    )}
-                </Router>
-            </AuthProvider>
-        </I18nextProvider>
+                                <Route
+                                    path='/:lang/auth'
+                                    element={
+                                        <Layout>
+                                            <Outlet />
+                                        </Layout>
+                                    }
+                                >
+                                    <Route path='login' element={<Login />} />
+                                    <Route path='register' element={<Register />} />{' '}
+                                </Route>
+
+                                {/* Protected Admin Routes */}
+                                <Route
+                                    path='/:lang/admin'
+                                    element={
+                                        <ProtectedRoute requireAdmin>
+                                            <AdminLayout>
+                                                <Outlet />
+                                            </AdminLayout>
+                                        </ProtectedRoute>
+                                    }
+                                >
+                                    <Route index element={<AdminDashboard />} />
+                                </Route>
+
+                                <Route path='*' element={<NotFound />} />
+                            </Routes>
+                        )}
+                    </Router>
+                </AuthProvider>
+            </I18nextProvider>
+        </div>
     );
 };
 
