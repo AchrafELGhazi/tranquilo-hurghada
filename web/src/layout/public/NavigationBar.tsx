@@ -180,7 +180,7 @@ export const NavigationBar: React.FC = () => {
 
             <header
                 className={`fixed top-0 left-0 right-0 z-50 font-roboto transition-all duration-300 ${
-                    scrolled ? 'navbar-blur bg-cream/80 shadow-lg border-b border-terracotta/20' : 'bg-cream/90'
+                    scrolled ? 'navbar-blur bg-cream-80 shadow-lg border-b border-terracotta' : 'bg-cream-90'
                 }`}
             >
                 <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
@@ -216,7 +216,7 @@ export const NavigationBar: React.FC = () => {
                                         className={`nav-link flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
                                             isActive
                                                 ? 'active text-burnt-orange bg-white/50'
-                                                : 'text-gray-700 hover:text-burnt-orange hover:bg-white/30'
+                                                : 'text-gray-600 hover:text-burnt-orange hover:bg-white/30'
                                         }`}
                                     >
                                         <span className='transition-transform duration-300'>{item.icon}</span>

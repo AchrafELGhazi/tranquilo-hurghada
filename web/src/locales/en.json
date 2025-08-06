@@ -25,7 +25,8 @@
             "theme": "Theme",
             "light": "Light",
             "dark": "Dark",
-            "info": "Information"
+            "info": "Information",
+            "chooseLanguage": "Choose Language"
       },
       "navigation": {
             "home": "Home",
