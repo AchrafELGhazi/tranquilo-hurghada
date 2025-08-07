@@ -103,6 +103,8 @@ export const getCurrentUser = async (userId: string): Promise<Omit<User, 'passwo
             id: true,
             email: true,
             fullName: true,
+            phone: true,
+            dateOfBirth: true,
             role: true,
             isActive: true,
             createdAt: true,

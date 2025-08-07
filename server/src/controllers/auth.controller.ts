@@ -9,7 +9,20 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         const { email, password, fullName } = req.body;
 
         if (!email || !password || !fullName) {
-            ApiResponse.badRequest(res, 'Missing required fields');
+            ApiResponse.badRequest(res, 'Missing required fields: email, password, and fullName are required');
+            return;
+        }
+
+        // Email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            ApiResponse.badRequest(res, 'Invalid email format');
+            return;
+        }
+
+        // Password validation (minimum 6 characters)
+        if (password.length < 6) {
+            ApiResponse.badRequest(res, 'Password must be at least 6 characters long');
             return;
         }
 
@@ -19,7 +32,12 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Registration failed';
         logger.error('Registration error:', errorMessage);
-        ApiResponse.badRequest(res, errorMessage);
+
+        if (errorMessage === 'Email already in use') {
+            ApiResponse.conflict(res, errorMessage);
+        } else {
+            ApiResponse.badRequest(res, errorMessage);
+        }
     }
 };
 

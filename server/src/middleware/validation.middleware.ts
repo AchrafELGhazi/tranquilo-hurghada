@@ -1,13 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
-import { PaymenyMethod } from '@prisma/client';
+import { PaymentMethod } from '@prisma/client'; // Fixed import name
 import { ApiResponse } from '../utils/apiResponse';
 import { validateBookingDates } from '../utils/booking.utils';
 
 export const validateBookingRequest = (req: Request, res: Response, next: NextFunction): void => {
-    const { villaId, checkIn, checkOut, totalGuests, paymentMethod } = req.body;
+    const { villaId, checkIn, checkOut, totalGuests, paymentMethod, phone, dateOfBirth } = req.body;
 
     // Required fields validation
-    const requiredFields = ['villaId', 'checkIn', 'checkOut', 'totalGuests', 'paymentMethod'];
+    const requiredFields = ['villaId', 'checkIn', 'checkOut', 'totalGuests', 'paymentMethod', 'phone', 'dateOfBirth'];
     const missingFields = requiredFields.filter(field => !req.body[field]);
 
     if (missingFields.length > 0) {
@@ -22,6 +22,42 @@ export const validateBookingRequest = (req: Request, res: Response, next: NextFu
     // Villa ID validation
     if (typeof villaId !== 'string' || villaId.trim().length === 0) {
         ApiResponse.validationError(res, { villaId: 'Villa ID must be a valid string' });
+        return;
+    }
+
+    // Phone validation
+    if (typeof phone !== 'string' || phone.trim().length === 0) {
+        ApiResponse.validationError(res, { phone: 'Phone number is required' });
+        return;
+    }
+
+    // Basic phone format validation (allows international formats)
+    const phoneRegex = /^[\+]?[1-9][\d]{8,14}$/;
+    if (!phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''))) {
+        ApiResponse.validationError(res, { phone: 'Phone number format is invalid' });
+        return;
+    }
+
+    // Date of birth validation
+    const dobDate = new Date(dateOfBirth);
+    if (isNaN(dobDate.getTime())) {
+        ApiResponse.validationError(res, { dateOfBirth: 'Invalid date of birth format' });
+        return;
+    }
+
+    // Age validation - must be at least 18
+    const today = new Date();
+    const age = today.getFullYear() - dobDate.getFullYear();
+    const monthDiff = today.getMonth() - dobDate.getMonth();
+    const finalAge = monthDiff < 0 || (monthDiff === 0 && today.getDate() < dobDate.getDate()) ? age - 1 : age;
+
+    if (finalAge < 18) {
+        ApiResponse.validationError(res, { dateOfBirth: 'You must be at least 18 years old to make a booking' });
+        return;
+    }
+
+    if (finalAge > 120) {
+        ApiResponse.validationError(res, { dateOfBirth: 'Invalid date of birth' });
         return;
     }
 
@@ -57,10 +93,10 @@ export const validateBookingRequest = (req: Request, res: Response, next: NextFu
     }
 
     // Payment method validation
-    if (!Object.values(PaymenyMethod).includes(paymentMethod)) {
+    if (!Object.values(PaymentMethod).includes(paymentMethod)) {
         ApiResponse.validationError(
             res,
-            { paymentMethod: `Payment method must be one of: ${Object.values(PaymenyMethod).join(', ')}` }
+            { paymentMethod: `Payment method must be one of: ${Object.values(PaymentMethod).join(', ')}` }
         );
         return;
     }

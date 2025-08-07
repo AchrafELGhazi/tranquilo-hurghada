@@ -2,7 +2,7 @@ import { Response } from 'express';
 import { AuthenticatedRequest } from '../middleware/auth.middleware';
 import { ApiResponse } from '../utils/apiResponse';
 import logger from '../config/logger';
-import { PaymenyMethod, BookingStatus } from '@prisma/client';
+import { PaymentMethod, BookingStatus } from '@prisma/client'; // Fixed import name
 import {
     createBooking,
     getBookings,
@@ -13,10 +13,11 @@ import {
     completeBooking
 } from '../services/booking.service';
 import { parseQueryDates } from '../utils/booking.utils';
+import { updateUserProfile } from '../services/user.service';
 
 export const createBookingRequest = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-        const { villaId, checkIn, checkOut, totalGuests, paymentMethod, notes } = req.body;
+        const { villaId, checkIn, checkOut, totalGuests, paymentMethod, notes, phone, dateOfBirth } = req.body;
         const guestId = req.user!.id;
 
         // Validation
@@ -25,8 +26,37 @@ export const createBookingRequest = async (req: AuthenticatedRequest, res: Respo
             return;
         }
 
+        // Validate phone and date of birth for booking
+        if (!phone) {
+            ApiResponse.badRequest(res, 'Phone number is required for booking');
+            return;
+        }
+
+        if (!dateOfBirth) {
+            ApiResponse.badRequest(res, 'Date of birth is required for booking');
+            return;
+        }
+
+        // Validate date of birth
+        const dobDate = new Date(dateOfBirth);
+        if (isNaN(dobDate.getTime())) {
+            ApiResponse.badRequest(res, 'Invalid date of birth format');
+            return;
+        }
+
+        // Check if user is at least 18 years old
+        const today = new Date();
+        const age = today.getFullYear() - dobDate.getFullYear();
+        const monthDiff = today.getMonth() - dobDate.getMonth();
+        const finalAge = monthDiff < 0 || (monthDiff === 0 && today.getDate() < dobDate.getDate()) ? age - 1 : age;
+
+        if (finalAge < 18) {
+            ApiResponse.badRequest(res, 'You must be at least 18 years old to make a booking');
+            return;
+        }
+
         // Validate payment method
-        if (!Object.values(PaymenyMethod).includes(paymentMethod)) {
+        if (!Object.values(PaymentMethod).includes(paymentMethod)) {
             ApiResponse.badRequest(res, 'Invalid payment method');
             return;
         }
@@ -44,6 +74,14 @@ export const createBookingRequest = async (req: AuthenticatedRequest, res: Respo
         if (isNaN(checkInDate.getTime()) || isNaN(checkOutDate.getTime())) {
             ApiResponse.badRequest(res, 'Invalid date format');
             return;
+        }
+
+        // Update user profile with phone and date of birth if not already set
+        try {
+            await updateUserProfile(guestId, { phone, dateOfBirth: dobDate });
+        } catch (profileError) {
+            logger.error('Failed to update user profile:', profileError);
+            // Continue with booking even if profile update fails
         }
 
         const booking = await createBooking({

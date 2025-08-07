@@ -1,4 +1,4 @@
-import { Booking, BookingStatus, PaymenyMethod, Prisma } from '@prisma/client';
+import { BookingStatus, PaymentMethod, Prisma } from '@prisma/client';
 import prisma from '../config/database';
 import { validateBookingDates, checkVillaAvailability, calculateTotalPrice } from '../utils/booking.utils';
 import { sendBookingNotificationEmails } from '../utils/emailService';
@@ -9,7 +9,7 @@ interface CreateBookingParams {
     checkIn: Date;
     checkOut: Date;
     totalGuests: number;
-    paymentMethod: PaymenyMethod;
+    paymentMethod: PaymentMethod;
     notes?: string;
 }
 
@@ -98,7 +98,7 @@ export const createBooking = async (params: CreateBookingParams): Promise<any> =
                 }
             },
             guest: {
-                select: { id: true, fullName: true, email: true }
+                select: { id: true, fullName: true, email: true, phone: true, dateOfBirth: true }
             }
         }
     });
@@ -200,7 +200,9 @@ export const getBookings = async (filters: BookingFilters): Promise<PaginatedBoo
                 select: {
                     id: true,
                     fullName: true,
-                    email: true
+                    email: true,
+                    phone: true,
+                    dateOfBirth: true
                 }
             }
         },
@@ -238,7 +240,13 @@ export const getBookingById = async (bookingId: string, userId: string, userRole
                 }
             },
             guest: {
-                select: { id: true, fullName: true, email: true }
+                select: {
+                    id: true,
+                    fullName: true,
+                    email: true,
+                    phone: true,
+                    dateOfBirth: true
+                }
             },
             confirmedBy: {
                 select: { id: true, fullName: true, email: true }
@@ -452,7 +460,7 @@ export const cancelBooking = async (
         throw new Error('Booking not found');
     }
 
-    const allowedStatuses = [BookingStatus.PENDING, BookingStatus.CONFIRMED];
+    const allowedStatuses: BookingStatus[] = [BookingStatus.PENDING, BookingStatus.CONFIRMED];
     if (!allowedStatuses.includes(booking.status)) {
         throw new Error(`Cannot cancel booking with status: ${booking.status}`);
     }
@@ -535,4 +543,4 @@ export const completeBooking = async (bookingId: string): Promise<any> => {
             completedAt: new Date()
         }
     });
-};
+};  

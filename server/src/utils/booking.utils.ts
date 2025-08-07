@@ -57,66 +57,82 @@ export const checkVillaAvailability = async (
     checkOut: Date,
     excludeBookingId?: string
 ): Promise<boolean> => {
-    // Convert to UTC to ensure consistent timezone handling
-    const checkInUTC = new Date(checkIn.toISOString());
-    const checkOutUTC = new Date(checkOut.toISOString());
+    try {
+        // Convert to UTC to ensure consistent timezone handling
+        const checkInUTC = new Date(checkIn.toISOString());
+        const checkOutUTC = new Date(checkOut.toISOString());
 
-    // Build where clause
-    const where: any = {
-        villaId,
-        status: {
-            in: ['PENDING', 'CONFIRMED']
-        },
-        OR: [
-            // New booking starts during existing booking
-            {
-                AND: [
-                    { checkIn: { lte: checkInUTC } },
-                    { checkOut: { gt: checkInUTC } }
-                ]
-            },
-            // New booking ends during existing booking
-            {
-                AND: [
-                    { checkIn: { lt: checkOutUTC } },
-                    { checkOut: { gte: checkOutUTC } }
-                ]
-            },
-            // New booking completely encompasses existing booking
-            {
-                AND: [
-                    { checkIn: { gte: checkInUTC } },
-                    { checkOut: { lte: checkOutUTC } }
-                ]
-            },
-            // Existing booking completely encompasses new booking
-            {
-                AND: [
-                    { checkIn: { lte: checkInUTC } },
-                    { checkOut: { gte: checkOutUTC } }
-                ]
-            }
-        ]
-    };
+        // Build where clause - Fix: Use proper array of allowed statuses
+        const allowedStatuses = ['PENDING', 'CONFIRMED'] as const;
 
-    // Exclude specific booking if provided (for updates)
-    if (excludeBookingId) {
-        where.id = { not: excludeBookingId };
+        const where: any = {
+            villaId,
+            status: {
+                in: allowedStatuses
+            },
+            OR: [
+                // New booking starts during existing booking
+                {
+                    AND: [
+                        { checkIn: { lte: checkInUTC } },
+                        { checkOut: { gt: checkInUTC } }
+                    ]
+                },
+                // New booking ends during existing booking
+                {
+                    AND: [
+                        { checkIn: { lt: checkOutUTC } },
+                        { checkOut: { gte: checkOutUTC } }
+                    ]
+                },
+                // New booking completely encompasses existing booking
+                {
+                    AND: [
+                        { checkIn: { gte: checkInUTC } },
+                        { checkOut: { lte: checkOutUTC } }
+                    ]
+                },
+                // Existing booking completely encompasses new booking
+                {
+                    AND: [
+                        { checkIn: { lte: checkInUTC } },
+                        { checkOut: { gte: checkOutUTC } }
+                    ]
+                }
+            ]
+        };
+
+        // Exclude specific booking if provided (for updates)
+        if (excludeBookingId) {
+            where.id = { not: excludeBookingId };
+        }
+
+        const conflictingBookings = await prisma.booking.findMany({ where });
+
+        return conflictingBookings.length === 0;
+    } catch (error) {
+        console.error('Error checking villa availability:', error);
+        throw new Error('Failed to check villa availability');
     }
-
-    const conflictingBookings = await prisma.booking.findMany({ where });
-
-    return conflictingBookings.length === 0;
 };
 
 export const calculateTotalPrice = (pricePerNight: Decimal, checkIn: Date, checkOut: Date): Decimal => {
-    const checkInDate = new Date(checkIn);
-    const checkOutDate = new Date(checkOut);
+    try {
+        const checkInDate = new Date(checkIn);
+        const checkOutDate = new Date(checkOut);
 
-    const diffTime = checkOutDate.getTime() - checkInDate.getTime();
-    const numberOfNights = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const diffTime = checkOutDate.getTime() - checkInDate.getTime();
+        const numberOfNights = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    return new Decimal(pricePerNight).mul(numberOfNights);
+        if (numberOfNights <= 0) {
+            throw new Error('Invalid booking duration');
+        }
+
+        return new Decimal(pricePerNight).mul(numberOfNights);
+    } catch (error) {
+        console.error('Error calculating total price:', error);
+        throw new Error('Failed to calculate total price');
+    }
 };
 
 export const getDaysBetweenDates = (startDate: Date, endDate: Date): number => {
@@ -125,21 +141,26 @@ export const getDaysBetweenDates = (startDate: Date, endDate: Date): number => {
 };
 
 export const formatBookingDateRange = (checkIn: Date, checkOut: Date): string => {
-    const checkInStr = checkIn.toLocaleDateString('en-US', {
-        weekday: 'short',
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-    });
+    try {
+        const checkInStr = checkIn.toLocaleDateString('en-US', {
+            weekday: 'short',
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
 
-    const checkOutStr = checkOut.toLocaleDateString('en-US', {
-        weekday: 'short',
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-    });
+        const checkOutStr = checkOut.toLocaleDateString('en-US', {
+            weekday: 'short',
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
 
-    return `${checkInStr} - ${checkOutStr}`;
+        return `${checkInStr} - ${checkOutStr}`;
+    } catch (error) {
+        console.error('Error formatting date range:', error);
+        return `${checkIn.toISOString().split('T')[0]} - ${checkOut.toISOString().split('T')[0]}`;
+    }
 };
 
 export const isBookingCancellable = (booking: { checkIn: Date; status: string }): boolean => {
@@ -191,4 +212,55 @@ export const buildDateRangeFilter = (startDate?: Date, endDate?: Date) => {
     }
 
     return filter;
+};
+
+export const validatePhoneNumber = (phone: string): { isValid: boolean; error?: string } => {
+    if (!phone || typeof phone !== 'string') {
+        return { isValid: false, error: 'Phone number is required' };
+    }
+
+    const cleanPhone = phone.replace(/[\s\-\(\)]/g, '');
+    const phoneRegex = /^[\+]?[1-9][\d]{8,14}$/;
+
+    if (!phoneRegex.test(cleanPhone)) {
+        return {
+            isValid: false,
+            error: 'Phone number must be 9-15 digits long and can include country code'
+        };
+    }
+
+    return { isValid: true };
+};
+
+export const validateDateOfBirth = (dateOfBirth: string | Date): { isValid: boolean; error?: string; age?: number } => {
+    let dobDate: Date;
+
+    if (typeof dateOfBirth === 'string') {
+        dobDate = new Date(dateOfBirth);
+    } else {
+        dobDate = dateOfBirth;
+    }
+
+    if (isNaN(dobDate.getTime())) {
+        return { isValid: false, error: 'Invalid date of birth format' };
+    }
+
+    const today = new Date();
+    const age = today.getFullYear() - dobDate.getFullYear();
+    const monthDiff = today.getMonth() - dobDate.getMonth();
+    const finalAge = monthDiff < 0 || (monthDiff === 0 && today.getDate() < dobDate.getDate()) ? age - 1 : age;
+
+    if (finalAge < 18) {
+        return { isValid: false, error: 'You must be at least 18 years old to make a booking' };
+    }
+
+    if (finalAge > 120) {
+        return { isValid: false, error: 'Invalid date of birth' };
+    }
+
+    if (dobDate > today) {
+        return { isValid: false, error: 'Date of birth cannot be in the future' };
+    }
+
+    return { isValid: true, age: finalAge };
 };
