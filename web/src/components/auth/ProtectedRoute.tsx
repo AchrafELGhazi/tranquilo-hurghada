@@ -18,7 +18,7 @@ export function ProtectedRoute({
     requireAdmin = false,
     requireHost = false,
     fallback,
-    redirectTo = 'login',
+    redirectTo = 'signin',
 }: ProtectedRouteProps) {
     const { isAuthenticated, hasRole, isAdmin, isHost, isLoading } = useAuth();
     const location = useLocation();
@@ -48,7 +48,7 @@ export function ProtectedRoute({
     // Check authentication
     if (!debouncedAuth.isAuthenticated) {
         // Don't redirect if already on login/register page
-        if (location.pathname.includes('/login') || location.pathname.includes('/register')) {
+        if (location.pathname.includes('/signin') || location.pathname.includes('/register')) {
             return <>{children}</>;
         }
         return <Navigate to={getLocalizedPath(redirectTo)} state={{ from: location }} replace />;
