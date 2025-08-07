@@ -174,7 +174,7 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
     const totalWithFees = calculateTotal() + serviceFee + cleaningFee;
 
     return (
-        <div className='sticky top-6 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden'>
+        <div className='sticky top-28 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden'>
             {/* Header */}
             <div className='p-6 border-b border-gray-100'>
                 <div className='flex items-baseline space-x-1 mb-1'>

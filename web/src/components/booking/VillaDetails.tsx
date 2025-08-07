@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, Star, Wifi, Car, Utensils, Snowflake, Waves, Trees } from 'lucide-react';
+import Map from './Map';
 
 interface Villa {
     id: string;
@@ -60,14 +61,10 @@ const VillaDetails: React.FC<VillaDetailsProps> = ({ villa }) => {
                 <div className='flex items-center space-x-4 text-sm text-gray-600'>
                     <div className='flex items-center'>
                         <Star className='w-4 h-4 fill-current text-yellow-400 mr-1' />
-                        <span className='font-medium'>4.9</span>
-                        <span className='mx-1'>·</span>
-                        <span className='underline'>23 reviews</span>
+                        <span className='font-medium'>5</span>
+                        
                     </div>
-                    <span>·</span>
-                    <span className='underline'>
-                        {villa.address}, {villa.city}, {villa.country}
-                    </span>
+                    
                 </div>
             </div>
 
@@ -131,9 +128,7 @@ const VillaDetails: React.FC<VillaDetailsProps> = ({ villa }) => {
                     <div className='border-b border-gray-200 pb-6'>
                         <div className='flex items-center justify-between mb-4'>
                             <div>
-                                <h2 className='text-xl font-semibold text-gray-900'>
-                                    Villa hosted by {villa.owner.fullName}
-                                </h2>
+                               
                                 <div className='flex items-center space-x-4 text-gray-600 mt-1'>
                                     <span>{villa.maxGuests} guests</span>
                                     <span>·</span>
@@ -142,11 +137,7 @@ const VillaDetails: React.FC<VillaDetailsProps> = ({ villa }) => {
                                     <span>{villa.bathrooms} bathrooms</span>
                                 </div>
                             </div>
-                            <div className='w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center'>
-                                <span className='text-lg font-semibold text-gray-600'>
-                                    {villa.owner.fullName.charAt(0)}
-                                </span>
-                            </div>
+                          
                         </div>
                     </div>
 
@@ -171,27 +162,20 @@ const VillaDetails: React.FC<VillaDetailsProps> = ({ villa }) => {
 
                     {/* Location */}
                     <div>
-                        <h3 className='text-lg font-semibold text-gray-900 mb-4'>Where you'll be</h3>
-                        <div className='bg-gray-100 rounded-lg p-4'>
-                            <p className='text-gray-700 font-medium'>
-                                {villa.city}, {villa.country}
-                            </p>
-                            <p className='text-gray-600 text-sm mt-1'>{villa.address}</p>
+                        <h3 className='text-lg -z-100 font-semibold text-gray-900 mb-4'>Where you'll be</h3>
+                        <div className='space-y-4'>
+                            <div className='bg-gray-100 rounded-lg p-4'>
+                                <p className='text-gray-700 font-medium'>
+                                    {villa.city}, {villa.country}
+                                </p>
+                                <p className='text-gray-600 text-sm mt-1'>{villa.address}</p>
+                            </div>
+                            <Map address={villa.address} city={villa.city} country={villa.country} />
                         </div>
                     </div>
                 </div>
 
-                {/* Booking Card Placeholder */}
-                <div className='lg:col-span-1'>
-                    <div className='sticky top-6 bg-white border border-gray-200 rounded-xl p-6 shadow-lg'>
-                        <div className='flex items-baseline space-x-1 mb-4'>
-                            <span className='text-2xl font-semibold'>{villa.pricePerNight} MAD</span>
-                            <span className='text-gray-600'>night</span>
-                        </div>
-
-                        <div className='text-center py-8 text-gray-500'>Booking form will appear here</div>
-                    </div>
-                </div>
+            
             </div>
         </div>
     );

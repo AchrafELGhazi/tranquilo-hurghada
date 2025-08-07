@@ -2,12 +2,12 @@ import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-// Fix for default markers in Leaflet
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
+
 L.Icon.Default.mergeOptions({
     iconUrl: markerIcon,
     iconRetinaUrl: markerIcon2x,
@@ -27,38 +27,62 @@ const Map: React.FC<MapProps> = ({ address, city, country }) => {
     useEffect(() => {
         if (!mapRef.current) return;
 
-        // North Hurghada coordinates (approximate location)
-        const latitude = 27.2579; // North Hurghada latitude
-        const longitude = 33.8116; // North Hurghada longitude
+        const latitude = 27.2579;
+        const longitude = 33.8116;
 
-        // Initialize the map
-        const map = L.map(mapRef.current).setView([latitude, longitude], 13);
+        const map = L.map(mapRef.current).setView([latitude, longitude], 15);
 
-        // Add OpenStreetMap tile layer
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors',
+            attribution: '',
         }).addTo(map);
 
-        // Add marker
-        const marker = L.marker([latitude, longitude]).addTo(map);
+        const customIcon = L.divIcon({
+            html: `
+        <div style="
+          background-color: #F8B259;
+          width: 20px;
+          height: 20px;
+          border-radius: 50% 50% 50% 0;
+          border: 2px solid #fff;
+          transform: rotate(-45deg);
+          box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+          position: relative;
+        ">
+          <div style="
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(45deg);
+            width: 8px;
+            height: 8px;
+            background-color: #fff;
+            border-radius: 50%;
+          "></div>
+        </div>
+      `,
+            className: 'custom-marker',
+            iconSize: [25, 25],
+            iconAnchor: [12, 24],
+            popupAnchor: [0, -24],
+        });
 
-        // Add popup with location info
+        const marker = L.marker([latitude, longitude], { icon: customIcon }).addTo(map);
+
         marker
             .bindPopup(
                 `
-      <div style="font-family: system-ui; line-height: 1.4;">
-        <strong>Villa Location</strong><br/>
-        North Hurghada, Red Sea<br/>
-        Villa No. 276, Mubarak Housing 7<br/>
-        Red Sea Governorate, Egypt
-      </div>
-    `
+        <div style="font-family: system-ui; line-height: 1.4;">
+          <strong>Villa Location</strong><br/>
+          North Hurghada, Red Sea<br/>
+          Villa No. 276, Mubarak Housing 7<br/>
+          Red Sea Governorate, Egypt
+        </div>
+        `
             )
             .openPopup();
 
         mapInstanceRef.current = map;
 
-        // Cleanup function
         return () => {
             if (mapInstanceRef.current) {
                 mapInstanceRef.current.remove();
@@ -68,7 +92,7 @@ const Map: React.FC<MapProps> = ({ address, city, country }) => {
     }, []);
 
     return (
-        <div className='w-full h-64 rounded-lg overflow-hidden border border-gray-200'>
+        <div className='w-full h-64 border-2 border-[#F8B259]/80 rounded-2xl overflow-hidden relative z-10'>
             <div ref={mapRef} className='w-full h-full' />
         </div>
     );
