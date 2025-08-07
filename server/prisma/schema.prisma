@@ -33,17 +33,14 @@ enum VillaStatus {
 }
 
 model User {
-    id          String    @id @default(cuid())
-    email       String    @unique
+    id          String   @id @default(cuid())
+    email       String   @unique
     password    String
-    firstName   String
-    lastName    String
-    dateOfBirth DateTime?
-    phoneNumber Int?
-    role        Role      @default(GUEST)
-    isActive    Boolean   @default(true)
-    createdAt   DateTime  @default(now())
-    updatedAt   DateTime  @updatedAt
+    fullName    String
+    role        Role     @default(GUEST)
+    isActive    Boolean  @default(true)
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
 
     ownedVillas       Villa[]   @relation("VillaOwner")
     guestBookings     Booking[] @relation("BookingGuest")

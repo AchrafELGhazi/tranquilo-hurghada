@@ -6,14 +6,14 @@ import { AuthenticatedRequest } from '../middleware/auth.middleware';
 
 export const register = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { email, password, firstName, lastName, dateOfBirth, phoneNumber } = req.body;
+        const { email, password, fullName } = req.body;
 
-        if (!email || !password || !firstName || !lastName) {
+        if (!email || !password || !fullName) {
             ApiResponse.badRequest(res, 'Missing required fields');
             return;
         }
 
-        const authData = await registerUser({ email, password, firstName, lastName, dateOfBirth, phoneNumber });
+        const authData = await registerUser({ email, password, fullName });
 
         ApiResponse.created(res, authData, 'User registered successfully');
     } catch (error: unknown) {

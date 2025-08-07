@@ -12,8 +12,7 @@ export const generateTokens = (user: User): {
     const payload: TokenPayload = {
         id: user.id,
         email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
+        fullName: user.fullName,
         role: user.role,
         isActive: user.isActive,
     };

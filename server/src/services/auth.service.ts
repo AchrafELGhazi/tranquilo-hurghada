@@ -7,10 +7,7 @@ import { determineUserRole } from '../utils/determinUserRole';
 interface RegisterParams {
     email: string;
     password: string;
-    firstName: string;
-    lastName: string;
-    dateOfBirth?: string | Date;
-    phoneNumber?: number;
+    fullName: string;
 }
 
 interface AuthResponse {
@@ -22,10 +19,7 @@ interface AuthResponse {
 export const registerUser = async ({
     email,
     password,
-    firstName,
-    lastName,
-    dateOfBirth,
-    phoneNumber,
+    fullName,
 }: RegisterParams): Promise<AuthResponse> => {
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
@@ -35,18 +29,11 @@ export const registerUser = async ({
     const hashedPassword = await hashPassword(password);
     const role = determineUserRole(email);
 
-    const parsedDateOfBirth = dateOfBirth
-        ? (typeof dateOfBirth === 'string' ? new Date(dateOfBirth) : dateOfBirth)
-        : undefined;
-
     const user = await prisma.user.create({
         data: {
             email,
             password: hashedPassword,
-            firstName,
-            lastName,
-            dateOfBirth: parsedDateOfBirth,
-            phoneNumber,
+            fullName,
             role,
         },
     });
@@ -115,10 +102,7 @@ export const getCurrentUser = async (userId: string): Promise<Omit<User, 'passwo
         select: {
             id: true,
             email: true,
-            firstName: true,
-            lastName: true,
-            dateOfBirth: true,
-            phoneNumber: true,
+            fullName: true,
             role: true,
             isActive: true,
             createdAt: true,
