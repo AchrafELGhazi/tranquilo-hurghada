@@ -14,9 +14,9 @@ const HeroSection = () => {
     ];
 
     const typewriterTexts = [
-        'Where luxury meets the Red Sea',
-        'Your desert oasis awaits',
-        'Experience Egyptian hospitality',
+        'The Gateway to Your Hurghada Adventure',
+        'From Desert Dunes to Coral Reefs—Start Here',
+        'Your Red Sea Escape Awaits',
         'Paradise found in Hurghada',
     ];
 

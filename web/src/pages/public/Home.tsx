@@ -1,8 +1,9 @@
-import ContactSection from "@/components/home/ContactSection";
-import FeaturesSection from "@/components/home/FeaturesSection";
-import HeroSection from "@/components/home/HeroSection";
-import RoomShowcase from "@/components/home/RoomShowcase";
-import TestimonialsSection from "@/components/home/TestimonialsSection";
+import ArticlesSection from '@/components/home/ArticlesSection';
+import BookingSection from '@/components/home/BookingSection';
+import ExploreHurghada from '@/components/home/ExploreHurghada';
+import HeroSection from '@/components/home/HeroSection';
+import ServicesSection from '@/components/home/ServicesSection';
+import VillaShowcase from '@/components/home/VillaShowcase';
 
 const Home = () => {
     return (
@@ -29,10 +30,11 @@ const Home = () => {
             `}</style>
 
             <HeroSection />
-            {/* <FeaturesSection />
-            <RoomShowcase />
-            <TestimonialsSection />
-            <ContactSection /> */}
+            <BookingSection />
+            <VillaShowcase />
+            <ServicesSection />
+            <ExploreHurghada />
+            <ArticlesSection />
         </div>
     );
 };
