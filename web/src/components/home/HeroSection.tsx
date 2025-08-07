@@ -42,7 +42,7 @@ const HeroSection = () => {
 
     return (
         <section
-            className='relative h-screen overflow-hidden bg-gradient-to-br from-orange-100 to-orange-200'
+            className='relative h-screen overflow-hidden bg-gradient-to-br -mt-24 sm:mt-0 from-orange-100 to-orange-200'
             style={{ height: 'calc(100vh - 80px)' }}
         >
             <div className='absolute inset-0'>
@@ -125,7 +125,7 @@ const HeroSection = () => {
                             isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'
                         } transition-all duration-800 ease-out delay-300`}
                     >
-                        <span className='inline-block px-3 py-1.5 backdrop-blur-md bg-orange-50/10 border border-orange-50/20 rounded-full text-yellow-400 font-medium text-sm tracking-wider uppercase'>
+                        <span className='inline-block px-2 py-1 sm:px-3 sm:py-1.5 backdrop-blur-md bg-orange-50/10 border border-orange-50/20 rounded-full text-yellow-400 font-medium text-xs sm:text-sm tracking-wider uppercase'>
                             Welcome to Paradise
                         </span>
                     </div>
