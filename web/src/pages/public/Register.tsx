@@ -1,16 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { Eye, EyeOff, Mail, Lock, User, Phone, Calendar } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
 
 export const Register = () => {
     const [formData, setFormData] = useState({
         email: '',
         password: '',
-        firstName: '',
-        lastName: '',
-        phoneNumber: '',
-        dateOfBirth: '',
+        fullName: '',
     });
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -44,7 +41,7 @@ export const Register = () => {
     };
 
     const validateForm = (): boolean => {
-        if (!formData.email || !formData.password || !formData.firstName || !formData.lastName) {
+        if (!formData.email || !formData.password || !formData.fullName) {
             setLocalError('Please fill in all required fields');
             return false;
         }
@@ -65,18 +62,9 @@ export const Register = () => {
             return false;
         }
 
-        if (formData.phoneNumber && !/^\d{10,15}$/.test(formData.phoneNumber.replace(/\s/g, ''))) {
-            setLocalError('Please enter a valid phone number (10-15 digits)');
+        if (formData.fullName.trim().length < 2) {
+            setLocalError('Full name must be at least 2 characters long');
             return false;
-        }
-
-        if (formData.dateOfBirth) {
-            const birthDate = new Date(formData.dateOfBirth);
-            const today = new Date();
-            if (birthDate > today) {
-                setLocalError('Date of birth cannot be in the future');
-                return false;
-            }
         }
 
         return true;
@@ -95,10 +83,7 @@ export const Register = () => {
             const registerData = {
                 email: formData.email,
                 password: formData.password,
-                firstName: formData.firstName,
-                lastName: formData.lastName,
-                phoneNumber: formData.phoneNumber ? parseInt(formData.phoneNumber.replace(/\s/g, '')) : undefined,
-                dateOfBirth: formData.dateOfBirth || undefined,
+                fullName: formData.fullName.trim(),
             };
             await register(registerData);
             // Navigation will be handled by the useEffect above
@@ -119,7 +104,7 @@ export const Register = () => {
 
     return (
         <div className='min-h-screen bg-[#F3E9DC] flex items-center justify-center px-4 sm:px-6 lg:px-8 py-8'>
-            <div className='w-full max-w-4xl'>
+            <div className='w-full max-w-2xl'>
                 {/* Header */}
                 <div className='text-center mb-8'>
                     <h2 className='text-3xl font-bold text-[#C75D2C] mb-2'>Create Your Account</h2>
@@ -135,132 +120,50 @@ export const Register = () => {
                     )}
 
                     <form onSubmit={handleSubmit} className='space-y-6'>
-                        {/* Name Fields Row */}
-                        <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                            {/* First Name */}
-                            <div>
-                                <label htmlFor='firstName' className='block text-sm font-semibold text-[#C75D2C] mb-2'>
-                                    First Name *
-                                </label>
-                                <div className='relative'>
-                                    <div className='absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none'>
-                                        <User className='h-5 w-5 text-[#D96F32]/60' />
-                                    </div>
-                                    <input
-                                        id='firstName'
-                                        name='firstName'
-                                        type='text'
-                                        value={formData.firstName}
-                                        onChange={handleInputChange}
-                                        className='w-full pl-12 pr-4 py-3 border-2 border-[#F8B259]/60 rounded-xl bg-white/50 text-[#C75D2C] placeholder-[#C75D2C]/50 focus:outline-none focus:border-[#D96F32] focus:bg-white/80 transition-all duration-300'
-                                        required
-                                        disabled={isLoading}
-                                        placeholder='First name'
-                                    />
+                        {/* Full Name Field */}
+                        <div>
+                            <label htmlFor='fullName' className='block text-sm font-semibold text-[#C75D2C] mb-2'>
+                                Full Name *
+                            </label>
+                            <div className='relative'>
+                                <div className='absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none'>
+                                    <User className='h-5 w-5 text-[#D96F32]/60' />
                                 </div>
-                            </div>
-
-                            {/* Last Name */}
-                            <div>
-                                <label htmlFor='lastName' className='block text-sm font-semibold text-[#C75D2C] mb-2'>
-                                    Last Name *
-                                </label>
-                                <div className='relative'>
-                                    <div className='absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none'>
-                                        <User className='h-5 w-5 text-[#D96F32]/60' />
-                                    </div>
-                                    <input
-                                        id='lastName'
-                                        name='lastName'
-                                        type='text'
-                                        value={formData.lastName}
-                                        onChange={handleInputChange}
-                                        className='w-full pl-12 pr-4 py-3 border-2 border-[#F8B259]/60 rounded-xl bg-white/50 text-[#C75D2C] placeholder-[#C75D2C]/50 focus:outline-none focus:border-[#D96F32] focus:bg-white/80 transition-all duration-300'
-                                        required
-                                        disabled={isLoading}
-                                        placeholder='Last name'
-                                    />
-                                </div>
+                                <input
+                                    id='fullName'
+                                    name='fullName'
+                                    type='text'
+                                    value={formData.fullName}
+                                    onChange={handleInputChange}
+                                    className='w-full pl-12 pr-4 py-3 border-2 border-[#F8B259]/60 rounded-xl bg-white/50 text-[#C75D2C] placeholder-[#C75D2C]/50 focus:outline-none focus:border-[#D96F32] focus:bg-white/80 transition-all duration-300'
+                                    required
+                                    disabled={isLoading}
+                                    placeholder='Enter your full name'
+                                />
                             </div>
                         </div>
 
-                        {/* Email and Phone Row */}
-                        <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                            {/* Email Field */}
-                            <div>
-                                <label htmlFor='email' className='block text-sm font-semibold text-[#C75D2C] mb-2'>
-                                    Email Address *
-                                </label>
-                                <div className='relative'>
-                                    <div className='absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none'>
-                                        <Mail className='h-5 w-5 text-[#D96F32]/60' />
-                                    </div>
-                                    <input
-                                        id='email'
-                                        name='email'
-                                        type='email'
-                                        value={formData.email}
-                                        onChange={handleInputChange}
-                                        className='w-full pl-12 pr-4 py-3 border-2 border-[#F8B259]/60 rounded-xl bg-white/50 text-[#C75D2C] placeholder-[#C75D2C]/50 focus:outline-none focus:border-[#D96F32] focus:bg-white/80 transition-all duration-300'
-                                        required
-                                        disabled={isLoading}
-                                        placeholder='Enter your email'
-                                    />
+                        {/* Email Field */}
+                        <div>
+                            <label htmlFor='email' className='block text-sm font-semibold text-[#C75D2C] mb-2'>
+                                Email Address *
+                            </label>
+                            <div className='relative'>
+                                <div className='absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none'>
+                                    <Mail className='h-5 w-5 text-[#D96F32]/60' />
                                 </div>
+                                <input
+                                    id='email'
+                                    name='email'
+                                    type='email'
+                                    value={formData.email}
+                                    onChange={handleInputChange}
+                                    className='w-full pl-12 pr-4 py-3 border-2 border-[#F8B259]/60 rounded-xl bg-white/50 text-[#C75D2C] placeholder-[#C75D2C]/50 focus:outline-none focus:border-[#D96F32] focus:bg-white/80 transition-all duration-300'
+                                    required
+                                    disabled={isLoading}
+                                    placeholder='Enter your email'
+                                />
                             </div>
-
-                            {/* Phone Number */}
-                            <div>
-                                <label
-                                    htmlFor='phoneNumber'
-                                    className='block text-sm font-semibold text-[#C75D2C] mb-2'
-                                >
-                                    Phone Number
-                                </label>
-                                <div className='relative'>
-                                    <div className='absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none'>
-                                        <Phone className='h-5 w-5 text-[#D96F32]/60' />
-                                    </div>
-                                    <input
-                                        id='phoneNumber'
-                                        name='phoneNumber'
-                                        type='tel'
-                                        value={formData.phoneNumber}
-                                        onChange={handleInputChange}
-                                        className='w-full pl-12 pr-4 py-3 border-2 border-[#F8B259]/60 rounded-xl bg-white/50 text-[#C75D2C] placeholder-[#C75D2C]/50 focus:outline-none focus:border-[#D96F32] focus:bg-white/80 transition-all duration-300'
-                                        disabled={isLoading}
-                                        placeholder='Enter your phone number'
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Date of Birth */}
-                        <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                            <div>
-                                <label
-                                    htmlFor='dateOfBirth'
-                                    className='block text-sm font-semibold text-[#C75D2C] mb-2'
-                                >
-                                    Date of Birth
-                                </label>
-                                <div className='relative'>
-                                    <div className='absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none'>
-                                        <Calendar className='h-5 w-5 text-[#D96F32]/60' />
-                                    </div>
-                                    <input
-                                        id='dateOfBirth'
-                                        name='dateOfBirth'
-                                        type='date'
-                                        value={formData.dateOfBirth}
-                                        onChange={handleInputChange}
-                                        className='w-full pl-12 pr-4 py-3 border-2 border-[#F8B259]/60 rounded-xl bg-white/50 text-[#C75D2C] placeholder-[#C75D2C]/50 focus:outline-none focus:border-[#D96F32] focus:bg-white/80 transition-all duration-300'
-                                        disabled={isLoading}
-                                        max={new Date().toISOString().split('T')[0]}
-                                    />
-                                </div>
-                            </div>
-                            <div></div> {/* Empty div for spacing */}
                         </div>
 
                         {/* Password Fields Row */}

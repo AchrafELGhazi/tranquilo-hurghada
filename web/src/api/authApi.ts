@@ -3,10 +3,7 @@ import apiService from "@/utils/api";
 export interface User {
     id: string;
     email: string;
-    firstName: string;
-    lastName: string;
-    dateOfBirth?: string;
-    phoneNumber?: number;
+    fullName: string;
     role: 'GUEST' | 'HOST' | 'ADMIN';
     isActive: boolean;
     createdAt: string;
@@ -16,10 +13,7 @@ export interface User {
 export interface RegisterData {
     email: string;
     password: string;
-    firstName: string;
-    lastName: string;
-    dateOfBirth?: string;
-    phoneNumber?: number;
+    fullName: string;
 }
 
 export interface LoginData {

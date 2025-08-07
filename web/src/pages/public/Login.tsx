@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link, useParams } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 
 export const Login = () => {
@@ -11,8 +11,8 @@ export const Login = () => {
     const { login, isAuthenticated, isLoading, error, clearError } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
+    const { lang } = useParams();
 
-    // Redirect if already authenticated
     useEffect(() => {
         if (isAuthenticated) {
             const from = (location.state as any)?.from?.pathname || '/';
@@ -150,7 +150,7 @@ export const Login = () => {
                         <p className='text-sm text-[#C75D2C]/70'>
                             Don't have an account?{' '}
                             <Link
-                                to='/register'
+                                to={`/${lang}/register`}
                                 className='font-semibold text-[#D96F32] hover:text-[#C75D2C] transition-colors duration-200 underline underline-offset-2 decoration-2 decoration-[#F8B259]/50 hover:decoration-[#F8B259]'
                             >
                                 Create one here
