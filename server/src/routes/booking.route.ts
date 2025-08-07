@@ -52,14 +52,14 @@ bookingRouter.get('/:bookingId',
 
 // Confirm a booking (hosts and admins only)
 bookingRouter.put('/:bookingId/confirm',
-    validateUUID('bookingId'),
+    // validateUUID('bookingId'),
     requireHost,
     confirmBookingRequest
 );
 
 // Reject a booking (hosts and admins only)
 bookingRouter.put('/:bookingId/reject',
-    validateUUID('bookingId'),
+    // validateUUID('bookingId'),
     validateBookingAction,
     requireHost,
     rejectBookingRequest
@@ -67,7 +67,7 @@ bookingRouter.put('/:bookingId/reject',
 
 // Cancel a booking (guests, hosts, and admins)
 bookingRouter.put('/:bookingId/cancel',
-    validateUUID('bookingId'),
+    // validateUUID('bookingId'),
     validateBookingAction,
     cancelBookingRequest
 );

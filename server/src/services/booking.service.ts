@@ -385,9 +385,9 @@ export const rejectBooking = async (
         throw new Error('Booking not found');
     }
 
-    if (booking.status !== BookingStatus.PENDING) {
-        throw new Error(`Cannot reject booking with status: ${booking.status}`);
-    }
+    // if (booking.status !== BookingStatus.PENDING) {
+    //     throw new Error(`Cannot reject booking with status: ${booking.status}`);
+    // }
 
     const updatedBooking = await prisma.booking.update({
         where: { id: bookingId },
