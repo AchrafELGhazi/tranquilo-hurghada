@@ -1,25 +1,30 @@
 import logger from "../config/logger";
 import prisma from "../config/database";
 import seedUsers from "./services/users.seed";
-
+import seedVillas from "./services/villas.seed";
 
 const seed = async () => {
-     try {
-          logger.info('Starting seeding data from seeds...');
+    try {
+        logger.info('Starting seeding data from seeds...');
 
-          await prisma.user.deleteMany();
+        logger.info('Clearing existing data...');
+        await prisma.booking.deleteMany();
+        await prisma.villa.deleteMany();
+        await prisma.user.deleteMany();
 
-          await seedUsers();
+        logger.info('Seeding users...');
+        await seedUsers();
 
-          logger.info('Seeding completed successfully');
-     } catch (error) {
-          logger.error('Seeding failed', error);
-     } finally {
-          await prisma.$disconnect;
-     }
+        logger.info('Seeding villas...');
+        await seedVillas();
+
+        logger.info('Seeding completed successfully');
+    } catch (error) {
+        logger.error('Seeding failed', error);
+        process.exit(1);
+    } finally {
+        await prisma.$disconnect();
+    }
 }
 
 seed();
-
-
-
