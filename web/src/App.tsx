@@ -17,6 +17,7 @@ import { Login } from './pages/public/Login';
 import { Register } from './pages/public/Register';
 import { VisitorInfo } from './pages/public/VisitorInfo';
 import Home from './pages/public/Home';
+import ScrollToTop from './utils/scrollToTop';
 
 const LanguageRedirect: React.FC = () => {
     const { lang } = useParams();
@@ -64,6 +65,7 @@ const App: React.FC = () => {
             <I18nextProvider i18n={i18n}>
                 <AuthProvider>
                     <Router>
+                        <ScrollToTop />
                         {isAppLoading ? (
                             <LoadingScreen progress={loadingProgress} />
                         ) : (
