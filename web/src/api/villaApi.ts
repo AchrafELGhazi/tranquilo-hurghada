@@ -16,7 +16,7 @@ export interface Booking {
 export interface Villa {
     id: string;
     title: string;
-    description?: string;
+    description: string;
     address: string;
     city: string;
     country: string;

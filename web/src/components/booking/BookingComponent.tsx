@@ -1,5 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Users, Phone, CreditCard, FileText, AlertCircle, Check } from 'lucide-react';
+import {
+    Calendar,
+    Users,
+    Phone,
+    CreditCard,
+    FileText,
+    AlertCircle,
+    Check,
+    Star,
+    Award,
+    Shield,
+    Clock,
+} from 'lucide-react';
 import bookingApi from '@/api/bookingApi';
 import villaApi from '@/api/villaApi';
 
@@ -174,219 +186,263 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
     const totalWithFees = calculateTotal() + serviceFee + cleaningFee;
 
     return (
-        <div className='sticky top-28 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden'>
-            {/* Header */}
-            <div className='p-6 border-b border-gray-100'>
-                <div className='flex items-baseline space-x-1 mb-1'>
-                    <span className='text-2xl font-semibold'>{villa.pricePerNight} MAD</span>
-                    <span className='text-gray-600'>night</span>
-                </div>
-                <div className='flex items-center text-sm text-gray-600'>
-                    <span className='font-medium'>4.9</span>
-                    <span className='mx-1'>·</span>
-                    <span className='underline'>23 reviews</span>
-                </div>
-            </div>
-
-            {/* Booking Form */}
-            <div className='p-6'>
-                {success && (
-                    <div className='bg-green-50 border border-green-200 rounded-lg p-4 mb-6 flex items-start space-x-3'>
-                        <Check className='w-5 h-5 text-green-600 mt-0.5 flex-shrink-0' />
-                        <div>
-                            <p className='text-green-800 font-medium'>Booking submitted!</p>
-                            <p className='text-green-700 text-sm mt-1'>{success}</p>
-                        </div>
+        <div className='sticky top-28 space-y-6'>
+            {/* Main Booking Card */}
+            <div className='bg-white/40 backdrop-blur-md border-2 border-[#F8B259]/70 rounded-2xl overflow-hidden shadow-xl'>
+                {/* Header */}
+                <div className='p-6 border-b border-[#F8B259]/50 bg-gradient-to-r from-[#F8B259]/20 to-[#D96F32]/20'>
+                    <div className='flex items-baseline space-x-2 mb-2'>
+                        <span className='text-3xl font-bold text-[#C75D2C]'>{villa.pricePerNight}</span>
+                        <span className='text-[#C75D2C]/70 font-medium'>MAD</span>
+                        <span className='text-[#C75D2C]/70'>/ night</span>
                     </div>
-                )}
-
-                {error && (
-                    <div className='bg-red-50 border border-red-200 rounded-lg p-4 mb-6 flex items-start space-x-3'>
-                        <AlertCircle className='w-5 h-5 text-red-600 mt-0.5 flex-shrink-0' />
-                        <div>
-                            <p className='text-red-800 font-medium'>Error</p>
-                            <p className='text-red-700 text-sm mt-1'>{error}</p>
-                        </div>
-                    </div>
-                )}
-
-                <div className='space-y-4'>
-                    {/* Dates */}
-                    <div className='border border-gray-300 rounded-lg overflow-hidden'>
-                        <div className='grid grid-cols-2'>
-                            <div className='p-3 border-r border-gray-300'>
-                                <label className='block text-xs font-medium text-gray-700 mb-1 uppercase tracking-wide'>
-                                    Check-in
-                                </label>
-                                <input
-                                    type='date'
-                                    name='checkIn'
-                                    value={formData.checkIn}
-                                    onChange={handleInputChange}
-                                    min={new Date().toISOString().split('T')[0]}
-                                    className='w-full text-sm focus:outline-none'
-                                />
-                            </div>
-                            <div className='p-3'>
-                                <label className='block text-xs font-medium text-gray-700 mb-1 uppercase tracking-wide'>
-                                    Check-out
-                                </label>
-                                <input
-                                    type='date'
-                                    name='checkOut'
-                                    value={formData.checkOut}
-                                    onChange={handleInputChange}
-                                    min={formData.checkIn || new Date().toISOString().split('T')[0]}
-                                    className='w-full text-sm focus:outline-none'
-                                />
-                            </div>
-                        </div>
-                        {(formErrors.checkIn || formErrors.checkOut || formErrors.dates) && (
-                            <div className='px-3 pb-2'>
-                                <p className='text-red-500 text-xs'>
-                                    {formErrors.checkIn || formErrors.checkOut || formErrors.dates}
-                                </p>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Guests */}
-                    <div className='border border-gray-300 rounded-lg p-3'>
-                        <label className='block text-xs font-medium text-gray-700 mb-1 uppercase tracking-wide'>
-                            Guests
-                        </label>
-                        <select
-                            name='totalGuests'
-                            value={formData.totalGuests}
-                            onChange={handleInputChange}
-                            className='w-full text-sm focus:outline-none'
-                        >
-                            {Array.from({ length: villa.maxGuests }, (_, i) => i + 1).map(num => (
-                                <option key={num} value={num}>
-                                    {num} {num === 1 ? 'guest' : 'guests'}
-                                </option>
+                    <div className='flex items-center space-x-4 text-sm'>
+                        <div className='flex items-center space-x-1'>
+                            {[...Array(5)].map((_, i) => (
+                                <Star key={i} className='w-4 h-4 fill-current text-[#F8B259]' />
                             ))}
-                        </select>
-                        {formErrors.totalGuests && (
-                            <p className='text-red-500 text-xs mt-1'>{formErrors.totalGuests}</p>
-                        )}
-                    </div>
-
-                    {/* Contact Info */}
-                    <div className='space-y-3'>
-                        <div>
-                            <label className='block text-sm font-medium text-gray-700 mb-2'>
-                                <Phone className='w-4 h-4 inline mr-2' />
-                                Phone Number *
-                            </label>
-                            <input
-                                type='tel'
-                                name='phone'
-                                value={formData.phone}
-                                onChange={handleInputChange}
-                                placeholder='+212 6 12 34 56 78'
-                                className='w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-                            />
-                            {formErrors.phone && <p className='text-red-500 text-xs mt-1'>{formErrors.phone}</p>}
+                            <span className='font-semibold text-[#C75D2C] ml-2'>5.0</span>
                         </div>
-
-                        <div>
-                            <label className='block text-sm font-medium text-gray-700 mb-2'>
-                                <Calendar className='w-4 h-4 inline mr-2' />
-                                Date of Birth *
-                            </label>
-                            <input
-                                type='date'
-                                name='dateOfBirth'
-                                value={formData.dateOfBirth}
-                                onChange={handleInputChange}
-                                max={new Date(Date.now() - 18 * 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
-                                className='w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-                            />
-                            {formErrors.dateOfBirth && (
-                                <p className='text-red-500 text-xs mt-1'>{formErrors.dateOfBirth}</p>
-                            )}
-                        </div>
+                        <span className='text-[#C75D2C]/60'>• 127 reviews</span>
                     </div>
+                </div>
 
-                    {/* Payment Method */}
-                    <div>
-                        <label className='block text-sm font-medium text-gray-700 mb-2'>
-                            <CreditCard className='w-4 h-4 inline mr-2' />
-                            Payment Method *
-                        </label>
-                        <select
-                            name='paymentMethod'
-                            value={formData.paymentMethod}
-                            onChange={handleInputChange}
-                            className='w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-                        >
-                            <option value='BANK_TRANSFER'>Bank Transfer</option>
-                            <option value='PAYMENT_ON_ARRIVAL'>Payment on Arrival</option>
-                        </select>
-                    </div>
-
-                    {/* Notes */}
-                    <div>
-                        <label className='block text-sm font-medium text-gray-700 mb-2'>
-                            <FileText className='w-4 h-4 inline mr-2' />
-                            Special Requests
-                        </label>
-                        <textarea
-                            name='notes'
-                            value={formData.notes}
-                            onChange={handleInputChange}
-                            rows={3}
-                            maxLength={500}
-                            placeholder='Any special requests...'
-                            className='w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none'
-                        />
-                        <p className='text-xs text-gray-500 mt-1'>{formData.notes.length}/500 characters</p>
-                    </div>
-
-                    {/* Price Breakdown */}
-                    {formData.checkIn && formData.checkOut && (
-                        <div className='border-t border-gray-200 pt-4 space-y-3'>
-                            <h4 className='font-medium text-gray-900'>Price breakdown</h4>
-                            <div className='space-y-2 text-sm'>
-                                <div className='flex justify-between'>
-                                    <span className='underline'>
-                                        {villa.pricePerNight} MAD × {calculateNights()} nights
-                                    </span>
-                                    <span>{calculateTotal()} MAD</span>
-                                </div>
-                                <div className='flex justify-between'>
-                                    <span className='underline'>Cleaning fee</span>
-                                    <span>{cleaningFee} MAD</span>
-                                </div>
-                                <div className='flex justify-between'>
-                                    <span className='underline'>Service fee</span>
-                                    <span>{serviceFee} MAD</span>
-                                </div>
-                                <div className='border-t border-gray-200 pt-2 flex justify-between font-semibold'>
-                                    <span>Total</span>
-                                    <span>{totalWithFees} MAD</span>
-                                </div>
+                {/* Booking Form */}
+                <div className='p-6'>
+                    {success && (
+                        <div className='bg-green-50/80 backdrop-blur-sm border-2 border-green-200/60 rounded-xl p-4 mb-6 flex items-start space-x-3'>
+                            <Check className='w-5 h-5 text-green-600 mt-0.5 flex-shrink-0' />
+                            <div>
+                                <p className='text-green-800 font-semibold'>Booking Submitted!</p>
+                                <p className='text-green-700 text-sm mt-1'>{success}</p>
                             </div>
                         </div>
                     )}
 
-                    {/* Submit Button */}
-                    <button
-                        onClick={handleSubmit}
-                        disabled={submitting || !formData.checkIn || !formData.checkOut}
-                        className={`w-full py-3 px-4 rounded-lg text-white font-medium transition-colors ${
-                            submitting || !formData.checkIn || !formData.checkOut
-                                ? 'bg-gray-400 cursor-not-allowed'
-                                : 'bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600'
-                        }`}
-                    >
-                        {submitting ? 'Submitting...' : 'Request to Book'}
-                    </button>
+                    {error && (
+                        <div className='bg-red-50/80 backdrop-blur-sm border-2 border-red-200/60 rounded-xl p-4 mb-6 flex items-start space-x-3'>
+                            <AlertCircle className='w-5 h-5 text-red-600 mt-0.5 flex-shrink-0' />
+                            <div>
+                                <p className='text-red-800 font-semibold'>Booking Error</p>
+                                <p className='text-red-700 text-sm mt-1'>{error}</p>
+                            </div>
+                        </div>
+                    )}
 
-                    <p className='text-xs text-gray-500 text-center'>
-                        You won't be charged yet. Your booking request will be sent to the host for approval.
-                    </p>
+                    <div className='space-y-6'>
+                        {/* Dates */}
+                        <div className='bg-white/30 border-2 border-[#F8B259]/50 rounded-xl overflow-hidden'>
+                            <div className='grid grid-cols-2'>
+                                <div className='p-4 border-r border-[#F8B259]/50'>
+                                    <label className='block text-xs font-bold text-[#C75D2C] mb-2 uppercase tracking-wider'>
+                                        Check-in
+                                    </label>
+                                    <input
+                                        type='date'
+                                        name='checkIn'
+                                        value={formData.checkIn}
+                                        onChange={handleInputChange}
+                                        min={new Date().toISOString().split('T')[0]}
+                                        className='w-full text-sm text-[#C75D2C] bg-transparent focus:outline-none font-medium'
+                                    />
+                                </div>
+                                <div className='p-4'>
+                                    <label className='block text-xs font-bold text-[#C75D2C] mb-2 uppercase tracking-wider'>
+                                        Check-out
+                                    </label>
+                                    <input
+                                        type='date'
+                                        name='checkOut'
+                                        value={formData.checkOut}
+                                        onChange={handleInputChange}
+                                        min={formData.checkIn || new Date().toISOString().split('T')[0]}
+                                        className='w-full text-sm text-[#C75D2C] bg-transparent focus:outline-none font-medium'
+                                    />
+                                </div>
+                            </div>
+                            {(formErrors.checkIn || formErrors.checkOut || formErrors.dates) && (
+                                <div className='px-4 pb-3 border-t border-[#F8B259]/30'>
+                                    <p className='text-red-600 text-xs mt-2 font-medium'>
+                                        {formErrors.checkIn || formErrors.checkOut || formErrors.dates}
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Guests */}
+                        <div className='bg-white/30 border-2 border-[#F8B259]/50 rounded-xl p-4'>
+                            <label className='block text-xs font-bold text-[#C75D2C] mb-2 uppercase tracking-wider'>
+                                <Users className='w-4 h-4 inline mr-2' />
+                                Guests
+                            </label>
+                            <select
+                                name='totalGuests'
+                                value={formData.totalGuests}
+                                onChange={handleInputChange}
+                                className='w-full text-sm text-[#C75D2C] bg-transparent focus:outline-none font-medium'
+                            >
+                                {Array.from({ length: villa.maxGuests }, (_, i) => i + 1).map(num => (
+                                    <option key={num} value={num}>
+                                        {num} {num === 1 ? 'guest' : 'guests'}
+                                    </option>
+                                ))}
+                            </select>
+                            {formErrors.totalGuests && (
+                                <p className='text-red-600 text-xs mt-2 font-medium'>{formErrors.totalGuests}</p>
+                            )}
+                        </div>
+
+                        {/* Contact Info */}
+                        <div className='space-y-4'>
+                            <div className='bg-white/30 border-2 border-[#F8B259]/50 rounded-xl p-4'>
+                                <label className='block text-xs font-bold text-[#C75D2C] mb-2 uppercase tracking-wider'>
+                                    <Phone className='w-4 h-4 inline mr-2' />
+                                    Phone Number *
+                                </label>
+                                <input
+                                    type='tel'
+                                    name='phone'
+                                    value={formData.phone}
+                                    onChange={handleInputChange}
+                                    placeholder='+212 6 12 34 56 78'
+                                    className='w-full text-sm text-[#C75D2C] bg-transparent focus:outline-none placeholder-[#C75D2C]/50 font-medium'
+                                />
+                                {formErrors.phone && (
+                                    <p className='text-red-600 text-xs mt-2 font-medium'>{formErrors.phone}</p>
+                                )}
+                            </div>
+
+                            <div className='bg-white/30 border-2 border-[#F8B259]/50 rounded-xl p-4'>
+                                <label className='block text-xs font-bold text-[#C75D2C] mb-2 uppercase tracking-wider'>
+                                    <Calendar className='w-4 h-4 inline mr-2' />
+                                    Date of Birth *
+                                </label>
+                                <input
+                                    type='date'
+                                    name='dateOfBirth'
+                                    value={formData.dateOfBirth}
+                                    onChange={handleInputChange}
+                                    max={
+                                        new Date(Date.now() - 18 * 365 * 24 * 60 * 60 * 1000)
+                                            .toISOString()
+                                            .split('T')[0]
+                                    }
+                                    className='w-full text-sm text-[#C75D2C] bg-transparent focus:outline-none font-medium'
+                                />
+                                {formErrors.dateOfBirth && (
+                                    <p className='text-red-600 text-xs mt-2 font-medium'>{formErrors.dateOfBirth}</p>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Payment Method */}
+                        <div className='bg-white/30 border-2 border-[#F8B259]/50 rounded-xl p-4'>
+                            <label className='block text-xs font-bold text-[#C75D2C] mb-2 uppercase tracking-wider'>
+                                <CreditCard className='w-4 h-4 inline mr-2' />
+                                Payment Method *
+                            </label>
+                            <select
+                                name='paymentMethod'
+                                value={formData.paymentMethod}
+                                onChange={handleInputChange}
+                                className='w-full text-sm text-[#C75D2C] bg-transparent focus:outline-none font-medium'
+                            >
+                                <option value='BANK_TRANSFER'>Bank Transfer</option>
+                                <option value='PAYMENT_ON_ARRIVAL'>Payment on Arrival</option>
+                            </select>
+                        </div>
+
+                        {/* Notes */}
+                        <div className='bg-white/30 border-2 border-[#F8B259]/50 rounded-xl p-4'>
+                            <label className='block text-xs font-bold text-[#C75D2C] mb-2 uppercase tracking-wider'>
+                                <FileText className='w-4 h-4 inline mr-2' />
+                                Special Requests
+                            </label>
+                            <textarea
+                                name='notes'
+                                value={formData.notes}
+                                onChange={handleInputChange}
+                                rows={3}
+                                maxLength={500}
+                                placeholder='Any special requests or requirements...'
+                                className='w-full text-sm text-[#C75D2C] bg-transparent focus:outline-none placeholder-[#C75D2C]/50 resize-none font-medium'
+                            />
+                            <p className='text-xs text-[#C75D2C]/60 mt-2'>{formData.notes.length}/500 characters</p>
+                        </div>
+
+                        {/* Price Breakdown */}
+                        {formData.checkIn && formData.checkOut && (
+                            <div className='bg-gradient-to-r from-[#F8B259]/20 to-[#D96F32]/20 border-2 border-[#F8B259]/50 rounded-xl p-6'>
+                                <h4 className='font-bold text-[#C75D2C] mb-4 font-butler text-lg'>Price Breakdown</h4>
+                                <div className='space-y-3 text-sm'>
+                                    <div className='flex justify-between items-center'>
+                                        <span className='text-[#C75D2C]/80'>
+                                            {villa.pricePerNight} MAD × {calculateNights()} nights
+                                        </span>
+                                        <span className='font-semibold text-[#C75D2C]'>{calculateTotal()} MAD</span>
+                                    </div>
+                                    <div className='flex justify-between items-center'>
+                                        <span className='text-[#C75D2C]/80'>Cleaning fee</span>
+                                        <span className='font-semibold text-[#C75D2C]'>{cleaningFee} MAD</span>
+                                    </div>
+                                    <div className='flex justify-between items-center'>
+                                        <span className='text-[#C75D2C]/80'>Service fee</span>
+                                        <span className='font-semibold text-[#C75D2C]'>{serviceFee} MAD</span>
+                                    </div>
+                                    <div className='border-t-2 border-[#F8B259]/50 pt-3 flex justify-between items-center'>
+                                        <span className='font-bold text-[#C75D2C] text-lg'>Total</span>
+                                        <span className='font-bold text-[#C75D2C] text-lg'>{totalWithFees} MAD</span>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Submit Button */}
+                        <button
+                            onClick={handleSubmit}
+                            disabled={submitting || !formData.checkIn || !formData.checkOut}
+                            className={`w-full py-4 px-6 rounded-xl text-white font-bold text-lg transition-all duration-300 ${
+                                submitting || !formData.checkIn || !formData.checkOut
+                                    ? 'bg-[#C75D2C]/50 cursor-not-allowed'
+                                    : 'bg-gradient-to-r from-[#D96F32] to-[#C75D2C] hover:from-[#C75D2C] hover:to-[#D96F32] hover:transform hover:-translate-y-0.5 active:transform active:translate-y-0 shadow-lg hover:shadow-xl'
+                            }`}
+                        >
+                            {submitting ? (
+                                <div className='flex items-center justify-center space-x-2'>
+                                    <div className='w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin'></div>
+                                    <span>Submitting...</span>
+                                </div>
+                            ) : (
+                                'Request to Book'
+                            )}
+                        </button>
+
+                        <div className='text-center'>
+                            <p className='text-xs text-[#C75D2C]/60 leading-relaxed'>
+                                You won't be charged yet. Your booking request will be reviewed and confirmed within 24
+                                hours.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Trust Indicators */}
+            <div className='grid grid-cols-3 gap-3'>
+                <div className='bg-white/30 backdrop-blur-md border border-[#F8B259]/50 rounded-xl p-4 text-center'>
+                    <Award className='w-6 h-6 text-[#D96F32] mx-auto mb-2' />
+                    <div className='text-xs font-bold text-[#C75D2C]'>Instant</div>
+                    <div className='text-xs text-[#C75D2C]/70'>Confirmation</div>
+                </div>
+                <div className='bg-white/30 backdrop-blur-md border border-[#F8B259]/50 rounded-xl p-4 text-center'>
+                    <Shield className='w-6 h-6 text-[#D96F32] mx-auto mb-2' />
+                    <div className='text-xs font-bold text-[#C75D2C]'>Secure</div>
+                    <div className='text-xs text-[#C75D2C]/70'>Booking</div>
+                </div>
+                <div className='bg-white/30 backdrop-blur-md border border-[#F8B259]/50 rounded-xl p-4 text-center'>
+                    <Clock className='w-6 h-6 text-[#D96F32] mx-auto mb-2' />
+                    <div className='text-xs font-bold text-[#C75D2C]'>24/7</div>
+                    <div className='text-xs text-[#C75D2C]/70'>Support</div>
                 </div>
             </div>
         </div>

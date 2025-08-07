@@ -70,17 +70,20 @@ const Booking: React.FC = () => {
         loadData();
     }, []);
 
-    const handleBookingSuccess = () => {
-        // Handle successful booking (e.g., show notification, redirect, etc.)
-        console.log('Booking successful!');
-    };
-
     if (loading) {
         return (
-            <div className='min-h-screen bg-white flex items-center justify-center'>
-                <div className='flex flex-col items-center space-y-4'>
-                    <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500'></div>
-                    <p className='text-gray-600'>Loading villa details...</p>
+            <div className='min-h-screen bg-gradient-to-br from-[#E8DCC6] to-[#F8B259]/20 flex items-center justify-center'>
+                <div className='flex flex-col items-center space-y-6'>
+                    <div className='relative'>
+                        <div className='w-16 h-16 border-4 border-[#F8B259]/30 border-t-[#D96F32] rounded-full animate-spin'></div>
+                        <div className='absolute inset-0 w-16 h-16 border-4 border-transparent border-b-[#C75D2C]/50 rounded-full animate-spin animation-delay-150'></div>
+                    </div>
+                    <div className='text-center'>
+                        <h2 className='text-xl font-bold text-[#C75D2C] mb-2 font-butler'>
+                            Loading Your Villa Experience
+                        </h2>
+                        <p className='text-[#C75D2C]/70'>Preparing your luxury escape...</p>
+                    </div>
                 </div>
             </div>
         );
@@ -88,14 +91,16 @@ const Booking: React.FC = () => {
 
     if (error && !villa) {
         return (
-            <div className='min-h-screen bg-white flex items-center justify-center'>
-                <div className='text-center'>
-                    <div className='text-6xl mb-4'>🏠</div>
-                    <h2 className='text-2xl font-semibold text-gray-900 mb-2'>Oops! Something went wrong</h2>
-                    <p className='text-gray-600 mb-4'>{error}</p>
+            <div className='min-h-screen bg-gradient-to-br from-[#E8DCC6] to-[#F8B259]/20 flex items-center justify-center px-4'>
+                <div className='text-center max-w-md'>
+                    <div className='w-24 h-24 bg-gradient-to-br from-[#D96F32]/20 to-[#F8B259]/20 rounded-full flex items-center justify-center mx-auto mb-6'>
+                        <div className='text-4xl'>🏠</div>
+                    </div>
+                    <h2 className='text-3xl font-bold text-[#C75D2C] mb-4 font-butler'>Oops! Something went wrong</h2>
+                    <p className='text-[#C75D2C]/80 mb-6 leading-relaxed'>{error}</p>
                     <button
                         onClick={() => window.location.reload()}
-                        className='bg-pink-500 text-white px-6 py-2 rounded-lg hover:bg-pink-600 transition-colors'
+                        className='bg-gradient-to-r from-[#D96F32] to-[#C75D2C] text-white px-8 py-3 rounded-xl font-semibold hover:from-[#C75D2C] hover:to-[#D96F32] hover:transform hover:-translate-y-0.5 transition-all duration-300 shadow-lg'
                     >
                         Try Again
                     </button>
@@ -106,11 +111,13 @@ const Booking: React.FC = () => {
 
     if (!villa || !user) {
         return (
-            <div className='min-h-screen bg-white flex items-center justify-center'>
-                <div className='text-center'>
-                    <div className='text-6xl mb-4'>🏠</div>
-                    <h2 className='text-2xl font-semibold text-gray-900 mb-2'>Villa not found</h2>
-                    <p className='text-gray-600'>
+            <div className='min-h-screen bg-gradient-to-br from-[#E8DCC6] to-[#F8B259]/20 flex items-center justify-center px-4'>
+                <div className='text-center max-w-md'>
+                    <div className='w-24 h-24 bg-gradient-to-br from-[#D96F32]/20 to-[#F8B259]/20 rounded-full flex items-center justify-center mx-auto mb-6'>
+                        <div className='text-4xl'>🏠</div>
+                    </div>
+                    <h2 className='text-3xl font-bold text-[#C75D2C] mb-4 font-butler'>Villa not found</h2>
+                    <p className='text-[#C75D2C]/80 leading-relaxed'>
                         The villa you're looking for doesn't exist or is no longer available.
                     </p>
                 </div>
@@ -119,16 +126,20 @@ const Booking: React.FC = () => {
     }
 
     return (
-        <div className='min-h-screen bg-cream'>
-            <div className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
+        <div className='min-h-screen bg-[#E8DCC6]'>
+            {/* Decorative background elements */}
+            <div className='absolute top-20 right-10 w-40 h-40 bg-gradient-radial from-[#F8B259]/20 to-transparent rounded-full blur-2xl'></div>
+            <div className='absolute bottom-20 left-10 w-60 h-60 bg-gradient-radial from-[#D96F32]/10 to-transparent rounded-full blur-3xl'></div>
+
+            <div className='relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
                 {/* Villa Details - Takes up 2/3 of the space */}
                 <div className='lg:col-span-2'>
                     <VillaDetails villa={villa} />
                 </div>
 
                 {/* Booking Component - Takes up 1/3 of the space, sticky */}
-                <div className='lg:col-span-1 px-4 sm:px-6 lg:px-8 py-8'>
-                    <BookingComponent villa={villa} user={user} onBookingSuccess={handleBookingSuccess} />
+                <div className='lg:col-span-1'>
+                    <BookingComponent villa={villa} user={user} />
                 </div>
             </div>
         </div>
