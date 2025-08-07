@@ -246,16 +246,10 @@ export const sendWelcomeEmail = async (userEmail: string, userName: string): Pro
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            line-height: 1.5;
-            color: #333;
-            margin: 0;
-            padding: 15px;
-            background: #F3E9DC;
-            min-height: 100vh;
         }
         .container {
-            max-width: 650px;
-            margin: 0 auto;
+            max-width: 990px;
+            margin: 0 0px;
             background: #FFFFFF;
             border-radius: 16px;
             overflow: hidden;
@@ -465,24 +459,7 @@ export const sendWelcomeEmail = async (userEmail: string, userName: string): Pro
                 <p>You now have access to our exclusive villa booking system and premium services. From desert dunes to coral reefs, your gateway to paradise is ready.</p>
             </div>
 
-            <div class="features">
-                <div class="feature">
-                    <div class="feature-icon">🏖️</div>
-                    <div class="feature-text">Pristine Beaches</div>
-                </div>
-                <div class="feature">
-                    <div class="feature-icon">🤿</div>
-                    <div class="feature-text">World-Class Diving</div>
-                </div>
-                <div class="feature">
-                    <div class="feature-icon">🏺</div>
-                    <div class="feature-text">Cultural Heritage</div>
-                </div>
-                <div class="feature">
-                    <div class="feature-icon">🌅</div>
-                    <div class="feature-text">Desert Adventures</div>
-                </div>
-            </div>
+           
 
             <div class="decorative-line"></div>
 
@@ -519,7 +496,7 @@ export const sendWelcomeEmail = async (userEmail: string, userName: string): Pro
         await transporter.sendMail({
             from: env.SMTP_FROM || 'noreply@tranquilo-hurghada.com',
             to: userEmail,
-            subject: 'Welcome to Tranquilo Hurghada - Your Red Sea Paradise Awaits! 🌊',
+            subject: 'Welcome to Tranquilo Hurghada - Your Red Sea Paradise Awaits!',
             html
         });
 
