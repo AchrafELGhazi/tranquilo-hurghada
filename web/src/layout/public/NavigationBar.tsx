@@ -114,7 +114,7 @@ export const NavigationBar: React.FC = () => {
 
                         {/* Center: Base Navigation */}
                         <nav className='flex justify-center mr-10'>
-                            <div className='flex items-center bg-cream-10   backdrop-blur-sm rounded-full px-2 py-2 shadow-lg shadow-terracotta-10 border border-terracotta-50'>
+                            <div className='flex items-center   px-2 py-2'>
                                 {baseNavigation.map((item, index) => {
                                     const isActive = location.pathname === item.href;
                                     return (
@@ -122,18 +122,26 @@ export const NavigationBar: React.FC = () => {
                                             key={item.href}
                                             to={item.href}
                                             onClick={item.onClick}
-                                            className={`group relative flex items-center space-x-2 px-4 py-2.5 rounded-full font-medium text-sm transition-all duration-400 ${
-                                                isActive
-                                                    ? 'text-cream bg-terracotta shadow-lg shadow-terracotta-30'
-                                                    : 'text-terracotta hover:text-cream hover:bg-terracotta-90 hover:shadow-md hover:shadow-terracotta-20'
+                                            className={`group relative flex items-center space-x-2 px-2 mx-4 py-2.5  font-medium text-sm transition-all duration-400 overflow-hidden ${
+                                                isActive ? 'text-terracotta ' : 'text-terracotta hover:text-cream h'
                                             } ${index < baseNavigation.length - 1 ? 'mr-1' : ''}`}
                                         >
-                                            <span className='transition-transform duration-300 group-hover:scale-110'>
+                                            <span className='transition-transform duration-300 group-hover:scale-110 relative z-10'>
                                                 {item.icon}
                                             </span>
-                                            <span className='tracking-wide font-medium text-sm whitespace-nowrap'>
+                                            <span className='tracking-wide font-medium text-sm whitespace-nowrap relative z-10'>
                                                 {item.name}
                                             </span>
+
+                                            {/* Improved animated underline - left to right with margin */}
+                                            <div
+                                                className={`absolute left-2 right-2 h-0.5 bg-terracotta transition-all duration-500 ease-out ${
+                                                    isActive
+                                                        ? 'bottom-0 mt-2 scale-x-100 origin-left'
+                                                        : 'bottom-0 mt-2 scale-x-0 origin-left group-hover:scale-x-100'
+                                                }`}
+                                                style={{ marginTop: '8px' }}
+                                            ></div>
                                         </Link>
                                     );
                                 })}
