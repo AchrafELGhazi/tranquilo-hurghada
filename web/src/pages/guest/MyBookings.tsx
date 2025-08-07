@@ -43,7 +43,8 @@ const MyBookings: React.FC = () => {
             setLoading(true);
             setError('');
             const response = await bookingApi.getMyBookings(filters);
-            setBookings(response.bookings);
+            console.log('Bookings response:', response);
+            setBookings(response.data);
             setCurrentPage(response.pagination.currentPage);
             setTotalPages(response.pagination.totalPages);
         } catch (err) {

@@ -128,7 +128,7 @@ class BookingApi {
     /**
      * Get current user's bookings
      */
-    async getMyBookings(filters?: Omit<BookingFilters, 'guestId' | 'ownerId' | 'villaId'>): Promise<BookingsResponse> {
+    async getMyBookings(filters?: Omit<BookingFilters, 'guestId' | 'ownerId' | 'villaId'>): Promise<any> {
         const queryParams = new URLSearchParams();
 
         if (filters) {
@@ -140,10 +140,10 @@ class BookingApi {
         }
 
         const url = `/bookings/my${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
-        const response = await apiService.get<BookingsResponse>(url);
-
+        const response = await apiService.get<any>(url);
+        // console.log('MyBookings response:', response);
         if (response.success && response.data) {
-            return response.data;
+            return response;
         }
 
         throw new Error(response.message || 'Failed to get your bookings');
