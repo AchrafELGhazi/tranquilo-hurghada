@@ -1,8 +1,8 @@
 // import ContactSection from "@/components/home/ContactSection";
 // import FeaturesSection from "@/components/home/FeaturesSection";
 import HeroSection from "@/components/home/HeroSection";
-// import RoomShowcase from "@/components/home/RoomShowcase";
-// import TestimonialsSection from "@/components/home/TestimonialsSection";
+import RoomShowcase from "@/components/home/RoomShowcase";
+import TestimonialsSection from "@/components/home/TestimonialsSection";
 
 const Home = () => {
     return (
