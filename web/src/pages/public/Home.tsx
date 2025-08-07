@@ -4,11 +4,9 @@ import HeroSection from "@/components/home/HeroSection";
 import RoomShowcase from "@/components/home/RoomShowcase";
 import TestimonialsSection from "@/components/home/TestimonialsSection";
 
-// Main Home Component
 const Home = () => {
     return (
-        <div className='min-h-screen' style={{ backgroundColor: '#aaa' }}>
-            {/* Custom CSS for animations */}
+        <div className='min-h-screen bg-cream'>
             <style>{`
                 @keyframes fade-in-up {
                     from {
@@ -31,10 +29,10 @@ const Home = () => {
             `}</style>
 
             <HeroSection />
-            <FeaturesSection />
+            {/* <FeaturesSection />
             <RoomShowcase />
             <TestimonialsSection />
-            <ContactSection />
+            <ContactSection /> */}
         </div>
     );
 };

@@ -45,7 +45,6 @@ const HeroSection = () => {
             className='relative h-screen overflow-hidden bg-gradient-to-br from-orange-100 to-orange-200'
             style={{ height: 'calc(100vh - 80px)' }}
         >
-            {/* Dynamic Background with Parallax Effect */}
             <div className='absolute inset-0'>
                 {heroImages.map((image, index) => (
                     <div
@@ -197,7 +196,7 @@ const HeroSection = () => {
 
             {/* Compact Scroll Indicator */}
             <div
-                className={`absolute bottom-4 left-1/2 transform -translate-x-1/2 animate-bounce z-20 ${
+                className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 animate-bounce z-20 ${
                     isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
                 } transition-all duration-800 ease-out delay-[1300ms]`}
             >

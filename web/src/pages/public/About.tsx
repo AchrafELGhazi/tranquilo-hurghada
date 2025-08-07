@@ -219,7 +219,7 @@ export const About: React.FC = () => {
 
                         <div className='grid grid-cols-1 md:grid-cols-3 gap-8 mb-16'>
                             <div className='text-center'>
-                                <div className='text-5xl font-bold text-[#D96F32] mb-2'>2024</div>
+                                <div className='text-5xl font-bold text-[#D96F32] mb-2'>2025</div>
                                 <p className='text-[#C75D2C]/80'>{t('about.built.year')}</p>
                             </div>
                             <div className='text-center'>
