@@ -43,9 +43,9 @@ interface BookingEmailData {
 // Create transporter
 const createTransporter = () => {
     return nodemailer.createTransport({
-        host: env.SMTP_HOST || 'localhost',
-        port: env.SMTP_PORT || 587,
-        secure: env.SMTP_SECURE || false,
+        host: 'smtp.office365.com',
+        port: 587,
+        secure: false,
         auth: {
             user: env.SMTP_USER,
             pass: env.SMTP_PASS
@@ -204,7 +204,7 @@ export const sendBookingNotificationEmails = async (data: BookingEmailData): Pro
         // Send email to guest
         emailPromises.push(
             transporter.sendMail({
-                from: env.SMTP_FROM || 'noreply@villabooking.com',
+                from: env.SMTP_FROM || 'noreply@tranquilo-hurghada.com',
                 to: data.booking.guest.email,
                 subject,
                 html
@@ -215,30 +215,13 @@ export const sendBookingNotificationEmails = async (data: BookingEmailData): Pro
         if (data.booking.villa.owner.email !== data.booking.guest.email) {
             emailPromises.push(
                 transporter.sendMail({
-                    from: env.SMTP_FROM || 'noreply@villabooking.com',
+                    from: env.SMTP_FROM || 'noreply@tranquilo-hurghada.com',
                     to: data.booking.villa.owner.email,
                     subject,
                     html
                 })
             );
         }
-
-        // Send email to all admins
-        const admins = await prisma.user.findMany({
-            where: { role: 'ADMIN', isActive: true },
-            select: { email: true }
-        });
-
-        admins.forEach(admin => {
-            emailPromises.push(
-                transporter.sendMail({
-                    from: env.SMTP_FROM || 'noreply@villabooking.com',
-                    to: admin.email,
-                    subject: `[ADMIN] ${subject}`,
-                    html
-                })
-            );
-        });
 
         await Promise.all(emailPromises);
         logger.info(`Booking notification emails sent for booking ${data.booking.id}`);
@@ -255,28 +238,226 @@ export const sendWelcomeEmail = async (userEmail: string, userName: string): Pro
 
         const html = `
             <!DOCTYPE html>
-            <html>
+            <html lang="en">
             <head>
                 <meta charset="utf-8">
-                <title>Welcome to Villa Booking System</title>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Welcome to Tranquilo Hurghada</title>
                 <style>
-                    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-                    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                    .header { background: #C75D2C; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
-                    .content { background: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px; }
+                    body {
+                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                        line-height: 1.6;
+                        color: #333;
+                        margin: 0;
+                        padding: 0;
+                        background: linear-gradient(135deg, #E8DCC6 0%, #F8B259 100%);
+                    }
+                    .container {
+                        max-width: 600px;
+                        margin: 0 auto;
+                        background: #FFFFFF;
+                        border-radius: 16px;
+                        overflow: hidden;
+                        box-shadow: 0 20px 40px rgba(199, 93, 44, 0.15);
+                    }
+                    .header {
+                        background: linear-gradient(135deg, #C75D2C 0%, #D96F32 50%, #F8B259 100%);
+                        color: white;
+                        padding: 40px 30px;
+                        text-align: center;
+                        position: relative;
+                        overflow: hidden;
+                    }
+                    .header::before {
+                        content: '';
+                        position: absolute;
+                        top: -50%;
+                        left: -50%;
+                        width: 200%;
+                        height: 200%;
+                        background: radial-gradient(circle, rgba(248, 178, 89, 0.1) 0%, transparent 70%);
+                        animation: float 6s ease-in-out infinite;
+                    }
+                    @keyframes float {
+                        0%, 100% { transform: translateY(0) rotate(0deg); }
+                        50% { transform: translateY(-20px) rotate(180deg); }
+                    }
+                    .logo {
+                        font-size: 32px;
+                        font-weight: 700;
+                        margin-bottom: 8px;
+                        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                        letter-spacing: 1px;
+                    }
+                    .subtitle {
+                        font-size: 14px;
+                        opacity: 0.9;
+                        text-transform: uppercase;
+                        letter-spacing: 2px;
+                        font-weight: 400;
+                    }
+                    .content {
+                        padding: 40px 30px;
+                        background: #FFFFFF;
+                    }
+                    .greeting {
+                        font-size: 24px;
+                        color: #C75D2C;
+                        margin-bottom: 20px;
+                        font-weight: 600;
+                    }
+                    .welcome-text {
+                        color: #555;
+                        margin-bottom: 25px;
+                        font-size: 16px;
+                        line-height: 1.7;
+                    }
+                    .highlight-box {
+                        background: linear-gradient(135deg, #E8DCC6, #F8F4E6);
+                        border: 2px solid #F8B259;
+                        border-radius: 12px;
+                        padding: 25px;
+                        margin: 25px 0;
+                        text-align: center;
+                    }
+                    .highlight-box h3 {
+                        color: #C75D2C;
+                        margin: 0 0 15px 0;
+                        font-size: 18px;
+                        font-weight: 600;
+                    }
+                    .highlight-box p {
+                        color: #666;
+                        margin: 0;
+                        font-size: 14px;
+                        line-height: 1.6;
+                    }
+                    .features {
+                        display: grid;
+                        grid-template-columns: 1fr 1fr;
+                        gap: 15px;
+                        margin: 25px 0;
+                    }
+                    .feature {
+                        background: #F8F4E6;
+                        border-radius: 8px;
+                        padding: 15px;
+                        text-align: center;
+                        border: 1px solid #F8B259;
+                    }
+                    .feature-icon {
+                        font-size: 20px;
+                        margin-bottom: 8px;
+                    }
+                    .feature-text {
+                        color: #C75D2C;
+                        font-size: 12px;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        letter-spacing: 1px;
+                    }
+                    .cta-button {
+                        display: inline-block;
+                        background: linear-gradient(135deg, #D96F32, #C75D2C);
+                        color: white;
+                        padding: 15px 30px;
+                        text-decoration: none;
+                        border-radius: 25px;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        letter-spacing: 1px;
+                        font-size: 14px;
+                        margin: 20px 0;
+                        box-shadow: 0 4px 15px rgba(199, 93, 44, 0.3);
+                        transition: all 0.3s ease;
+                    }
+                    .footer {
+                        background: #F8F4E6;
+                        padding: 25px 30px;
+                        text-align: center;
+                        border-top: 1px solid #F8B259;
+                    }
+                    .footer-text {
+                        color: #666;
+                        font-size: 12px;
+                        margin: 5px 0;
+                    }
+                    .contact-info {
+                        color: #C75D2C;
+                        font-size: 12px;
+                        margin: 15px 0 5px 0;
+                        font-weight: 600;
+                    }
+                    .decorative-line {
+                        height: 2px;
+                        background: linear-gradient(90deg, transparent, #F8B259, transparent);
+                        margin: 20px 0;
+                        border-radius: 2px;
+                    }
+                    @media (max-width: 600px) {
+                        .container { margin: 0 10px; }
+                        .features { grid-template-columns: 1fr; }
+                        .header, .content, .footer { padding: 20px; }
+                    }
                 </style>
             </head>
             <body>
                 <div class="container">
                     <div class="header">
-                        <h1>Welcome to Villa Booking System!</h1>
+                        <div class="logo">Tranquilo</div>
+                        <div class="subtitle">HURGHADA</div>
                     </div>
+                    
                     <div class="content">
-                        <h2>Hello ${userName}!</h2>
-                        <p>Thank you for joining Villa Booking System. We're excited to have you as part of our community!</p>
-                        <p>You can now start exploring our beautiful villas and make bookings.</p>
-                        <p>If you have any questions, feel free to contact our support team.</p>
-                        <p>Happy travels!</p>
+                        <div class="greeting">Welcome, ${userName}!</div>
+                        
+                        <div class="welcome-text">
+                            Thank you for joining Tranquilo Hurghada, where ancient Egyptian mystique meets contemporary luxury along the crystal-clear Red Sea coast.
+                        </div>
+
+                        <div class="highlight-box">
+                            <h3>Your Red Sea Adventure Begins Here</h3>
+                            <p>You now have access to our exclusive villa booking system and premium services. From desert dunes to coral reefs, your gateway to paradise is ready.</p>
+                        </div>
+
+                        <div class="features">
+                            <div class="feature">
+                                <div class="feature-icon">🏖️</div>
+                                <div class="feature-text">Pristine Beaches</div>
+                            </div>
+                            <div class="feature">
+                                <div class="feature-icon">🤿</div>
+                                <div class="feature-text">World-Class Diving</div>
+                            </div>
+                            <div class="feature">
+                                <div class="feature-icon">🏺</div>
+                                <div class="feature-text">Cultural Heritage</div>
+                            </div>
+                            <div class="feature">
+                                <div class="feature-icon">🌅</div>
+                                <div class="feature-text">Desert Adventures</div>
+                            </div>
+                        </div>
+
+                        <div class="decorative-line"></div>
+
+                        <div style="text-align: center;">
+                            <a href="https://tranquilo-hurghada.com" class="cta-button">Explore Our Villa</a>
+                        </div>
+
+                        <div class="welcome-text">
+                            Need assistance? Our dedicated team is here to help you create unforgettable memories in Hurghada. Contact us anytime for personalized recommendations and booking support.
+                        </div>
+                    </div>
+                    
+                    <div class="footer">
+                        <div class="contact-info">📍 Villa No. 276, Mubarak Housing 7, North Hurghada, Egypt</div>
+                        <div class="footer-text">📞 +49 176 7623 0320 | ✉️ nabil.laaouina@outlook.com</div>
+                        <div class="footer-text">🌐 tranquilo-hurghada.com</div>
+                        <div style="margin-top: 15px;">
+                            <div class="footer-text">This email was sent to ${userEmail}</div>
+                            <div class="footer-text">© 2024 Tranquilo Hurghada. All rights reserved.</div>
+                        </div>
                     </div>
                 </div>
             </body>
@@ -284,9 +465,9 @@ export const sendWelcomeEmail = async (userEmail: string, userName: string): Pro
         `;
 
         await transporter.sendMail({
-            from: env.SMTP_FROM || 'noreply@villabooking.com',
+            from: env.SMTP_FROM || 'noreply@tranquilo-hurghada.com',
             to: userEmail,
-            subject: 'Welcome to Villa Booking System!',
+            subject: 'Welcome to Tranquilo Hurghada - Your Red Sea Paradise Awaits! 🌊',
             html
         });
 
