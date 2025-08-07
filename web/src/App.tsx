@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Outlet, Navigate } from 'react-router-dom';
 import { I18nextProvider } from 'react-i18next';
 import i18n from '@/utils/i18n';
 import { LoadingScreen } from '@/components/common/LoadingScreen';
@@ -18,7 +18,74 @@ import { Register } from './pages/public/Register';
 import { VisitorInfo } from './pages/public/VisitorInfo';
 import Home from './pages/public/Home';
 import ScrollToTop from './utils/scrollToTop';
-import LanguageRedirect from './components/common/LanguageRedirect';
+import { supportedLanguages } from '@/utils/constants';
+import { normalizeLanguageCode } from '@/utils/normalizeLanguageCode';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
+
+const RootRedirect: React.FC = () => {
+    const storedLang = localStorage.getItem('preferred-language');
+    const targetLang =
+        storedLang && supportedLanguages.includes(storedLang as any)
+            ? storedLang
+            : normalizeLanguageCode(navigator.language);
+
+    return <Navigate to={`/${targetLang}`} replace />;
+};
+
+const LanguageRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const { lang } = useParams();
+    const navigate = useNavigate();
+    const location = useLocation();
+    const [isValidating, setIsValidating] = useState(true);
+
+    useEffect(() => {
+        const validateLanguage = () => {
+            if (!lang) {
+                navigate('/', { replace: true });
+                return;
+            }
+
+            const normalizedLang = normalizeLanguageCode(lang);
+
+            // If language needs normalization, redirect
+            if (lang !== normalizedLang) {
+                const pathSegments = location.pathname.split('/');
+                pathSegments[1] = normalizedLang;
+                const newPath = pathSegments.join('/') + location.search;
+                navigate(newPath, { replace: true });
+                return;
+            }
+
+            // If language is not supported, redirect to English version
+            if (!supportedLanguages.includes(normalizedLang as any)) {
+                const pathSegments = location.pathname.split('/');
+                pathSegments[1] = 'en';
+                const newPath = pathSegments.join('/') + location.search;
+                navigate(newPath, { replace: true });
+                return;
+            }
+
+            // Valid language - sync i18n and localStorage
+            if (i18n.language !== normalizedLang) {
+                i18n.changeLanguage(normalizedLang);
+            }
+            localStorage.setItem('preferred-language', normalizedLang);
+
+            // Language is valid, allow rendering
+            setIsValidating(false);
+        };
+
+        validateLanguage();
+    }, [lang, location.pathname, location.search, navigate]);
+
+    // Show nothing while validating/redirecting
+    if (isValidating) {
+        return null;
+    }
+
+    // Language is valid, render children
+    return <>{children}</>;
+};
 
 const App: React.FC = () => {
     const [isAppLoading, setIsAppLoading] = useState(true);
@@ -56,15 +123,18 @@ const App: React.FC = () => {
                             <LoadingScreen progress={loadingProgress} />
                         ) : (
                             <Routes>
-                                <Route path='/' element={<LanguageRedirect />} />
+                                {/* Root path redirect */}
+                                <Route path='/' element={<RootRedirect />} />
 
                                 {/* Public Routes */}
                                 <Route
                                     path='/:lang'
                                     element={
-                                        <Layout>
-                                            <Outlet />
-                                        </Layout>
+                                        <LanguageRoute>
+                                            <Layout>
+                                                <Outlet />
+                                            </Layout>
+                                        </LanguageRoute>
                                     }
                                 >
                                     <Route index element={<Home />} />
@@ -81,24 +151,28 @@ const App: React.FC = () => {
                                 <Route
                                     path='/:lang/auth'
                                     element={
-                                        <Layout>
-                                            <Outlet />
-                                        </Layout>
+                                        <LanguageRoute>
+                                            <Layout>
+                                                <Outlet />
+                                            </Layout>
+                                        </LanguageRoute>
                                     }
                                 >
                                     <Route path='login' element={<Login />} />
-                                    <Route path='register' element={<Register />} />{' '}
+                                    <Route path='register' element={<Register />} />
                                 </Route>
 
                                 {/* Protected Admin Routes */}
                                 <Route
                                     path='/:lang/admin'
                                     element={
-                                        <ProtectedRoute requireAdmin>
-                                            <AdminLayout>
-                                                <Outlet />
-                                            </AdminLayout>
-                                        </ProtectedRoute>
+                                        <LanguageRoute>
+                                            <ProtectedRoute requireAdmin>
+                                                <AdminLayout>
+                                                    <Outlet />
+                                                </AdminLayout>
+                                            </ProtectedRoute>
+                                        </LanguageRoute>
                                     }
                                 >
                                     <Route index element={<AdminDashboard />} />

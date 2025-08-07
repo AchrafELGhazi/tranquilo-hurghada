@@ -7,7 +7,6 @@ import ruTranslations from '@/locales/ru.json';
 import deTranslations from '@/locales/de.json';
 import { normalizeLanguageCode } from './normalizeLanguageCode';
 
-
 i18n
     .use(LanguageDetector)
     .use(initReactI18next)
