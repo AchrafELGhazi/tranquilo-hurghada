@@ -40,10 +40,10 @@ const App: React.FC = () => {
     useEffect(() => {
         const initializeApp = async () => {
             const steps = [
-                { message: 'Loading translations...', progress: 20, delay: 100 },
+                { message: 'Loading translations...', progress: 20, delay: 200 },
                 { message: 'Initializing router...', progress: 40, delay: 100 },
-                { message: 'Setting up components...', progress: 60, delay: 100 },
-                { message: 'Applying theme...', progress: 80, delay: 100 },
+                { message: 'Setting up components...', progress: 60, delay: 200 },
+                { message: 'Applying theme...', progress: 80, delay: 200 },
                 { message: 'Almost ready...', progress: 100, delay: 100 },
             ];
 
