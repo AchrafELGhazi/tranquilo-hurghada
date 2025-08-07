@@ -13,8 +13,8 @@ import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { Unauthorized } from './pages/public/Unauthorized';
-import { Login } from './pages/admin/Login';
-import { Register } from './pages/admin/Register';
+import { Login } from './pages/public/Login';
+import { Register } from './pages/public/Register';
 import { VisitorInfo } from './pages/public/VisitorInfo';
 import Home from './pages/public/Home';
 

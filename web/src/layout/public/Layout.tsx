@@ -13,7 +13,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       useRTL();
 
       return (
-            <div className='min-h-screen bg-gray-50 dark:bg-gray-900'>
+            <div className='min-h-screen'>
                   <NavigationBar />
                   <MainBody>{children}</MainBody>
                   <Footer />
