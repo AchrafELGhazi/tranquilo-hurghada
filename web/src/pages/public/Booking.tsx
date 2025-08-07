@@ -48,8 +48,8 @@ const Booking: React.FC = () => {
                 setLoading(true);
 
                 // Load current user
-                const currentUser = await authApi.getCurrentUser();
-                setUser(currentUser);
+                // const currentUser = await authApi.getCurrentUser();
+                // setUser(currentUser);
 
                 // Load villa data
                 const villasResponse = await villaApi.getAllVillas({ limit: 1 });
