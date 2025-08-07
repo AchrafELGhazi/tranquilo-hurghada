@@ -318,53 +318,6 @@ export const sendWelcomeEmail = async (userEmail: string, userName: string): Pro
             font-size: 14px;
             line-height: 1.6;
         }
-        .features {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin: 25px 0;
-        }
-        .feature {
-            background: #FFFFFF;
-            border: 2px solid #F3E9DC;
-            border-radius: 12px;
-            padding: 20px 15px;
-            text-align: center;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        .feature:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(199, 93, 44, 0.1);
-            border-color: #F8B259;
-        }
-        .feature::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, #C75D2C, #F8B259);
-            transform: translateX(-100%);
-            transition: transform 0.3s ease;
-        }
-        .feature:hover::before {
-            transform: translateX(0);
-        }
-        .feature-icon {
-            font-size: 24px;
-            margin-bottom: 10px;
-            display: block;
-        }
-        .feature-text {
-            color: #C75D2C;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
         .cta-button {
             display: inline-block;
             background: linear-gradient(135deg, #C75D2C, #D96F32);
