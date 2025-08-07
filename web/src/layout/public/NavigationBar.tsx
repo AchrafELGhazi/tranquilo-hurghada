@@ -219,23 +219,27 @@ export const NavigationBar: React.FC = () => {
                             />
                         </div>
 
-                        {/* Mobile Menu Button */}
-                        <button
-                            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                            className='bg-terracotta text-cream p-3 rounded-xl shadow-lg shadow-terracotta/30 transition-all duration-400 hover:bg-burnt-orange hover:shadow-xl hover:shadow-terracotta/40 hover:-translate-y-0.5 active:scale-95'
-                        >
-                            <div className='transition-transform duration-300'>
-                                {isMobileMenuOpen ? <X className='w-5 h-5' /> : <Menu className='w-5 h-5' />}
-                            </div>
-                        </button>
+                        <div className='flex items-center space-x-3'>
+                            <LanguageSelector />
+
+                            {/* Mobile Menu Button */}
+                            <button
+                                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                                className='bg-terracotta text-cream p-2 cursor-pointer rounded-xl shadow-lg shadow-terracotta/30 transition-all duration-400 hover:bg-burnt-orange hover:shadow-xl hover:shadow-terracotta/40 hover:-translate-y-0.5 active:scale-95'
+                            >
+                                <div className='transition-transform duration-300'>
+                                    {isMobileMenuOpen ? <X className='w-5 h-5' /> : <Menu className='w-5 h-5' />}
+                                </div>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
                 {/* Mobile Menu */}
                 {isMobileMenuOpen && (
-                    <div className='lg:hidden animate-slide-down'>
-                        <div className='bg-cream/95 backdrop-blur-xl border-t border-terracotta/20 shadow-xl'>
-                            <div className='px-6 pt-6 pb-8 space-y-3 max-w-sm mx-auto'>
+                    <div className='lg:hidden'>
+                        <div className=' border-t border-terracotta-60 shadow-lg'>
+                            <div className='px-2 py-6 space-y-1 max-w-xl mx-auto'>
                                 {/* Mobile Navigation Items */}
                                 {allNavigation.map((item, index) => {
                                     const isActive = location.pathname === item.href;
@@ -250,60 +254,22 @@ export const NavigationBar: React.FC = () => {
                                                 item.onClick?.(e);
                                                 setIsMobileMenuOpen(false);
                                             }}
-                                            className={`group relative flex items-center space-x-4 p-4 rounded-2xl font-medium text-base transition-all duration-400 border overflow-hidden ${
+                                            className={`flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium transition-colors duration-200 ${
                                                 isActive
-                                                    ? 'text-cream bg-terracotta border-terracotta shadow-lg shadow-terracotta/30'
+                                                    ? 'text-white bg-terracotta'
                                                     : isSignInMobile
-                                                    ? 'text-cream bg-gradient-to-r from-terracotta to-burnt-orange border-2 border-golden-yellow shadow-lg shadow-terracotta/30 hover:shadow-xl hover:shadow-golden-yellow/40'
+                                                    ? 'text-white bg-terracotta hover:bg-terracotta-90'
                                                     : isAuthItem
-                                                    ? 'text-burnt-orange bg-golden-yellow/20 border-golden-yellow/30 hover:bg-golden-yellow/30 hover:border-golden-yellow/50 hover:shadow-md'
-                                                    : 'text-terracotta bg-white/50 border-white/50 hover:bg-terracotta/10 hover:border-terracotta/30 hover:shadow-md'
+                                                    ? 'text-terracotta bg-terracotta-5 hover:bg-terracotta-10'
+                                                    : 'text-gray-700 hover:text-terracotta hover:bg-gray-50'
                                             }`}
                                         >
-                                            {/* Mobile shine effect for sign in */}
-                                            {isSignInMobile && (
-                                                <div className='absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 -translate-x-full group-hover:translate-x-full transition-all duration-1000'></div>
-                                            )}
-
-                                            <span
-                                                className={`relative z-10 transition-all duration-300 group-hover:scale-110 ${
-                                                    isActive
-                                                        ? 'text-cream'
-                                                        : isAuthItem
-                                                        ? isSignInMobile
-                                                            ? 'text-cream'
-                                                            : 'text-burnt-orange'
-                                                        : 'text-terracotta'
-                                                }`}
-                                            >
-                                                {item.icon}
-                                            </span>
-                                            <span className='relative z-10 tracking-wide font-medium flex-1'>
-                                                {item.name}
-                                            </span>
-
-                                            {/* Arrow indicator */}
-                                            <div
-                                                className={`relative z-10 w-2 h-2 rounded-full transition-all duration-300 ${
-                                                    isActive
-                                                        ? 'bg-cream scale-100'
-                                                        : isSignInMobile
-                                                        ? 'bg-cream group-hover:scale-100 scale-0'
-                                                        : 'bg-transparent group-hover:bg-terracotta group-hover:scale-100 scale-0'
-                                                }`}
-                                            ></div>
+                                            <span className='text-lg'>{item.icon}</span>
+                                            <span className='flex-1'>{item.name}</span>
+                                            {isActive && <div className='w-1.5 h-1.5 rounded-full bg-white'></div>}
                                         </Link>
                                     );
                                 })}
-
-                                {/* Mobile Language Selector */}
-                                <div className='pt-4 mt-6 border-t border-terracotta/20'>
-                                    <div className='bg-white/50 backdrop-blur-sm border border-white/50 rounded-2xl p-4 hover:bg-white/60 hover:border-terracotta/20 transition-all duration-400'>
-                                        <div className='flex items-center justify-center'>
-                                            <LanguageSelector />
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
