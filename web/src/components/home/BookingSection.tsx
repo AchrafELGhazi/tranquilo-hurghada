@@ -70,7 +70,7 @@ const BookingSection = () => {
                                     onChange={e => setGuests(e.target.value)}
                                     className='w-full pl-10 pr-4 py-3 border-2 border-orange-200/60 rounded-xl bg-white/70 text-orange-900 focus:outline-none focus:border-orange-500 focus:bg-white transition-all duration-300 appearance-none'
                                 >
-                                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
+                                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11,12].map(num => (
                                         <option key={num} value={num}>
                                             {num} Guest{num > 1 ? 's' : ''}
                                         </option>
