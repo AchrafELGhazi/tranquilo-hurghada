@@ -11,7 +11,7 @@ interface Villa {
     address: string;
     city: string;
     country: string;
-    pricePerNight: string;
+    pricePerNight: number; // Changed from string to number
     maxGuests: number;
     bedrooms: number;
     bathrooms: number;
@@ -32,7 +32,7 @@ interface Villa {
 interface User {
     id: string;
     fullName: string;
-    phone?: string;
+    phone?: string | null;
     dateOfBirth?: Date | null;
 }
 
@@ -48,8 +48,12 @@ const Booking: React.FC = () => {
                 setLoading(true);
 
                 // Load current user
-                // const currentUser = await authApi.getCurrentUser();
-                // setUser(currentUser);
+                try {
+                    const currentUser = await authApi.getCurrentUser();
+                    setUser(currentUser);
+                } catch (userError) {
+                    setUser(null);
+                }
 
                 // Load villa data
                 const villasResponse = await villaApi.getAllVillas({ limit: 1 });
@@ -109,7 +113,7 @@ const Booking: React.FC = () => {
         );
     }
 
-    if (!villa || !user) {
+    if (!villa) {
         return (
             <div className='min-h-screen bg-gradient-to-br from-[#E8DCC6] to-[#F8B259]/20 flex items-center justify-center px-4'>
                 <div className='text-center max-w-md'>

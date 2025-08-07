@@ -23,7 +23,7 @@ interface Villa {
     address: string;
     city: string;
     country: string;
-    pricePerNight: string;
+    pricePerNight: number; // Changed from string to number
     maxGuests: number;
     bedrooms: number;
     bathrooms: number;
@@ -233,7 +233,7 @@ const VillaDetails: React.FC<VillaDetailsProps> = ({ villa }) => {
                                 <Map address={villa.address} city={villa.city} country={villa.country} />
                             </div>
                         </div>
-                    </div>                   
+                    </div>
                 </div>
             </div>
         </div>
