@@ -1,0 +1,57 @@
+{
+    "common": {
+        "preparing": "Подготовка вашего опыта...",
+        "loadingTranslations": "Загрузка переводов...",
+        "initializingRouter": "Инициализация маршрутизатора...",
+        "settingUpComponents": "Настройка компонентов...",
+        "applyingTheme": "Применение темы...",
+        "almostReady": "Почти готово...",
+        "startingUp": "Запуск приложения",
+        "loadingResources": "Загрузка необходимых ресурсов",
+        "configuringApp": "Настройка параметров приложения",
+        "finalizingSetup": "Завершение настройки",
+        "readyToLaunch": "Готово к запуску",
+        "language": "Язык",
+        "appName": "",
+        "description": "Все права защищены",
+        "hello": "Привет",
+        "searchPlaceholder": "Поиск...",
+        "save": "Сохранить",
+        "cancel": "Отмена",
+        "thankyou": "Спасибо",
+        "greeting": "Привет, {{name}}!",
+        "back": "Назад",
+        "currentLang": "Текущий язык: {{lang}}",
+        "theme": "Тема",
+        "light": "Светлая",
+        "dark": "Тёмная",
+        "info": "Информация",
+        "chooseLanguage": "Выберите язык"
+    },
+    "navigation": {
+        "home": "Главная",
+        "about": "О нас",
+        "profile": "Профиль",
+        "settings": "Настройки",
+        "signin": "Войти",
+        "register": "Регистрация",
+        "logout": "Выйти",
+        "services": "Услуги",
+        "visitorInfo": "Информация для посетителей",
+        "contact": "Контакты"
+    },
+    "pages": {
+        "profileTitle": "Ваш профиль",
+        "profileDescription": "Управление настройками профиля",
+        "aboutTitle": "О нас",
+        "aboutDescription": "Узнайте больше о нашей компании",
+        "homeTitle": "Добро пожаловать",
+        "homeSubtitle": "Откройте для себя наши удивительные возможности",
+        "settingsTitle": "Настройки",
+        "settingsDescription": "Настройте свои предпочтения"
+    },
+    "errors": {
+        "pageNotFound": "Страница не найдена",
+        "resourceNotFound": "Запрашиваемый ресурс не найден"
+    }
+}
