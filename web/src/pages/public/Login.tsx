@@ -20,7 +20,6 @@ export const Login = () => {
         }
     }, [isAuthenticated, navigate, location]);
 
-    // Clear errors when component mounts
     useEffect(() => {
         clearError();
         setLocalError('');
@@ -38,7 +37,6 @@ export const Login = () => {
 
         try {
             await login({ email, password });
-            // Navigation will be handled by the useEffect above
         } catch (err: any) {
             setLocalError(err.message || 'Login failed. Please check your credentials.');
         }
@@ -55,38 +53,41 @@ export const Login = () => {
     }
 
     return (
-        <div className='min-h-screen bg-[#F3E9DC] flex items-center justify-center px-4 sm:px-6 lg:px-8 -mt-6'>
-            <div className='w-full max-w-md'>
-                {/* Header */}
-                <div className='text-center mb-8'>
-                    <h2 className='text-3xl font-bold text-[#C75D2C] mb-2'>Welcome Back</h2>
-                    <p className='text-[#C75D2C]/70 text-sm'>Please sign in to your account</p>
+        <div className='min-h-screen bg-[#F3E9DC] flex items-center justify-center px-4 py-4 -mt-20 sm:mt-0'>
+            <div className='w-full max-w-sm'>
+                {/* Header - More compact on mobile */}
+                <div className='text-center mb-4 sm:mb-6'>
+                    <h2 className='text-2xl sm:text-3xl font-bold text-[#C75D2C] mb-1'>Welcome Back</h2>
+                    <p className='text-[#C75D2C]/70 text-xs sm:text-sm'>Please sign in to your account</p>
                 </div>
 
-                {/* Login Form */}
-                <div className='bg-white/40 backdrop-blur-md border-2 border-[#F8B259]/60 rounded-2xl p-8'>
+                {/* Login Form - Reduced padding and spacing on mobile */}
+                <div className='bg-white/40 backdrop-blur-md border-2 border-[#F8B259]/60 rounded-xl sm:rounded-2xl p-4 sm:p-6'>
                     {displayError && (
-                        <div className='mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm'>
+                        <div className='mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-xs sm:text-sm'>
                             {displayError}
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit} className='space-y-6'>
+                    <form onSubmit={handleSubmit} className='space-y-4 sm:space-y-5'>
                         {/* Email Field */}
                         <div>
-                            <label htmlFor='email' className='block text-sm font-semibold text-[#C75D2C] mb-2'>
+                            <label
+                                htmlFor='email'
+                                className='block text-xs sm:text-sm font-semibold text-[#C75D2C] mb-1.5 sm:mb-2'
+                            >
                                 Email Address
                             </label>
                             <div className='relative'>
-                                <div className='absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none'>
-                                    <Mail className='h-5 w-5 text-[#D96F32]/60' />
+                                <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
+                                    <Mail className='h-4 w-4 sm:h-5 sm:w-5 text-[#D96F32]/60' />
                                 </div>
                                 <input
                                     id='email'
                                     type='email'
                                     value={email}
                                     onChange={e => setEmail(e.target.value)}
-                                    className='w-full pl-12 pr-4 py-3 border-2 border-[#F8B259]/60 rounded-xl bg-white/50 text-[#C75D2C] placeholder-[#C75D2C]/50 focus:outline-none focus:border-[#D96F32] focus:bg-white/80 transition-all duration-300'
+                                    className='w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-2.5 sm:py-3 border-2 border-[#F8B259]/60 rounded-lg sm:rounded-xl bg-white/50 text-[#C75D2C] placeholder-[#C75D2C]/50 focus:outline-none focus:border-[#D96F32] focus:bg-white/80 transition-all duration-300 text-sm sm:text-base'
                                     required
                                     disabled={isLoading}
                                     placeholder='Enter your email'
@@ -96,19 +97,22 @@ export const Login = () => {
 
                         {/* Password Field */}
                         <div>
-                            <label htmlFor='password' className='block text-sm font-semibold text-[#C75D2C] mb-2'>
+                            <label
+                                htmlFor='password'
+                                className='block text-xs sm:text-sm font-semibold text-[#C75D2C] mb-1.5 sm:mb-2'
+                            >
                                 Password
                             </label>
                             <div className='relative'>
-                                <div className='absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none'>
-                                    <Lock className='h-5 w-5 text-[#D96F32]/60' />
+                                <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
+                                    <Lock className='h-4 w-4 sm:h-5 sm:w-5 text-[#D96F32]/60' />
                                 </div>
                                 <input
                                     id='password'
                                     type={showPassword ? 'text' : 'password'}
                                     value={password}
                                     onChange={e => setPassword(e.target.value)}
-                                    className='w-full pl-12 pr-12 py-3 border-2 border-[#F8B259]/60 rounded-xl bg-white/50 text-[#C75D2C] placeholder-[#C75D2C]/50 focus:outline-none focus:border-[#D96F32] focus:bg-white/80 transition-all duration-300'
+                                    className='w-full pl-10 sm:pl-12 pr-10 sm:pr-12 py-2.5 sm:py-3 border-2 border-[#F8B259]/60 rounded-lg sm:rounded-xl bg-white/50 text-[#C75D2C] placeholder-[#C75D2C]/50 focus:outline-none focus:border-[#D96F32] focus:bg-white/80 transition-all duration-300 text-sm sm:text-base'
                                     required
                                     disabled={isLoading}
                                     placeholder='Enter your password'
@@ -116,10 +120,14 @@ export const Login = () => {
                                 <button
                                     type='button'
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className='absolute inset-y-0 right-0 pr-4 flex items-center text-[#D96F32]/60 hover:text-[#D96F32] transition-colors duration-200'
+                                    className='absolute inset-y-0 right-0 pr-3 flex items-center text-[#D96F32]/60 hover:text-[#D96F32] transition-colors duration-200'
                                     disabled={isLoading}
                                 >
-                                    {showPassword ? <EyeOff className='h-5 w-5' /> : <Eye className='h-5 w-5' />}
+                                    {showPassword ? (
+                                        <EyeOff className='h-4 w-4 sm:h-5 sm:w-5' />
+                                    ) : (
+                                        <Eye className='h-4 w-4 sm:h-5 sm:w-5' />
+                                    )}
                                 </button>
                             </div>
                         </div>
@@ -128,7 +136,7 @@ export const Login = () => {
                         <button
                             type='submit'
                             disabled={isLoading}
-                            className={`w-full py-3 px-4 rounded-xl font-semibold text-white transition-all duration-300 ${
+                            className={`w-full py-2.5 sm:py-3 px-4 rounded-lg sm:rounded-xl font-semibold text-white transition-all duration-300 text-sm sm:text-base ${
                                 isLoading
                                     ? 'bg-[#C75D2C]/50 cursor-not-allowed'
                                     : 'bg-gradient-to-r from-[#D96F32] to-[#C75D2C] hover:from-[#C75D2C] hover:to-[#D96F32] hover:transform hover:-translate-y-0.5 active:transform active:translate-y-0'
@@ -136,7 +144,7 @@ export const Login = () => {
                         >
                             {isLoading ? (
                                 <div className='flex items-center justify-center space-x-2'>
-                                    <div className='w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin'></div>
+                                    <div className='w-3 h-3 sm:w-4 sm:h-4 border-2 border-white/30 border-t-white rounded-full animate-spin'></div>
                                     <span>Signing in...</span>
                                 </div>
                             ) : (
@@ -146,8 +154,8 @@ export const Login = () => {
                     </form>
 
                     {/* Sign Up Link */}
-                    <div className='mt-8 text-center'>
-                        <p className='text-sm text-[#C75D2C]/70'>
+                    <div className='mt-5 sm:mt-6 text-center'>
+                        <p className='text-xs sm:text-sm text-[#C75D2C]/70'>
                             Don't have an account?{' '}
                             <Link
                                 to={`/${lang}/register`}
@@ -159,8 +167,8 @@ export const Login = () => {
                     </div>
                 </div>
 
-                {/* Footer */}
-                <div className='mt-8 text-center'>
+                {/* Footer - Smaller on mobile */}
+                <div className='mt-4 sm:mt-6 text-center'>
                     <p className='text-xs text-[#C75D2C]/50'>Secure login powered by modern encryption</p>
                 </div>
             </div>
