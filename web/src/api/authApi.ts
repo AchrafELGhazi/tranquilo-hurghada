@@ -6,6 +6,8 @@ export interface User {
     fullName: string;
     role: 'GUEST' | 'HOST' | 'ADMIN';
     isActive: boolean;
+    phone: string | undefined;
+    dateOfBirth: Date | undefined;
     createdAt: string;
     updatedAt: string;
 }

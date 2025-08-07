@@ -74,10 +74,12 @@ export interface VillasResponse {
     pagination: PaginationInfo;
 }
 
+// API response structure that matches your actual API
 export interface ApiResponse<T> {
     success: boolean;
     message: string;
     data: T;
+    pagination: PaginationInfo; // Your API always includes pagination
 }
 
 // Popular amenities for filtering/forms
@@ -138,10 +140,15 @@ class VillaApi {
         }
 
         const url = `/villas${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
-        const response = await apiService.get<VillasResponse>(url);
+        const response = await apiService.get<Villa[]>(url) as ApiResponse<Villa[]>;
+        console.log('Get all villas response:', response);
 
         if (response.success && response.data) {
-            return response.data;
+            // Your API returns data as Villa[] directly
+            return {
+                villas: response.data,
+                pagination: response.pagination
+            };
         }
 
         throw new Error(response.message || 'Failed to get villas');

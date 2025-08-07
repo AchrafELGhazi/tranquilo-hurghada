@@ -27,7 +27,7 @@ export interface Booking {
     checkOut: string;
     totalGuests: number;
     totalPrice: number;
-    paymentMethod: 'CREDIT_CARD' | 'BANK_TRANSFER' | 'CASH' | 'PAYPAL';
+    paymentMethod: 'PAYMENT_ON_ARRIVAL' | 'BANK_TRANSFER';
     status: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'REJECTED' | 'COMPLETED';
     notes?: string;
     rejectionReason?: string;
@@ -43,7 +43,7 @@ export interface CreateBookingData {
     checkIn: string; // ISO date string
     checkOut: string; // ISO date string
     totalGuests: number;
-    paymentMethod: 'CREDIT_CARD' | 'BANK_TRANSFER' | 'CASH' | 'PAYPAL';
+    paymentMethod: 'PAYMENT_ON_ARRIVAL' | 'BANK_TRANSFER';
     phone: string;
     dateOfBirth: string; // ISO date string
     notes?: string;

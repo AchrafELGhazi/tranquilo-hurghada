@@ -21,6 +21,7 @@ import ScrollToTop from './utils/scrollToTop';
 import { supportedLanguages } from '@/utils/constants';
 import { normalizeLanguageCode } from '@/utils/normalizeLanguageCode';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import Booking from './pages/public/Booking';
 
 const RootRedirect: React.FC = () => {
     const storedLang = localStorage.getItem('preferred-language');
@@ -142,6 +143,7 @@ const App: React.FC = () => {
                                     <Route path='services' element={<Services />} />
                                     <Route path='visitorInfo' element={<VisitorInfo />} />
                                     <Route path='contact' element={<Contact />} />
+                                    <Route path='booking' element={<Booking />} />
                                     <Route path='signin' element={<Login />} />
                                     <Route path='register' element={<Register />} />
                                     <Route path='404' element={<NotFound />} />
