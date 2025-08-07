@@ -9,6 +9,7 @@ import {
 import { notFoundHandler } from './middleware/notFoundHandler';
 import { env } from './config/env';
 import apiRouter from './routes/api';
+import { startBookingAutoCompletionJob } from './jobs/booking.job';
 
 const app = express();
 const apiPrefix = `/api/${env.API_VERSION}`;
@@ -55,6 +56,7 @@ app.get('/health', (_req, res) => {
   });
 });
 
+startBookingAutoCompletionJob();
 app.use(apiPrefix, apiRouter);
 app.use(notFoundHandler);
 app.use(errorHandler);
