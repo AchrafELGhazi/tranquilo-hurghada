@@ -114,7 +114,7 @@ const App: React.FC = () => {
     }, []);
 
     return (
-        <div className='min-h-screen bg-cream'>
+        <div className='bg-cream'>
             <I18nextProvider i18n={i18n}>
                 <AuthProvider>
                     <Router>
