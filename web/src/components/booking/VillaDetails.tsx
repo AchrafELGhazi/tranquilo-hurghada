@@ -23,7 +23,7 @@ interface Villa {
     address: string;
     city: string;
     country: string;
-    pricePerNight: number; // Changed from string to number
+    pricePerNight: number;
     maxGuests: number;
     bedrooms: number;
     bathrooms: number;
