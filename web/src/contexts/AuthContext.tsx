@@ -29,29 +29,24 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     const isAuthenticated = !!user && !!authApi.getAccessToken();
 
-    // Initialize auth state on app start
     useEffect(() => {
         const initializeAuth = async () => {
             try {
                 setIsLoading(true);
 
-                // Check if we have stored user data and token
                 const storedUser = authApi.getUserFromStorage();
                 const accessToken = authApi.getAccessToken();
 
                 if (storedUser && accessToken) {
                     try {
-                        // Verify token is still valid by getting current user
                         const currentUser = await authApi.getCurrentUser();
                         setUser(currentUser);
                     } catch (error) {
-                        // Token might be expired, clear everything
                         console.warn('Token validation failed, clearing auth data');
                         authApi.clearAuthData();
                         setUser(null);
                     }
                 } else {
-                    // No stored auth data
                     setUser(null);
                 }
             } catch (error) {
@@ -103,7 +98,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
             await authApi.logout();
             setUser(null);
         } catch (error: any) {
-            // Even if logout fails on server, clear local state
             console.warn('Logout error:', error);
             authApi.clearAuthData();
             setUser(null);
@@ -115,13 +109,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const hasRole = (role: 'GUEST' | 'HOST' | 'ADMIN'): boolean => {
         if (!user) return false;
 
-        // Admin has access to everything
         if (user.role === 'ADMIN') return true;
 
-        // Host has access to HOST and GUEST
         if (user.role === 'HOST' && (role === 'HOST' || role === 'GUEST')) return true;
 
-        // Guest only has access to GUEST
         return user.role === role;
     };
 
