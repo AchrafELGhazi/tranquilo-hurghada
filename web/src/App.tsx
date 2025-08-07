@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Outlet, useParams, useLocation, useNavigate } from 'react-router-dom';
 import { I18nextProvider } from 'react-i18next';
-import i18n from '@/utils/i18n';
+import i18n, { normalizeLanguageCode } from '@/utils/i18n';
 import { LoadingScreen } from '@/components/common/LoadingScreen';
 import { Layout } from './layout/public/Layout';
 import { About } from './pages/public/About';
@@ -26,8 +26,24 @@ const LanguageRedirect: React.FC = () => {
 
     useEffect(() => {
         if (!lang) {
-            const detectedLang = i18n.language || 'en';
+            // Get the detected language and normalize it
+            const detectedLang = normalizeLanguageCode(i18n.language);
             navigate(`/${detectedLang}${location.pathname}`, { replace: true });
+        } else {
+            // Normalize the current URL language parameter
+            const normalizedLang = normalizeLanguageCode(lang);
+
+            // If the URL has a locale code (like en-US), redirect to normalized version
+            if (lang !== normalizedLang) {
+                const newPath = location.pathname.replace(`/${lang}`, `/${normalizedLang}`);
+                navigate(newPath, { replace: true });
+                return;
+            }
+
+            // Update i18n language if different from current
+            if (i18n.language !== normalizedLang) {
+                i18n.changeLanguage(normalizedLang);
+            }
         }
     }, [lang, location, navigate]);
 

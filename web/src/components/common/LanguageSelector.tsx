@@ -39,7 +39,7 @@ export const LanguageSelector: React.FC = () => {
         <div className='relative' ref={dropdownRef}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className='group flex cursor-pointer items-center gap-2 px-2 py-1.5 bg-white/80 hover:bg-white/95 backdrop-blur-sm border border-terracotta-20 hover:border-terracotta rounded-lg text-sm font-medium text-gray-700 hover:text-burnt-orange transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-terracotta-20 focus:outline-none focus:ring-1 focus:ring-amber-400'
+                className='group flex cursor-pointer items-center gap-2 px-2 py-1.5 bg-white/80  backdrop-blur-sm border border-terracotta-20 hover:border-terracotta rounded-lg text-sm font-medium text-gray-700 hover:text-burnt-orange transition-all duration-300  focus:outline-none focus:ring-1 focus:ring-amber-400'
                 aria-expanded={isOpen}
                 aria-haspopup='true'
             >
