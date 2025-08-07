@@ -111,6 +111,64 @@
             "subtitle": "Reserve your perfect getaway today",
             "button": "Book Now"
         }
+    },"about": {
+        "hero": {
+            "title": "Tranquilo",
+            "subtitle": "Luxury Villa with Hotel Services",
+            "description": "Discover a world of calm and beauty in the heart of North Hurghada, where modern luxury meets authentic Egyptian hospitality."
+        },
+        "story": {
+            "title": "Our Story",
+            "passion": {
+                "title": "Born from Passion",
+                "description": "We are passionate about traveling and meeting new people. In 2023, we decided to create our luxury villa in North Hurghada, a place where tranquility meets sophistication."
+            },
+            "vision": {
+                "title": "A Vision Realized",
+                "description": "After months of careful planning, we fell in love with this peaceful location in North Hurghada. Every detail has been thoughtfully designed to create an authentic and welcoming space."
+            },
+            "dream": {
+                "title": "A Dream Come True",
+                "description": "We worked with skilled local artisans to bring our vision to life. Using premium materials and modern architecture, we created a haven where guests feel at home, away from the hustle and bustle of city life."
+            }
+        },
+        "parallax": {
+            "title": "Experience Tranquility",
+            "subtitle": "Where luxury meets the Red Sea, creating unforgettable moments of peace and beauty."
+        },
+        "features": {
+            "title": "Why Choose Tranquilo?",
+            "subtitle": "Modern luxury villa designed for ultimate comfort and relaxation",
+            "capacity": {
+                "title": "Perfect Capacity",
+                "description": "Our villa comfortably accommodates guests with spacious rooms and luxurious amenities for the perfect getaway."
+            },
+            "luxury": {
+                "title": "Hotel-Level Service",
+                "description": "Enjoy the comfort of a private villa with the luxury of hotel services, including housekeeping and concierge assistance."
+            },
+            "location": {
+                "title": "Prime Location",
+                "description": "Located in North Hurghada with easy access to the Red Sea, offering the perfect blend of tranquility and convenience."
+            }
+        },
+        "owner": {
+            "title": "Meet Your Host",
+            "description": "Hello! I'm Nabil, your host at Tranquilo Hurghada. I'm passionate about hospitality and creating unforgettable experiences for our guests. Having lived and traveled extensively, I understand what makes a perfect getaway. I'm here to ensure your stay is nothing short of extraordinary.",
+            "name": "Nabil Laaouina"
+        },
+        "built": {
+            "title": "Built with Love in 2024",
+            "description": "Our villa was completed in 2024 after careful construction by skilled local artisans. We are proud of what we've achieved together - a space that combines modern luxury with authentic Egyptian charm.",
+            "year": "Year Built",
+            "villa": "Luxury Villa",
+            "memories": "Endless Memories"
+        },
+        "cta": {
+            "title": "Ready for Your Perfect Getaway?",
+            "subtitle": "Don't wait any longer. Come and discover this haven of tranquility where you can recharge and enjoy moments of pure relaxation.",
+            "button": "Book Your Stay"
+        }
     },
     "errors": {
         "pageNotFound": "Page Not Found",
