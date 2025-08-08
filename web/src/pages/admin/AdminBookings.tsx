@@ -9,10 +9,8 @@ import {
     CheckCircle,
     XCircle,
     Clock,
-    Eye,
     ChevronLeft,
     ChevronRight,
-    MessageSquare,
 } from 'lucide-react';
 import { bookingApi, type BookingFilters } from '@/api/bookingApi';
 import type { Booking, BookingStatus } from '@/utils/types';
@@ -28,8 +26,6 @@ export const AdminBookings: React.FC = () => {
     // Filters
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState<string>('');
-    const [villaFilter, setVillaFilter] = useState('');
-    const [dateFilter, setDateFilter] = useState('');
     const [sortBy, setSortBy] = useState<'createdAt' | 'checkIn' | 'checkOut' | 'totalPrice'>('createdAt');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
     const [showFilters, setShowFilters] = useState(false);
@@ -247,17 +243,6 @@ export const AdminBookings: React.FC = () => {
                                     <option value='REJECTED'>Rejected</option>
                                     <option value='COMPLETED'>Completed</option>
                                 </select>
-                            </div>
-
-                            <div>
-                                <label className='block text-sm font-medium text-gray-700 mb-1'>Villa</label>
-                                <input
-                                    type='text'
-                                    placeholder='Filter by villa'
-                                    value={villaFilter}
-                                    onChange={e => setVillaFilter(e.target.value)}
-                                    className='w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-                                />
                             </div>
 
                             <div>
