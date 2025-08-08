@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import bookingApi from '@/api/bookingApi';
 import villaApi from '@/api/villaApi';
+import DateRangePickerModal from './DateRangePickerModal';
 import type { PaymentMethod, User, Villa } from '@/utils/types';
 
 interface FormData {
@@ -50,6 +51,7 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [showSignInModal, setShowSignInModal] = useState(false);
+    const [showDatePicker, setShowDatePicker] = useState(false); // New state for date picker modal
 
     const [formData, setFormData] = useState<FormData>({
         checkIn: '',
@@ -129,6 +131,26 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
                 [name]: '',
             }));
         }
+    };
+
+    // New function to handle date selection from modal
+    const handleDateSelect = (checkIn: string, checkOut: string) => {
+        const newFormData = {
+            ...formData,
+            checkIn,
+            checkOut,
+        };
+
+        setFormData(newFormData);
+        saveFormDataToStorage(newFormData);
+
+        // Clear any existing date errors
+        setFormErrors(prev => ({
+            ...prev,
+            checkIn: '',
+            checkOut: '',
+            dates: '',
+        }));
     };
 
     const validateForm = (): boolean => {
@@ -236,6 +258,15 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
         return villaApi.calculateNights(formData.checkIn, formData.checkOut);
     };
 
+    // Format date for display
+    const formatDisplayDate = (dateString: string) => {
+        if (!dateString) return '';
+        return new Date(dateString).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+        });
+    };
+
     const serviceFee = Math.round(calculateTotal() * 0.05); // 5% service fee
     const cleaningFee = 150; // Fixed cleaning fee
     const totalWithFees = calculateTotal() + serviceFee + cleaningFee;
@@ -298,36 +329,40 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
                         )}
 
                         <div className='space-y-6'>
-                            {/* Dates */}
-                            <div className='bg-white/30 border-2 border-[#F8B259]/50 rounded-xl overflow-hidden'>
+                            {/* Date Selection - Updated to use modal */}
+                            <div
+                                className='bg-white/30 border-2 border-[#F8B259]/50 rounded-xl overflow-hidden cursor-pointer hover:bg-white/40 transition-colors'
+                                onClick={() => setShowDatePicker(true)}
+                            >
                                 <div className='grid grid-cols-2'>
                                     <div className='p-4 border-r border-[#F8B259]/50'>
                                         <label className='block text-xs font-bold text-[#C75D2C] mb-2 uppercase tracking-wider'>
+                                            <Calendar className='w-4 h-4 inline mr-1' />
                                             Check-in
                                         </label>
-                                        <input
-                                            type='date'
-                                            name='checkIn'
-                                            value={formData.checkIn}
-                                            onChange={handleInputChange}
-                                            min={new Date().toISOString().split('T')[0]}
-                                            className='w-full text-sm text-[#C75D2C] bg-transparent focus:outline-none font-medium'
-                                        />
+                                        <div className='text-sm text-[#C75D2C] font-medium'>
+                                            {formData.checkIn ? formatDisplayDate(formData.checkIn) : 'Add date'}
+                                        </div>
                                     </div>
                                     <div className='p-4'>
                                         <label className='block text-xs font-bold text-[#C75D2C] mb-2 uppercase tracking-wider'>
                                             Check-out
                                         </label>
-                                        <input
-                                            type='date'
-                                            name='checkOut'
-                                            value={formData.checkOut}
-                                            onChange={handleInputChange}
-                                            min={formData.checkIn || new Date().toISOString().split('T')[0]}
-                                            className='w-full text-sm text-[#C75D2C] bg-transparent focus:outline-none font-medium'
-                                        />
+                                        <div className='text-sm text-[#C75D2C] font-medium'>
+                                            {formData.checkOut ? formatDisplayDate(formData.checkOut) : 'Add date'}
+                                        </div>
                                     </div>
                                 </div>
+                                {formData.checkIn && formData.checkOut && (
+                                    <div className='px-4 pb-3 border-t border-[#F8B259]/30 bg-[#F8B259]/10'>
+                                        <div className='flex items-center justify-center space-x-2 mt-2'>
+                                            <Clock className='w-4 h-4 text-[#D96F32]' />
+                                            <span className='text-sm font-semibold text-[#C75D2C]'>
+                                                {calculateNights()} {calculateNights() === 1 ? 'night' : 'nights'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                )}
                                 {(formErrors.checkIn || formErrors.checkOut || formErrors.dates) && (
                                     <div className='px-4 pb-3 border-t border-[#F8B259]/30'>
                                         <p className='text-red-600 text-xs mt-2 font-medium'>
@@ -527,6 +562,15 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
                 </div>
             </div>
 
+            <DateRangePickerModal
+                isOpen={showDatePicker}
+                onClose={() => setShowDatePicker(false)}
+                villaId={villa.id}
+                onDateSelect={handleDateSelect}
+                initialCheckIn={formData.checkIn}
+                initialCheckOut={formData.checkOut}
+            />
+
             {/* Sign In Modal */}
             {showSignInModal && (
                 <div className='fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4'>
@@ -561,7 +605,7 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
                                 className='w-full bg-white/50 text-[#C75D2C] py-3 px-6 rounded-xl font-semibold border-2 border-[#F8B259]/50 hover:bg-white/70 transition-all duration-300'
                             >
                                 Continue as Guest
-                            </button>{' '}
+                            </button>
                             <p className='text-sm text-center text-[#C75D2C]/70'>
                                 <strong>Note:</strong> Continuing as a guest will not allow you to complete the booking.
                             </p>

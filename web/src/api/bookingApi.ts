@@ -1,7 +1,7 @@
 
 import apiService from "@/utils/api";
 import { colorMap, statusMap } from "@/utils/constants";
-import type { Booking, BookingStatus, PaymentMethod } from "@/utils/types";
+import type { Booking, BookingStatus, PaymentMethod, UserRole } from "@/utils/types";
 
 export interface CreateBookingData {
     villaId: string;
@@ -44,6 +44,20 @@ export interface BookingsResponse {
 export interface BookingActionData {
     rejectionReason?: string;
     cancellationReason?: string;
+}
+export interface VillaBookedDatesParams {
+    year?: number;
+    month?: number;
+}
+
+export interface VillaBookedDatesResponse {
+    villaId: string;
+    villaTitle: string;
+    dateRange: {
+        start: string;
+        end: string;
+    };
+    bookedDates: string[];
 }
 
 export interface ApiResponse<T> {
@@ -130,6 +144,35 @@ class BookingApi {
 
         throw new Error(response.message || 'Failed to get booking details');
     }
+
+    /**
+   * Get villa booked dates for calendar/date picker
+   */
+    async getVillaBookedDates(villaId: string, params?: VillaBookedDatesParams): Promise<VillaBookedDatesResponse> {
+        if (!villaId) {
+            throw new Error('Villa ID is required');
+        }
+
+        const queryParams = new URLSearchParams();
+
+        if (params?.year) {
+            queryParams.append('year', params.year.toString());
+        }
+
+        if (params?.month) {
+            queryParams.append('month', params.month.toString());
+        }
+
+        const url = `/bookings/villa/${villaId}/booked-dates${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+        const response = await apiService.get<VillaBookedDatesResponse>(url);
+
+        if (response.success && response.data) {
+            return response.data;
+        }
+
+        throw new Error(response.message || 'Failed to get villa booked dates');
+    }
+
 
     /**
      * Confirm a booking (hosts and admins only)
@@ -274,7 +317,7 @@ class BookingApi {
     /**
      * Check if booking can be cancelled by the current user
      */
-    canCancelBooking(booking: Booking, currentUserId: string, userRole: 'GUEST' | 'HOST' | 'ADMIN'): boolean {
+    canCancelBooking(booking: Booking, currentUserId: string, userRole: UserRole): boolean {
         if (booking.status !== 'PENDING' && booking.status !== 'CONFIRMED') {
             return false;
         }
@@ -289,7 +332,7 @@ class BookingApi {
     /**
      * Check if booking can be confirmed/rejected by the current user
      */
-    canManageBooking(booking: Booking, currentUserId: string, userRole: 'GUEST' | 'HOST' | 'ADMIN'): boolean {
+    canManageBooking(booking: Booking, currentUserId: string, userRole: UserRole): boolean {
         if (booking.status !== 'PENDING') {
             return false;
         }

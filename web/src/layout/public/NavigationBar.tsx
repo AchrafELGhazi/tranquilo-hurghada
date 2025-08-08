@@ -23,7 +23,7 @@ export const NavigationBar: React.FC = () => {
     return (
         <>
             <header
-                className={`fixed top-0 left-0 right-0 z-50 font-roboto transition-all duration-700 ease-out ${
+                className={`fixed top-0 left-0 right-0 z-20 font-roboto transition-all duration-700 ease-out ${
                     scrolled
                         ? 'bg-cream-90 backdrop-blur-xl shadow-2xl shadow-terracotta-5 border-b border-terracotta-10'
                         : 'bg-cream-80 backdrop-blur-md border-b border-terracotta-50'

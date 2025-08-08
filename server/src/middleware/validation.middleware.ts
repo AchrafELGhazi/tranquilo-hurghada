@@ -263,3 +263,40 @@ export const validateBookingFilters = (req: Request, res: Response, next: NextFu
 
     next();
 };
+
+export const validateVillaBookedDatesParams = (req: Request, res: Response, next: NextFunction): void => {
+    const { villaId } = req.params;
+    const { year, month } = req.query;
+
+    // Villa ID validation
+    if (!villaId) {
+        ApiResponse.validationError(res, { villaId: 'Villa ID is required' });
+        return;
+    }
+
+    // Year validation (optional)
+    if (year) {
+        const yearNum = parseInt(year as string);
+        if (isNaN(yearNum) || yearNum < 2020 || yearNum > 2030) {
+            ApiResponse.validationError(res, { year: 'Year must be between 2020 and 2030' });
+            return;
+        }
+    }
+
+    // Month validation (optional)
+    if (month) {
+        const monthNum = parseInt(month as string);
+        if (isNaN(monthNum) || monthNum < 1 || monthNum > 12) {
+            ApiResponse.validationError(res, { month: 'Month must be between 1 and 12' });
+            return;
+        }
+
+        // If month is provided, year should also be provided
+        if (!year) {
+            ApiResponse.validationError(res, { year: 'Year is required when month is specified' });
+            return;
+        }
+    }
+
+    next();
+};

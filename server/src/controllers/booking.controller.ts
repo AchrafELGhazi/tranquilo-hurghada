@@ -2,7 +2,7 @@ import { Response } from 'express';
 import { AuthenticatedRequest } from '../middleware/auth.middleware';
 import { ApiResponse } from '../utils/apiResponse';
 import logger from '../config/logger';
-import { PaymentMethod, BookingStatus } from '@prisma/client'; // Fixed import name
+import { PaymentMethod, BookingStatus } from '@prisma/client';
 import {
     createBooking,
     getBookings,
@@ -10,23 +10,23 @@ import {
     confirmBooking,
     rejectBooking,
     cancelBooking,
-    completeBooking
+    completeBooking,
+    getVillaBookedDatesFromDB
 } from '../services/booking.service';
 import { parseQueryDates } from '../utils/booking.utils';
 import { updateUserProfile } from '../services/user.service';
+import prisma from '../config/database';
 
 export const createBookingRequest = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
         const { villaId, checkIn, checkOut, totalGuests, paymentMethod, notes, phone, dateOfBirth } = req.body;
         const guestId = req.user!.id;
 
-        // Validation
         if (!villaId || !checkIn || !checkOut || !totalGuests || !paymentMethod) {
             ApiResponse.badRequest(res, 'Missing required fields: villaId, checkIn, checkOut, totalGuests, paymentMethod');
             return;
         }
 
-        // Validate phone and date of birth for booking
         if (!phone) {
             ApiResponse.badRequest(res, 'Phone number is required for booking');
             return;
@@ -37,14 +37,12 @@ export const createBookingRequest = async (req: AuthenticatedRequest, res: Respo
             return;
         }
 
-        // Validate date of birth
         const dobDate = new Date(dateOfBirth);
         if (isNaN(dobDate.getTime())) {
             ApiResponse.badRequest(res, 'Invalid date of birth format');
             return;
         }
 
-        // Check if user is at least 18 years old
         const today = new Date();
         const age = today.getFullYear() - dobDate.getFullYear();
         const monthDiff = today.getMonth() - dobDate.getMonth();
@@ -62,7 +60,7 @@ export const createBookingRequest = async (req: AuthenticatedRequest, res: Respo
         }
 
         // Validate guest count
-        if (totalGuests < 1 || totalGuests > 50) {
+        if (totalGuests < 1 || totalGuests > 12) {
             ApiResponse.badRequest(res, 'Total guests must be between 1 and 50');
             return;
         }
@@ -418,6 +416,79 @@ export const getMyBookings = async (req: AuthenticatedRequest, res: Response): P
     } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to get your bookings';
         logger.error('Get my bookings error:', errorMessage);
+        ApiResponse.serverError(res, errorMessage);
+    }
+};
+
+
+export const getVillaBookedDates = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+        const { villaId } = req.params;
+        const { year, month } = req.query;
+
+        if (!villaId) {
+            ApiResponse.badRequest(res, 'Villa ID is required');
+            return;
+        }
+
+        // Build date range filter
+        let startDate: Date | undefined;
+        let endDate: Date | undefined;
+
+        if (year) {
+            const yearNum = parseInt(year as string);
+            if (isNaN(yearNum) || yearNum < 2020 || yearNum > 2030) {
+                ApiResponse.badRequest(res, 'Invalid year. Must be between 2020 and 2030');
+                return;
+            }
+
+            if (month) {
+                const monthNum = parseInt(month as string);
+                if (isNaN(monthNum) || monthNum < 1 || monthNum > 12) {
+                    ApiResponse.badRequest(res, 'Invalid month. Must be between 1 and 12');
+                    return;
+                }
+
+                // Get specific month
+                startDate = new Date(yearNum, monthNum - 1, 1);
+                endDate = new Date(yearNum, monthNum, 0); // Last day of the month
+            } else {
+                // Get entire year
+                startDate = new Date(yearNum, 0, 1);
+                endDate = new Date(yearNum, 11, 31);
+            }
+        } else {
+            // Default: get next 12 months from today
+            startDate = new Date();
+            endDate = new Date();
+            endDate.setFullYear(endDate.getFullYear() + 1);
+        }
+
+        const villa = await prisma.villa.findUnique({
+            where: { id: villaId },
+            select: { id: true, title: true, isActive: true }
+        });
+
+        if (!villa) {
+            ApiResponse.notFound(res, 'Villa not found');
+            return;
+        }
+
+        const bookedDates = await getVillaBookedDatesFromDB(villaId, startDate, endDate);
+
+        ApiResponse.success(res, {
+            villaId,
+            villaTitle: villa.title,
+            dateRange: {
+                start: startDate.toISOString().split('T')[0],
+                end: endDate.toISOString().split('T')[0]
+            },
+            bookedDates
+        }, 'Villa booked dates retrieved successfully');
+
+    } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to get villa booked dates';
+        logger.error('Get villa booked dates error:', errorMessage);
         ApiResponse.serverError(res, errorMessage);
     }
 };
