@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Award, Calendar, ChevronDown, MapPin, Users, Star } from 'lucide-react';
 import { useTypewriter } from '@/hooks/useTypewriter';
 import FloatingBadge from '../common/FloatingBadge';
+import { mottos } from '@/utils/constants';
 
 const HeroSection = () => {
     const [currentSlide, setCurrentSlide] = useState(0);
@@ -13,14 +14,7 @@ const HeroSection = () => {
         'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80',
     ];
 
-    const typewriterTexts = [
-        'The Gateway to Your Hurghada Adventure',
-        'From Desert Dunes to Coral Reefs—Start Here',
-        'Your Red Sea Escape Awaits',
-        'Paradise found in Hurghada',
-    ];
-
-    const { text: typewriterText, cursor } = useTypewriter(typewriterTexts, {
+    const { text: typewriterText, cursor } = useTypewriter(mottos, {
         speed: 80,
         deleteSpeed: 40,
         delayBetweenTexts: 3000,
@@ -42,7 +36,7 @@ const HeroSection = () => {
 
     return (
         <section
-            className='relative h-screen overflow-hidden bg-gradient-to-br -mt-24 sm:mt-0 from-orange-100 to-orange-200'
+            className='relative h-screen overflow-hidden bg-gradient-to-br  sm:mt-0 from-orange-100 to-orange-200'
             style={{ height: 'calc(100vh - 80px)' }}
         >
             <div className='absolute inset-0'>

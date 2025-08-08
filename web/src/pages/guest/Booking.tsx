@@ -3,38 +3,7 @@ import villaApi from '@/api/villaApi';
 import authApi from '@/api/authApi';
 import VillaDetails from '@/components/booking/VillaDetails';
 import BookingComponent from '@/components/booking/BookingComponent';
-
-interface Villa {
-    id: string;
-    title: string;
-    description: string;
-    address: string;
-    city: string;
-    country: string;
-    pricePerNight: number; // Changed from string to number
-    maxGuests: number;
-    bedrooms: number;
-    bathrooms: number;
-    amenities: string[];
-    images: string[];
-    status: string;
-    isActive: boolean;
-    createdAt: string;
-    updatedAt: string;
-    ownerId: string;
-    owner: {
-        id: string;
-        fullName: string;
-        email: string;
-    };
-}
-
-interface User {
-    id: string;
-    fullName: string;
-    phone?: string | null;
-    dateOfBirth?: Date | null;
-}
+import type { User, Villa } from '@/utils/types';
 
 const Booking: React.FC = () => {
     const [villa, setVilla] = useState<Villa | null>(null);
@@ -47,7 +16,6 @@ const Booking: React.FC = () => {
             try {
                 setLoading(true);
 
-                // Load current user
                 try {
                     const currentUser = await authApi.getCurrentUser();
                     setUser(currentUser);
@@ -55,7 +23,6 @@ const Booking: React.FC = () => {
                     setUser(null);
                 }
 
-                // Load villa data
                 const villasResponse = await villaApi.getAllVillas({ limit: 1 });
 
                 if (villasResponse.villas && villasResponse.villas.length > 0) {

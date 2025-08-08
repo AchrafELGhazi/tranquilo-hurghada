@@ -29,7 +29,6 @@ const MyBookings: React.FC = () => {
     const [showCancelModal, setShowCancelModal] = useState(false);
     const [cancellationReason, setCancellationReason] = useState('');
 
-    // Pagination and filters
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [filters, setFilters] = useState<BookingFilters>({

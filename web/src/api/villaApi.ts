@@ -1,6 +1,7 @@
 
 import apiService from "@/utils/api";
-import type { Villa } from "@/utils/types";
+import { POPULAR_AMENITIES, POPULAR_CITIES } from "@/utils/constants";
+import type { Villa, VillaStatus } from "@/utils/types";
 
 
 export interface VillaFilters {
@@ -12,10 +13,10 @@ export interface VillaFilters {
     minBedrooms?: number;
     minBathrooms?: number;
     amenities?: string[];
-    status?: 'AVAILABLE' | 'UNAVAILABLE' | 'MAINTENANCE';
+    status?: VillaStatus;
     ownerId?: string;
-    checkIn?: string; // ISO date string
-    checkOut?: string; // ISO date string
+    checkIn?: string;
+    checkOut?: string;
     page?: number;
     limit?: number;
     sortBy?: 'title' | 'pricePerNight' | 'maxGuests' | 'bedrooms' | 'createdAt';
@@ -23,7 +24,7 @@ export interface VillaFilters {
 }
 
 export interface MyVillaFilters {
-    status?: 'AVAILABLE' | 'UNAVAILABLE' | 'MAINTENANCE';
+    status?: VillaStatus;
     page?: number;
     limit?: number;
     sortBy?: 'title' | 'pricePerNight' | 'maxGuests' | 'bedrooms' | 'createdAt';
@@ -42,51 +43,12 @@ export interface VillasResponse {
     pagination: PaginationInfo;
 }
 
-// API response structure that matches your actual API
 export interface ApiResponse<T> {
     success: boolean;
     message: string;
     data: T;
-    pagination: PaginationInfo; // Your API always includes pagination
+    pagination: PaginationInfo;
 }
-
-// Popular amenities for filtering/forms
-export const POPULAR_AMENITIES = [
-    'wifi',
-    'pool',
-    'parking',
-    'kitchen',
-    'air_conditioning',
-    'heating',
-    'tv',
-    'washing_machine',
-    'dishwasher',
-    'balcony',
-    'garden',
-    'terrace',
-    'gym',
-    'spa',
-    'bbq',
-    'fireplace',
-    'hot_tub',
-    'beach_access',
-    'mountain_view',
-    'city_view'
-];
-
-// Popular Moroccan cities for location filtering
-export const POPULAR_CITIES = [
-    'Marrakech',
-    'Casablanca',
-    'Fez',
-    'Rabat',
-    'Agadir',
-    'Tangier',
-    'Meknes',
-    'Ouarzazate',
-    'Essaouira',
-    'Chefchaouen'
-];
 
 class VillaApi {
     /**

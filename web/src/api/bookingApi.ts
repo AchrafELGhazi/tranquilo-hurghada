@@ -1,25 +1,26 @@
 
 import apiService from "@/utils/api";
-import type { Booking } from "@/utils/types";
+import { colorMap, statusMap } from "@/utils/constants";
+import type { Booking, BookingStatus, PaymentMethod } from "@/utils/types";
 
 export interface CreateBookingData {
     villaId: string;
-    checkIn: string; // ISO date string
-    checkOut: string; // ISO date string
+    checkIn: string;
+    checkOut: string;
     totalGuests: number;
-    paymentMethod: 'PAYMENT_ON_ARRIVAL' | 'BANK_TRANSFER';
+    paymentMethod: PaymentMethod;
     phone: string;
-    dateOfBirth: string; // ISO date string
+    dateOfBirth: string;
     notes?: string;
 }
 
 export interface BookingFilters {
-    status?: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'REJECTED' | 'COMPLETED';
+    status?: BookingStatus;
     villaId?: string;
     guestId?: string;
     ownerId?: string;
-    startDate?: string; // ISO date string
-    endDate?: string; // ISO date string
+    startDate?: string;
+    endDate?: string; 
     page?: number;
     limit?: number;
     sortBy?: 'createdAt' | 'checkIn' | 'checkOut' | 'totalPrice';
@@ -260,14 +261,6 @@ class BookingApi {
      * Get booking status color for UI
      */
     getStatusColor(status: Booking['status']): string {
-        const colorMap = {
-            PENDING: '#f59e0b', // amber
-            CONFIRMED: '#10b981', // emerald
-            COMPLETED: '#059669', // emerald-600
-            CANCELLED: '#6b7280', // gray
-            REJECTED: '#ef4444' // red
-        };
-
         return colorMap[status] || '#6b7280';
     }
 
@@ -275,14 +268,6 @@ class BookingApi {
      * Get human-readable status text
      */
     getStatusText(status: Booking['status']): string {
-        const statusMap = {
-            PENDING: 'Pending Approval',
-            CONFIRMED: 'Confirmed',
-            COMPLETED: 'Completed',
-            CANCELLED: 'Cancelled',
-            REJECTED: 'Rejected'
-        };
-
         return statusMap[status] || status;
     }
 

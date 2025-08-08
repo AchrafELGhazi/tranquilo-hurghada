@@ -16,20 +16,7 @@ import {
 } from 'lucide-react';
 import bookingApi from '@/api/bookingApi';
 import villaApi from '@/api/villaApi';
-
-interface Villa {
-    id: string;
-    title: string;
-    pricePerNight: number; // Changed from string to number
-    maxGuests: number;
-}
-
-interface User {
-    id: string;
-    fullName: string;
-    phone?: string | null;
-    dateOfBirth?: Date | null;
-}
+import type { PaymentMethod, User, Villa } from '@/utils/types';
 
 interface FormData {
     checkIn: string;
@@ -37,7 +24,7 @@ interface FormData {
     totalGuests: number;
     phone: string;
     dateOfBirth: string;
-    paymentMethod: 'BANK_TRANSFER' | 'PAYMENT_ON_ARRIVAL';
+    paymentMethod: PaymentMethod;
     notes: string;
 }
 
@@ -52,7 +39,7 @@ interface FormErrors {
 
 interface BookingComponentProps {
     villa: Villa;
-    user: User | null; // Changed to allow null
+    user: User;
     onBookingSuccess?: () => void;
 }
 

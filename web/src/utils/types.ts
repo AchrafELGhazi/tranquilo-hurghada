@@ -2,6 +2,11 @@ import type { supportedLanguages } from "./constants";
 
 export type SupportedLanguage = typeof supportedLanguages[number];
 
+export type UserRole = 'GUEST' | 'HOST' | 'ADMIN';
+export type VillaStatus = 'AVAILABLE' | 'UNAVAILABLE' | 'MAINTENANCE';
+export type PaymentMethod = 'PAYMENT_ON_ARRIVAL' | 'BANK_TRANSFER';
+export type BookingStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'REJECTED' | 'COMPLETED';
+
 export interface Language {
     code: SupportedLanguage;
     name: string;
@@ -17,7 +22,7 @@ export interface User {
     phone?: string;
     dateOfBirth?: Date;
     isActive: boolean;
-    role: 'GUEST' | 'HOST' | 'ADMIN';
+    role: UserRole;
     createdAt: string;
     updatedAt: string;
 }
@@ -35,7 +40,7 @@ export interface Villa {
     bathrooms: number;
     amenities: string[];
     images: string[];
-    status: 'AVAILABLE' | 'UNAVAILABLE' | 'MAINTENANCE';
+    status: VillaStatus;
     isActive: boolean;
     createdAt: string;
     updatedAt: string;
@@ -52,8 +57,8 @@ export interface Booking {
     checkOut: string;
     totalGuests: number;
     totalPrice: number;
-    paymentMethod: 'PAYMENT_ON_ARRIVAL' | 'BANK_TRANSFER';
-    status: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'REJECTED' | 'COMPLETED';
+    paymentMethod: PaymentMethod;
+    status: BookingStatus;
     notes?: string;
     rejectionReason?: string;
     cancellationReason?: string;

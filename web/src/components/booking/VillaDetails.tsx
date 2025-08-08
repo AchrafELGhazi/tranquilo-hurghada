@@ -15,31 +15,7 @@ import {
     Bath,
 } from 'lucide-react';
 import Map from './Map';
-
-interface Villa {
-    id: string;
-    title: string;
-    description: string;
-    address: string;
-    city: string;
-    country: string;
-    pricePerNight: number;
-    maxGuests: number;
-    bedrooms: number;
-    bathrooms: number;
-    amenities: string[];
-    images: string[];
-    status: string;
-    isActive: boolean;
-    createdAt: string;
-    updatedAt: string;
-    ownerId: string;
-    owner: {
-        id: string;
-        fullName: string;
-        email: string;
-    };
-}
+import type { Villa } from '@/utils/types';
 
 interface VillaDetailsProps {
     villa: Villa;
