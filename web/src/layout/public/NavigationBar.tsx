@@ -72,11 +72,11 @@ export const NavigationBar: React.FC = () => {
             href: `/${lang}/services`,
             icon: <User className='w-4 h-4' />,
         },
-        {
-            name: t('navigation.visitorInfo'),
-            href: `/${lang}/visitorInfo`,
-            icon: <Settings className='w-4 h-4' />,
-        },
+        // {
+        //     name: t('navigation.visitorInfo'),
+        //     href: `/${lang}/visitorInfo`,
+        //     icon: <Settings className='w-4 h-4' />,
+        // },
         {
             name: t('navigation.contact'),
             href: `/${lang}/contact`,
@@ -106,12 +106,12 @@ export const NavigationBar: React.FC = () => {
         <div className='relative' ref={dropdownRef}>
             <button
                 onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
-                className='group relative flex items-center space-x-2 px-4 py-2.5 rounded-full font-medium text-sm transition-all duration-400 overflow-hidden bg-white/40 backdrop-blur-md border-2 border-[#F8B259]/70 text-[#C75D2C] hover:bg-white/60 hover:border-[#D96F32] hover:-translate-y-0.5 shadow-lg hover:shadow-xl'
+                className='group relative flex items-center space-x-1.5 px-3 py-2 rounded-full font-medium text-xs transition-all duration-400 overflow-hidden bg-white/40 backdrop-blur-md border-2 border-[#F8B259]/70 text-[#C75D2C] hover:bg-white/60 hover:border-[#D96F32] hover:-translate-y-0.5 shadow-lg hover:shadow-xl'
             >
-                <UserCircle className='w-5 h-5' />
-                <span className='font-semibold max-w-24 truncate'>{user?.fullName}</span>
+                <UserCircle className='w-4 h-4' />
+                <span className='font-semibold max-w-20 truncate'>{user?.fullName}</span>
                 <ChevronDown
-                    className={`w-4 h-4 transition-transform duration-300 ${isUserDropdownOpen ? 'rotate-180' : ''}`}
+                    className={`w-3 h-3 transition-transform duration-300 ${isUserDropdownOpen ? 'rotate-180' : ''}`}
                 />
             </button>
 
@@ -207,8 +207,8 @@ export const NavigationBar: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* Center: Base Navigation */}
-                        <nav className='flex justify-center mr-10'>
+                        {/* Center: Base Navigation - shifted left with smaller gaps */}
+                        <nav className='flex justify-start -ml-10'>
                             <div className='flex items-center px-2 py-2'>
                                 {baseNavigation.map((item, index) => {
                                     const isActive = location.pathname === item.href;
@@ -217,9 +217,9 @@ export const NavigationBar: React.FC = () => {
                                             key={item.href}
                                             to={item.href}
                                             onClick={item.onClick}
-                                            className={`group relative flex items-center space-x-2 px-2 mx-4 py-2.5 font-medium text-sm transition-all duration-400 overflow-hidden ${
+                                            className={`group relative flex items-center space-x-2 px-2 mx-2 py-2.5 font-medium text-sm transition-all duration-400 overflow-hidden ${
                                                 isActive ? 'text-terracotta ' : 'text-terracotta hover:text-cream h'
-                                            } ${index < baseNavigation.length - 1 ? 'mr-1' : ''}`}
+                                            }`}
                                         >
                                             <span className='transition-transform duration-300 group-hover:scale-110 relative z-10'>
                                                 {item.icon}
@@ -244,22 +244,21 @@ export const NavigationBar: React.FC = () => {
                         </nav>
 
                         {/* Right: Book Now, Auth & Language */}
-                        <div className='flex justify-end items-center space-x-4'>
+                        <div className='flex justify-end items-center space-x-3'>
                             <LanguageSelector />
-                            {/* Book Now Button */}
+                            {/* Book Now Button - smaller */}
                             <Link
                                 to={`/${lang}/booking`}
-                                className='group relative flex items-center space-x-2 px-6 py-3 rounded-full font-bold text-sm transition-all duration-500 overflow-hidden bg-white/80 backdrop-blur-md border-2 border-[#F8B259]/70 text-[#C75D2C] hover:bg-white hover:border-[#D96F32] hover:text-[#D96F32] shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:scale-95'
+                                className='group relative flex items-center justify-center space-x-1.5 px-4 py-2.5 w-28 rounded-full font-bold text-xs transition-all duration-500 bg-white/80 backdrop-blur-md border-2 border-[#F8B259]/70 text-[#C75D2C] hover:bg-white hover:border-[#D96F32] hover:text-[#D96F32] shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:scale-95 whitespace-nowrap'
                             >
                                 {/* Magic shine effect */}
                                 <div className='absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700'>
                                     <div className='absolute inset-0 bg-gradient-to-r from-transparent via-[#F8B259]/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out'></div>
                                 </div>
-
-                                <Calendar className='w-4 h-4 relative z-10 transition-transform duration-300 group-hover:scale-110' />
+                                <Calendar className='w-3 h-3 relative z-10 transition-transform duration-300 group-hover:scale-110 flex-shrink-0' />
                                 <span className='relative z-10 tracking-wide font-bold'>Book Now</span>
                             </Link>
-                            {/* Auth Section */}
+                            {/* Auth Section - smaller */}
                             <div className='flex items-center space-x-2'>
                                 {isAuthenticated ? (
                                     <UserDropdown />
@@ -269,17 +268,16 @@ export const NavigationBar: React.FC = () => {
                                             key={item.href}
                                             to={item.href}
                                             onClick={item.onClick}
-                                            className='group relative flex items-center space-x-2 px-6 py-3 rounded-full font-semibold text-sm transition-all duration-500 overflow-hidden bg-gradient-to-r from-[#D96F32] via-[#C75D2C] to-[#D96F32] bg-size-200 bg-pos-0 hover:bg-pos-100 text-cream border-2 border-[#f8b359aa] hover:border-golden-yellow shadow-lg shadow-terracotta-30 hover:shadow-xl hover:shadow-golden-yellow/40 hover:-translate-y-0.5 active:scale-95'
+                                            className='group relative flex items-center justify-center space-x-1.5 px-6 py-2.5 w-32 rounded-full font-semibold text-xs transition-all duration-500 overflow-hidden bg-gradient-to-r from-[#D96F32] via-[#C75D2C] to-[#D96F32] bg-size-200 bg-pos-0 hover:bg-pos-100 text-cream border-2 border-[#f8b359aa] hover:border-golden-yellow shadow-lg shadow-terracotta-30 hover:shadow-xl hover:shadow-golden-yellow/40 hover:-translate-y-0.5 active:scale-95 whitespace-nowrap'
                                         >
                                             {/* Magic shine effect */}
                                             <div className='absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700'>
                                                 <div className='absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out'></div>
                                             </div>
-
-                                            <span className='relative z-10 transition-all duration-300 group-hover:scale-110 group-hover:drop-shadow-sm'>
+                                            <span className='relative z-10 transition-all duration-300 group-hover:scale-110 group-hover:drop-shadow-sm flex-shrink-0'>
                                                 {item.icon}
                                             </span>
-                                            <span className='relative z-10 tracking-wide font-semibold group-hover:text-shadow'>
+                                            <span className='relative z-10 tracking-wide font-semibold group-hover:text-shadow truncate'>
                                                 {item.name}
                                             </span>
                                         </Link>

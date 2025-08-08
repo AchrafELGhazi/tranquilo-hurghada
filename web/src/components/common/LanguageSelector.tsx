@@ -64,7 +64,7 @@ export const LanguageSelector: React.FC = () => {
                     </div>
                 )}
 
-                <span className='hidden md:inline font-medium text-xs'>
+                <span className='hidden lg:inline font-medium text-xs'>
                     {currentLanguage?.nativeName || 'Language'}
                 </span>
 
