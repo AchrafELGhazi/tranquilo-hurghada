@@ -180,8 +180,8 @@ const App: React.FC = () => {
                                             </ProtectedRoute>
                                         </LanguageRoute>
                                     }
-                                >
-                                    <Route index element={<AdminDashboard />} />
+                                    >
+                                        {/* Admin routes here */}
                                 </Route>
 
                                 <Route path='*' element={<NotFound />} />
