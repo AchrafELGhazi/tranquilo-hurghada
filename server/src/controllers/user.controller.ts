@@ -175,3 +175,26 @@ export const deactivateAccount = async (req: AuthenticatedRequest, res: Response
         ApiResponse.serverError(res, 'Failed to deactivate account');
     }
 };
+
+export const getAllUsers = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+        const users = await prisma.user.findMany({
+            where: { isActive: true },
+            select: {
+                id: true,
+                fullName: true,
+                email: true,
+                phone: true,
+                isActive: true,
+                dateOfBirth: true,
+                createdAt: true,
+                updatedAt: true
+            }
+        })
+        ApiResponse.success(res, users, 'All users retrieved successfully');
+
+    } catch (error: any) {
+        console.error('Get all users error:', error);
+        ApiResponse.serverError(res, 'Failed to retrieve users');
+    }
+}

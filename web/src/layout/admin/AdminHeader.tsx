@@ -43,7 +43,7 @@ export const AdminHeader: React.FC = () => {
                         {/* Back to Site */}
                         <Link
                             to={`/${lang}`}
-                            className='flex items-center space-x-2 px-4 py-2 text-sm font-medium text-[#C75D2C] hover:text-[#D96F32] bg-white/30 hover:bg-white/50 border-2 border-[#F8B259]/50 rounded-xl transition-all duration-300 hover:scale-105'
+                            className='flex items-center space-x-2 px-4 py-2 text-sm font-medium text-[#C75D2C] hover:text-[#D96F32] bg-white/30 hover:bg-white/50 border-2 border-[#F8B259]/50 rounded-xl transition-all duration-300'
                         >
                             <Home className='w-4 h-4' />
                             <span>{t('admin.backToSite')}</span>
@@ -58,7 +58,7 @@ export const AdminHeader: React.FC = () => {
                         <div className='relative'>
                             <button
                                 onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                                className='flex items-center cursor-pointer space-x-3 p-3 text-sm font-medium text-[#C75D2C] hover:text-[#D96F32] bg-white/30 hover:bg-white/50 border-2 border-[#F8B259]/50 rounded-xl transition-all duration-300 hover:scale-105'
+                                className='flex items-center cursor-pointer space-x-3 p-3 text-sm font-medium text-[#C75D2C] hover:text-[#D96F32] bg-white/30 hover:bg-white/50 border-2 border-[#F8B259]/50 rounded-xl transition-all duration-300'
                             >
                                 <div className='w-8 h-8 bg-gradient-to-r from-[#D96F32] to-[#C75D2C] rounded-xl flex items-center justify-center shadow-lg'>
                                     <span className='text-sm font-bold text-white'>

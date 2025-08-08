@@ -1,14 +1,16 @@
 import { Router } from 'express';
 import { authenticate } from '../middleware/auth.middleware';
-import { changePassword, checkProfileComplete, deactivateAccount, getProfile, updateProfile } from '../controllers/user.controller';
+import { changePassword, checkProfileComplete, deactivateAccount, getAllUsers, getProfile, updateProfile } from '../controllers/user.controller';
 
 const userRouter = Router();
 
 // All routes require authentication
-userRouter.use(authenticate);
+// userRouter.use(authenticate);
 
 // Get current user profile
 userRouter.get('/', getProfile);
+userRouter.get('/all', getAllUsers);
+
 
 // Update user profile
 userRouter.put('/', updateProfile);
