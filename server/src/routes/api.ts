@@ -2,11 +2,13 @@ import { Router } from 'express';
 import authRouter from './auth.route';
 import villaRouter from './villa.route';
 import bookingRouter from './booking.route';
+import userRouter from './user.route';
 
 const apiRouter = Router();
 
 
 apiRouter.use('/auth', authRouter);
+apiRouter.use('/profile', userRouter);
 apiRouter.use('/villas', villaRouter);
 apiRouter.use('/bookings', bookingRouter);
 

@@ -23,6 +23,7 @@ import { normalizeLanguageCode } from '@/utils/normalizeLanguageCode';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import Booking from './pages/guest/Booking';
 import MyBookings from './pages/guest/MyBookings';
+import Profile from './pages/guest/Profile';
 
 const RootRedirect: React.FC = () => {
     const storedLang = localStorage.getItem('preferred-language');
@@ -144,6 +145,7 @@ const App: React.FC = () => {
                                     <Route path='services' element={<Services />} />
                                     <Route path='visitorInfo' element={<VisitorInfo />} />
                                     <Route path='contact' element={<Contact />} />
+                                    <Route path='profile' element={<Profile />} />
                                     <Route path='booking' element={<Booking />} />
                                     <Route path='my-bookings' element={<MyBookings />} />
                                     <Route path='signin' element={<Login />} />
