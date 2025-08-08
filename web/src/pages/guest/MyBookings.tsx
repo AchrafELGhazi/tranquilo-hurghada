@@ -15,8 +15,9 @@ import {
     ChevronLeft,
     ChevronRight,
 } from 'lucide-react';
-import bookingApi, { type Booking, type BookingFilters } from '@/api/bookingApi';
+import bookingApi, { type BookingFilters } from '@/api/bookingApi';
 import { useAuth } from '@/contexts/AuthContext';
+import type { Booking } from '@/utils/types';
 
 const MyBookings: React.FC = () => {
     const { user } = useAuth();
@@ -242,7 +243,7 @@ const MyBookings: React.FC = () => {
                                                         </div>
                                                         <div>
                                                             <p className='font-semibold text-[#C75D2C]'>
-                                                                {booking.villa.name}
+                                                                {booking.villa.title}
                                                             </p>
                                                             <p className='text-xs text-[#C75D2C]/60'>
                                                                 #{booking.id.slice(-8)}
@@ -328,7 +329,7 @@ const MyBookings: React.FC = () => {
                                     >
                                         <div className='flex justify-between items-start'>
                                             <div>
-                                                <h3 className='font-semibold text-[#C75D2C]'>{booking.villa.name}</h3>
+                                                <h3 className='font-semibold text-[#C75D2C]'>{booking.villa.title}</h3>
                                                 <p className='text-xs text-[#C75D2C]/60'>#{booking.id.slice(-8)}</p>
                                             </div>
                                             {getStatusBadge(booking.status)}
@@ -447,7 +448,7 @@ const MyBookings: React.FC = () => {
                             <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                                 <div className='bg-white/30 border border-[#F8B259]/50 rounded-xl p-4'>
                                     <h4 className='font-semibold text-[#C75D2C] mb-2'>Villa Information</h4>
-                                    <p className='font-medium text-[#C75D2C]'>{selectedBooking.villa.name}</p>
+                                    <p className='font-medium text-[#C75D2C]'>{selectedBooking.villa.title}</p>
                                     <p className='text-sm text-[#C75D2C]/60'>Booking ID: #{selectedBooking.id}</p>
                                 </div>
                                 <div className='bg-white/30 border border-[#F8B259]/50 rounded-xl p-4'>
@@ -549,7 +550,7 @@ const MyBookings: React.FC = () => {
                         <div className='space-y-4'>
                             <p className='text-[#C75D2C]'>
                                 Are you sure you want to cancel your booking for{' '}
-                                <strong>{selectedBooking.villa.name}</strong>?
+                                <strong>{selectedBooking.villa.title}</strong>?
                             </p>
 
                             <div>

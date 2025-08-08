@@ -1,6 +1,6 @@
-import type { User } from "@/types/user.types";
-import type { Villa } from "@/types/villa.types";
+
 import apiService from "@/utils/api";
+import type { Villa } from "@/utils/types";
 
 
 export interface VillaFilters {

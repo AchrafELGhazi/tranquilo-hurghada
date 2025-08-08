@@ -1,6 +1,6 @@
-import type { Booking } from "@/types/bookin.types";
-import type { User } from "@/types/user.types";
+
 import apiService from "@/utils/api";
+import type { Booking } from "@/utils/types";
 
 export interface CreateBookingData {
     villaId: string;

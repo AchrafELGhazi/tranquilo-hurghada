@@ -1,5 +1,5 @@
-import type { User } from "@/types/user.types";
 import apiService from "@/utils/api";
+import type { User } from "@/utils/types";
 
 export interface RegisterData {
     email: string;
