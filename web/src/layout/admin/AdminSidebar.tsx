@@ -9,12 +9,11 @@ export const AdminSidebar: React.FC = () => {
       const [isCollapsed, setIsCollapsed] = useState(false);
 
       const adminNavigation = [
-            { name: t('admin.dashboard'), href: `/${lang}/admin`, icon: '📊', exact: true },
-            { name: t('admin.users'), href: `/${lang}/admin/users`, icon: '👥' },
-            { name: t('admin.content'), href: `/${lang}/admin/content`, icon: '📝' },
-            { name: t('admin.analytics'), href: `/${lang}/admin/analytics`, icon: '📈' },
-            { name: t('admin.settings'), href: `/${lang}/admin/settings`, icon: '⚙️' },
-            { name: t('admin.logs'), href: `/${lang}/admin/logs`, icon: '📋' },
+            { name: t('admin.dashboard'), href: `/${lang}/admin`, exact: true },
+            { name: t('admin.users'), href: `/${lang}/admin/users` },
+            { name: t('admin.bookings'), href: `/${lang}/admin/bookings`},
+            { name: t('admin.villas'), href: `/${lang}/admin/villas`},
+
       ];
 
       const isActive = (href: string, exact?: boolean) => {
@@ -87,7 +86,6 @@ export const AdminSidebar: React.FC = () => {
                                           } ${isCollapsed ? 'justify-center' : ''}`}
                                           title={isCollapsed ? item.name : undefined}
                                     >
-                                          <span className='text-lg'>{item.icon}</span>
                                           {!isCollapsed && <span>{item.name}</span>}
                                     </Link>
                               );
