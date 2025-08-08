@@ -82,14 +82,14 @@ export const Contact: React.FC = () => {
 
             {/* Main Content */}
             <div className='bg-[#E8DCC6] py-12 px-4 sm:px-6 lg:px-8 -mt-1'>
-                <div className='max-w-12xl mx-auto space-y-12'>
+                <div className='max-w-4xl mx-auto space-y-12'>
                     {/* Contact Information - One Line */}
                     <div className='bg-white/30 backdrop-blur-md border-2 border-[#F8B259]/70 rounded-2xl p-6 sm:p-8'>
                         <h2 className='text-2xl font-bold text-[#C75D2C] mb-6 font-butler text-center'>
                             {t('contact.info.title')}
                         </h2>
 
-                        <div className='grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8'>
+                        <div className='grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-6'>
                             {/* Location */}
                             <div className='flex items-center space-x-4 group'>
                                 <div className='p-3 bg-[#D96F32]/20 rounded-xl border border-[#D96F32]/30 group-hover:bg-[#D96F32]/30 transition-colors duration-300 flex-shrink-0'>
