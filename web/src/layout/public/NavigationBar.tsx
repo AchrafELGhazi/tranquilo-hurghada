@@ -166,7 +166,7 @@ export const NavigationBar: React.FC = () => {
                         <div className='border-t border-[#F8B259]/50 mt-2 pt-2'>
                             <button
                                 onClick={handleLogout}
-                                className='flex items-center space-x-3 px-4 py-3 w-full text-left text-[#C75D2C] hover:bg-red-50 hover:text-red-600 transition-colors duration-200'
+                                className='flex items-center cursor-pointer space-x-3 px-4 py-3 w-full text-left text-[#C75D2C] hover:bg-red-50 hover:text-red-600 transition-colors duration-200'
                             >
                                 <LogOut className='w-5 h-5' />
                                 <span className='font-medium'>Logout</span>
@@ -409,7 +409,7 @@ export const NavigationBar: React.FC = () => {
 
                                                 <button
                                                     onClick={handleLogout}
-                                                    className='flex items-center space-x-3 px-3 py-2 w-full text-left text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200'
+                                                    className='flex items-center  cursor-pointer space-x-3 px-3 py-2 w-full text-left text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200'
                                                 >
                                                     <LogOut className='w-4 h-4' />
                                                     <span className='text-sm font-medium'>Logout</span>

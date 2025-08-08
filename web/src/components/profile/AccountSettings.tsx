@@ -48,7 +48,7 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ onAlert, onLogout }) 
                         <button
                             onClick={handleAccountDeactivation}
                             disabled={loading}
-                            className='bg-red-600 text-white px-6 py-3 rounded-xl hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center space-x-2'
+                            className='bg-red-600 cursor-pointer text-white px-6 py-3 rounded-xl hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center space-x-2'
                         >
                             {loading ? (
                                 <>

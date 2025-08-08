@@ -163,7 +163,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user, onAlert }) => {
                     <button
                         type='submit'
                         disabled={loading}
-                        className='bg-gradient-to-r from-[#D96F32] to-[#C75D2C] text-white px-8 py-3 rounded-xl hover:from-[#C75D2C] hover:to-[#D96F32] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center space-x-2'
+                        className='bg-gradient-to-r cursor-pointer from-[#D96F32] to-[#C75D2C] text-white px-8 py-3 rounded-xl hover:from-[#C75D2C] hover:to-[#D96F32] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center space-x-2'
                     >
                         {loading ? (
                             <>

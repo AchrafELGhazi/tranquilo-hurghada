@@ -24,7 +24,7 @@ interface TabProps {
 const Tab: React.FC<TabProps> = ({ label, isActive, onClick }) => (
     <button
         onClick={onClick}
-        className={`px-6 py-3 font-medium text-sm rounded-xl transition-all duration-300 ${
+        className={`px-6 py-3  cursor-pointer font-medium text-sm rounded-xl transition-all duration-300 ${
             isActive
                 ? 'bg-gradient-to-r from-[#D96F32] to-[#C75D2C] text-white shadow-lg'
                 : 'bg-white/50 text-[#C75D2C] hover:bg-white/70 border-2 border-[#F8B259]/50'
