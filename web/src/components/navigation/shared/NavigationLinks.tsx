@@ -83,7 +83,6 @@ export const NavigationLinks: React.FC<NavigationLinksProps> = ({ location, lang
                         </span>
                         <span className='tracking-wide font-medium whitespace-nowrap'>{item.name}</span>
 
-                        {/* Animated underline */}
                         <div
                             className={`absolute left-0 right-0 -bottom-1 h-0.5 bg-terracotta transition-all duration-300 ease-out ${
                                 isActive
