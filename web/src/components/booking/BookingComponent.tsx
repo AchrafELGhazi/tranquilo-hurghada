@@ -39,7 +39,7 @@ interface FormErrors {
 
 interface BookingComponentProps {
     villa: Villa;
-    user: User;
+    user: User | null;
     onBookingSuccess?: () => void;
 }
 
