@@ -1,16 +1,5 @@
+import type { User } from "@/types/user.types";
 import apiService from "@/utils/api";
-
-export interface User {
-    id: string;
-    email: string;
-    fullName: string;
-    role: 'GUEST' | 'HOST' | 'ADMIN';
-    isActive: boolean;
-    phone: string | null;
-    dateOfBirth: Date | null;
-    createdAt: string;
-    updatedAt: string;
-}
 
 export interface UpdateProfileData {
     email?: string;

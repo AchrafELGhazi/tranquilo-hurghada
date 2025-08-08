@@ -1,42 +1,6 @@
+import type { Booking } from "@/types/bookin.types";
+import type { User } from "@/types/user.types";
 import apiService from "@/utils/api";
-
-export interface Villa {
-    id: string;
-    name: string;
-    ownerId: string;
-    // Add other villa properties as needed
-}
-
-export interface User {
-    id: string;
-    email: string;
-    fullName: string;
-    phone?: string;
-    dateOfBirth?: string;
-    role: 'GUEST' | 'HOST' | 'ADMIN';
-    isActive: boolean;
-    createdAt: string;
-    updatedAt: string;
-}
-
-export interface Booking {
-    id: string;
-    villaId: string;
-    guestId: string;
-    checkIn: string;
-    checkOut: string;
-    totalGuests: number;
-    totalPrice: number;
-    paymentMethod: 'PAYMENT_ON_ARRIVAL' | 'BANK_TRANSFER';
-    status: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'REJECTED' | 'COMPLETED';
-    notes?: string;
-    rejectionReason?: string;
-    cancellationReason?: string;
-    createdAt: string;
-    updatedAt: string;
-    villa: Villa;
-    guest: User;
-}
 
 export interface CreateBookingData {
     villaId: string;

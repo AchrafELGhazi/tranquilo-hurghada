@@ -1,39 +1,7 @@
+import type { User } from "@/types/user.types";
+import type { Villa } from "@/types/villa.types";
 import apiService from "@/utils/api";
 
-export interface User {
-    id: string;
-    fullName: string;
-    email: string;
-    role?: 'GUEST' | 'HOST' | 'ADMIN';
-}
-
-export interface Booking {
-    checkIn: string;
-    checkOut: string;
-    status: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'REJECTED' | 'COMPLETED';
-}
-
-export interface Villa {
-    id: string;
-    title: string;
-    description: string;
-    address: string;
-    city: string;
-    country: string;
-    pricePerNight: number;
-    maxGuests: number;
-    bedrooms: number;
-    bathrooms: number;
-    amenities: string[];
-    images: string[];
-    status: 'AVAILABLE' | 'UNAVAILABLE' | 'MAINTENANCE';
-    isActive: boolean;
-    createdAt: string;
-    updatedAt: string;
-    ownerId: string;
-    owner: User;
-    bookings?: Booking[];
-}
 
 export interface VillaFilters {
     city?: string;

@@ -1,8 +1,6 @@
 import type { User } from "@/types/user.types";
 import apiService from "@/utils/api";
 
-
-
 export interface RegisterData {
     email: string;
     password: string;
