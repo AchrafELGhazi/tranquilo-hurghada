@@ -1,3 +1,4 @@
+import type { LoginData, RegisterData } from "@/api/authApi";
 import type { supportedLanguages } from "./constants";
 
 export type SupportedLanguage = typeof supportedLanguages[number];
@@ -66,4 +67,26 @@ export interface Booking {
     updatedAt: string;
     villa: Villa;
     guest: User;
+}
+
+
+export interface NavigationItem {
+    name: string;
+    href: string;
+    icon: React.ReactNode;
+}
+
+export interface AuthContextType {
+    user: User | null;
+    isAuthenticated: boolean;
+    isLoading: boolean;
+    error: string | null;
+    login: (data: LoginData) => Promise<void>;
+    register: (data: RegisterData) => Promise<void>;
+    logout: () => Promise<void>;
+    hasRole: (role: 'GUEST' | 'HOST' | 'ADMIN') => boolean;
+    isGuest: () => boolean;
+    isHost: () => boolean;
+    isAdmin: () => boolean;
+    clearError: () => void;
 }
