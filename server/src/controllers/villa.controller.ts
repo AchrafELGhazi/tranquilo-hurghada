@@ -5,6 +5,7 @@ import logger from '../config/logger';
 import { VillaStatus } from '@prisma/client';
 import { getVillas, getVillaById } from '../services/villa.service';
 import { parseQueryDates } from '../utils/booking.utils';
+import prisma from '../config/database';
 
 export const getAllVillas = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -211,5 +212,198 @@ export const getMyVillas = async (req: AuthenticatedRequest, res: Response): Pro
         const errorMessage = error instanceof Error ? error.message : 'Failed to get your villas';
         logger.error('Get my villas error:', errorMessage);
         ApiResponse.serverError(res, errorMessage);
+    }
+};
+
+export const updateVilla = async (req: any, res: Response) => {
+    try {
+        const { villaId } = req.params;
+        const userId = req.user.id;
+        const userRole = req.user?.role;
+
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: 'Authentication required'
+            });
+        }
+
+        // Check if villa exists
+        const existingVilla = await prisma.villa.findUnique({
+            where: { id: villaId },
+            include: { owner: true }
+        });
+
+        if (!existingVilla) {
+            return res.status(404).json({
+                success: false,
+                message: 'Villa not found'
+            });
+        }
+
+        // Check permissions (only villa owner or admin can update)
+        if (existingVilla.ownerId !== userId && userRole !== 'ADMIN') {
+            return res.status(403).json({
+                success: false,
+                message: 'You are not authorized to update this villa'
+            });
+        }
+
+        const {
+            title,
+            description,
+            address,
+            city,
+            country,
+            pricePerNight,
+            maxGuests,
+            bedrooms,
+            bathrooms,
+            amenities,
+            images,
+            status,
+            isActive
+        } = req.body;
+
+        // Validate required fields
+        if (!title || !address || !city || !country || !pricePerNight || !maxGuests || !bedrooms || !bathrooms) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please provide all required fields'
+            });
+        }
+
+        // Validate numeric values
+        if (pricePerNight <= 0 || maxGuests <= 0 || bedrooms <= 0 || bathrooms <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Numeric values must be greater than 0'
+            });
+        }
+
+        // Validate status
+        const validStatuses = ['AVAILABLE', 'UNAVAILABLE', 'MAINTENANCE'];
+        if (status && !validStatuses.includes(status)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid villa status'
+            });
+        }
+
+        // Update villa
+        const updatedVilla = await prisma.villa.update({
+            where: { id: villaId },
+            data: {
+                title: title.trim(),
+                description: description?.trim() || null,
+                address: address.trim(),
+                city: city.trim(),
+                country: country.trim(),
+                pricePerNight: parseFloat(pricePerNight),
+                maxGuests: parseInt(maxGuests),
+                bedrooms: parseInt(bedrooms),
+                bathrooms: parseInt(bathrooms),
+                amenities: amenities || [],
+                images: images || [],
+                status: status || existingVilla.status,
+                isActive: isActive !== undefined ? isActive : existingVilla.isActive,
+                updatedAt: new Date()
+            },
+            include: {
+                owner: {
+                    select: {
+                        id: true,
+                        fullName: true,
+                        email: true,
+                        phone: true,
+                        role: true
+                    }
+                }
+            }
+        });
+
+        res.status(200).json({
+            success: true,
+            message: 'Villa updated successfully',
+            data: updatedVilla
+        });
+
+    } catch (error) {
+        console.error('Error updating villa:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        });
+    }
+};
+
+/**
+ * @route   DELETE /api/villas/:villaId
+ * @desc    Delete villa (soft delete - set isActive to false)
+ * @access  Private (Admins only)
+ */
+export const deleteVilla = async (req: any, res: Response) => {
+    try {
+        const { villaId } = req.params;
+        const userId = req.user?.id;
+        const userRole = req.user?.role;
+
+        if (!userId || userRole !== 'ADMIN') {
+            return res.status(403).json({
+                success: false,
+                message: 'Only administrators can delete villas'
+            });
+        }
+
+        // Check if villa exists
+        const existingVilla = await prisma.villa.findUnique({
+            where: { id: villaId },
+            include: {
+                bookings: {
+                    where: {
+                        status: {
+                            in: ['PENDING', 'CONFIRMED']
+                        }
+                    }
+                }
+            }
+        });
+
+        if (!existingVilla) {
+            return res.status(404).json({
+                success: false,
+                message: 'Villa not found'
+            });
+        }
+
+        // Check if villa has active bookings
+        if (existingVilla.bookings.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Cannot delete villa with active bookings. Please cancel or complete all bookings first.'
+            });
+        }
+
+        // Soft delete - set isActive to false instead of actually deleting
+        await prisma.villa.update({
+            where: { id: villaId },
+            data: {
+                isActive: false,
+                status: 'UNAVAILABLE',
+                updatedAt: new Date()
+            }
+        });
+
+        res.status(200).json({
+            success: true,
+            message: 'Villa deleted successfully'
+        });
+
+    } catch (error) {
+        console.error('Error deleting villa:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        });
     }
 };

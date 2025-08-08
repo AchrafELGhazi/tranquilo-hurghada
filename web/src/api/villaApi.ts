@@ -1,8 +1,6 @@
-
 import apiService from "@/utils/api";
 import { POPULAR_AMENITIES, POPULAR_CITIES } from "@/utils/constants";
 import type { Villa, VillaStatus } from "@/utils/types";
-
 
 export interface VillaFilters {
     city?: string;
@@ -29,6 +27,22 @@ export interface MyVillaFilters {
     limit?: number;
     sortBy?: 'title' | 'pricePerNight' | 'maxGuests' | 'bedrooms' | 'createdAt';
     sortOrder?: 'asc' | 'desc';
+}
+
+export interface UpdateVillaData {
+    title?: string;
+    description?: string;
+    address?: string;
+    city?: string;
+    country?: string;
+    pricePerNight?: number;
+    maxGuests?: number;
+    bedrooms?: number;
+    bathrooms?: number;
+    amenities?: string[];
+    images?: string[];
+    status?: VillaStatus;
+    isActive?: boolean;
 }
 
 export interface PaginationInfo {
@@ -99,6 +113,42 @@ class VillaApi {
         }
 
         throw new Error(response.message || 'Failed to get villa details');
+    }
+
+    /**
+     * Update villa details (admins and villa owners only)
+     */
+    async updateVilla(villaId: string, data: UpdateVillaData): Promise<Villa> {
+        if (!villaId) {
+            throw new Error('Villa ID is required');
+        }
+
+        if (!data || Object.keys(data).length === 0) {
+            throw new Error('Update data is required');
+        }
+
+        const response = await apiService.put<Villa>(`/villas/${villaId}`, data);
+
+        if (response.success && response.data) {
+            return response.data;
+        }
+
+        throw new Error(response.message || 'Failed to update villa');
+    }
+
+    /**
+     * Delete villa (admins only)
+     */
+    async deleteVilla(villaId: string): Promise<void> {
+        if (!villaId) {
+            throw new Error('Villa ID is required');
+        }
+
+        const response = await apiService.delete(`/villas/${villaId}`);
+
+        if (!response.success) {
+            throw new Error(response.message || 'Failed to delete villa');
+        }
     }
 
     /**

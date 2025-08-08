@@ -24,6 +24,10 @@ import Booking from './pages/guest/Booking';
 import MyBookings from './pages/guest/MyBookings';
 import Profile from './pages/guest/Profile';
 import PracticalInfo from './pages/guest/PracticalInfo';
+import { AdminVillas } from './pages/admin/AdminVillas';
+import { AdminVillaDetails } from './pages/admin/AdminVillaDetails';
+import AdminEditVilla from './pages/admin/AdminEditVilla';
+import { AdminBookings } from './pages/admin/AdminBookings';
 
 const RootRedirect: React.FC = () => {
     const storedLang = localStorage.getItem('preferred-language');
@@ -180,8 +184,12 @@ const App: React.FC = () => {
                                             </ProtectedRoute>
                                         </LanguageRoute>
                                     }
-                                    >
-                                        {/* Admin routes here */}
+                                >
+                                    <Route index element={<AdminDashboard />} />
+                                    <Route path='villas' element={<AdminVillas />} />
+                                    <Route path='villas/:villaId' element={<AdminVillaDetails />} />
+                                    <Route path='villas/:villaId/edit' element={<AdminEditVilla />} />
+                                    <Route path='bookings' element={<AdminBookings />} />{' '}
                                 </Route>
 
                                 <Route path='*' element={<NotFound />} />

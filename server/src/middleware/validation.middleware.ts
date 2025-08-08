@@ -300,3 +300,74 @@ export const validateVillaBookedDatesParams = (req: Request, res: Response, next
 
     next();
 };
+
+
+export const validateVillaUpdate = (req: Request, res: Response, next: Function) => {
+    const {
+        title,
+        pricePerNight,
+        maxGuests,
+        bedrooms,
+        bathrooms,
+        amenities,
+        images
+    } = req.body;
+
+    // Validate title length
+    if (title && (title.length < 3 || title.length > 200)) {
+        return res.status(400).json({
+            success: false,
+            message: 'Villa title must be between 3 and 200 characters'
+        });
+    }
+
+    // Validate price
+    if (pricePerNight && (isNaN(pricePerNight) || pricePerNight <= 0)) {
+        return res.status(400).json({
+            success: false,
+            message: 'Price per night must be a positive number'
+        });
+    }
+
+    // Validate capacity
+    if (maxGuests && (isNaN(maxGuests) || maxGuests <= 0 || maxGuests > 50)) {
+        return res.status(400).json({
+            success: false,
+            message: 'Max guests must be between 1 and 50'
+        });
+    }
+
+    if (bedrooms && (isNaN(bedrooms) || bedrooms <= 0 || bedrooms > 20)) {
+        return res.status(400).json({
+            success: false,
+            message: 'Bedrooms must be between 1 and 20'
+        });
+    }
+
+    if (bathrooms && (isNaN(bathrooms) || bathrooms <= 0 || bathrooms > 20)) {
+        return res.status(400).json({
+            success: false,
+            message: 'Bathrooms must be between 1 and 20'
+        });
+    }
+
+    // Validate amenities array
+    if (amenities && !Array.isArray(amenities)) {
+        return res.status(400).json({
+            success: false,
+            message: 'Amenities must be an array'
+        });
+    }
+
+    // Validate images array
+    if (images && !Array.isArray(images)) {
+        return res.status(400).json({
+            success: false,
+            message: 'Images must be an array of URLs'
+        });
+    }
+
+    
+
+    next();
+};
