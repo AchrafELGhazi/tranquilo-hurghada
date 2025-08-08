@@ -367,7 +367,6 @@ export const validateVillaUpdate = (req: Request, res: Response, next: Function)
         });
     }
 
-    
 
     next();
 };
