@@ -3,7 +3,9 @@ import bcrypt from 'bcrypt';
 import {
     updateUserProfile,
     getUserProfile,
-    checkUserProfileComplete
+    checkUserProfileComplete,
+    GetUsersQuery,
+    getAllUsersService
 } from '../services/user.service';
 import prisma from '../config/database';
 import { AuthenticatedRequest } from '../middleware/auth.middleware';
@@ -178,23 +180,27 @@ export const deactivateAccount = async (req: AuthenticatedRequest, res: Response
 
 export const getAllUsers = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-        const users = await prisma.user.findMany({
-            where: { isActive: true },
-            select: {
-                id: true,
-                fullName: true,
-                email: true,
-                phone: true,
-                isActive: true,
-                dateOfBirth: true,
-                createdAt: true,
-                updatedAt: true
-            }
-        })
-        ApiResponse.success(res, users, 'All users retrieved successfully');
+        const query: GetUsersQuery = {
+            page: req.query.page ? parseInt(req.query.page as string) : undefined,
+            limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
+            search: req.query.search as string,
+            role: req.query.role as string,
+            sortBy: req.query.sortBy as 'fullName' | 'email' | 'createdAt' | 'updatedAt',
+            sortOrder: req.query.sortOrder as 'asc' | 'desc',
+            isActive: req.query.isActive ? req.query.isActive === 'true' : undefined
+        };
+
+        const result = await getAllUsersService(query);
+
+        ApiResponse.successWithPagination(
+            res,
+            result.users,
+            result.pagination,
+            'Users retrieved successfully'
+        );
 
     } catch (error: any) {
         console.error('Get all users error:', error);
         ApiResponse.serverError(res, 'Failed to retrieve users');
     }
-}
+};

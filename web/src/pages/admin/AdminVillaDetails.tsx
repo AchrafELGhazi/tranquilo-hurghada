@@ -218,13 +218,10 @@ export const AdminVillaDetails: React.FC = () => {
                                         className='w-full h-full object-cover'
                                         onError={e => {
                                             e.currentTarget.style.display = 'none';
-                                            e.currentTarget.nextElementSibling!.style.display = 'flex';
                                         }}
                                     />
                                 ) : null}
-                                <div className='w-full h-full flex items-center justify-center text-gray-400'>
-                                    No Image Available
-                                </div>
+                             
                             </div>
 
                             {villa.images && villa.images.length > 1 && (
@@ -244,7 +241,6 @@ export const AdminVillaDetails: React.FC = () => {
                                                     className='w-full h-full object-cover'
                                                     onError={e => {
                                                         e.currentTarget.style.display = 'none';
-                                                        e.currentTarget.nextElementSibling!.style.display = 'flex';
                                                     }}
                                                 />
                                                 <div className='w-full h-full flex items-center justify-center text-gray-400 text-xs'>

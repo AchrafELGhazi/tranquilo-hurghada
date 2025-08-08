@@ -496,10 +496,7 @@ import { POPULAR_CITIES, POPULAR_AMENITIES } from '@/utils/constants';
                                         src={url}
                                         alt='Preview'
                                         className='w-full max-w-sm h-48 object-cover rounded-lg mx-auto'
-                                        onError={e => {
-                                            e.currentTarget.style.display = 'none';
-                                            e.currentTarget.nextElementSibling!.style.display = 'block';
-                                        }}
+                                      
                                     />
                                     <div style={{ display: 'none' }} className='text-center py-4 text-red-500'>
                                         <AlertCircle className='w-6 h-6 mx-auto mb-2' />

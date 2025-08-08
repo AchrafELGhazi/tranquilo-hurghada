@@ -17,6 +17,7 @@ import {
     MapPin,
     Eye,
     User,
+    RefreshCw,
 } from 'lucide-react';
 import { villaApi } from '@/api/villaApi';
 import { bookingApi } from '@/api/bookingApi';
@@ -67,125 +68,7 @@ export const AdminDashboard: React.FC = () => {
     const [refreshing, setRefreshing] = useState(false);
     const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
 
-    const fetchDashboardData = async (isRefresh = false) => {
-        try {
-            if (isRefresh) {
-                setRefreshing(true);
-            } else {
-                setLoading(true);
-            }
-            setError(null);
 
-            // Fetch comprehensive data
-            const [villasResponse, bookingsResponse, allBookingsResponse] = await Promise.all([
-                villaApi.getAllVillas({ limit: 10, sortBy: 'createdAt', sortOrder: 'desc' }),
-                bookingApi.getAllBookings({ limit: 15, sortBy: 'createdAt', sortOrder: 'desc' }),
-                bookingApi.getAllBookings({ limit: 1000 }), // Get more data for calculations
-            ]);
-
-            // Set recent items
-            setRecentVillas(villasResponse.villas);
-            setRecentBookings(bookingsResponse.bookings);
-
-            // Calculate comprehensive stats
-            const allBookings = allBookingsResponse.bookings;
-            const currentDate = new Date();
-            const currentMonth = currentDate.getMonth();
-            const currentYear = currentDate.getFullYear();
-            const oneWeekAgo = new Date(currentDate.getTime() - 7 * 24 * 60 * 60 * 1000);
-
-            // Villa stats
-            const allVillasResponse = await villaApi.getAllVillas({ limit: 1000 });
-            const allVillas = allVillasResponse.villas;
-            const activeVillas = allVillas.filter(v => v.isActive && v.status === 'AVAILABLE').length;
-            const inactiveVillas = allVillas.filter(v => !v.isActive || v.status !== 'AVAILABLE').length;
-
-            // Booking stats by status
-            const pendingBookings = allBookings.filter(b => b.status === 'PENDING').length;
-            const confirmedBookings = allBookings.filter(b => b.status === 'CONFIRMED').length;
-            const completedBookings = allBookings.filter(b => b.status === 'COMPLETED').length;
-            const cancelledBookings = allBookings.filter(
-                b => b.status === 'CANCELLED' || b.status === 'REJECTED'
-            ).length;
-
-            // Revenue calculations
-            const completedBookingsData = allBookings.filter(b => b.status === 'COMPLETED');
-            const totalRevenue = completedBookingsData.reduce((sum, booking) => sum + booking.totalPrice, 0);
-
-            const monthlyBookings = allBookings.filter(booking => {
-                const bookingDate = new Date(booking.createdAt);
-                return bookingDate.getMonth() === currentMonth && bookingDate.getFullYear() === currentYear;
-            });
-            const monthlyRevenue = monthlyBookings
-                .filter(b => b.status === 'COMPLETED')
-                .reduce((sum, booking) => sum + booking.totalPrice, 0);
-
-            const weeklyBookings = allBookings.filter(booking => {
-                const bookingDate = new Date(booking.createdAt);
-                return bookingDate >= oneWeekAgo;
-            });
-            const weeklyRevenue = weeklyBookings
-                .filter(b => b.status === 'COMPLETED')
-                .reduce((sum, booking) => sum + booking.totalPrice, 0);
-
-            const averageBookingValue =
-                completedBookingsData.length > 0 ? totalRevenue / completedBookingsData.length : 0;
-
-            // Monthly trend data (last 6 months)
-            const monthlyTrends: MonthlyData[] = [];
-            for (let i = 5; i >= 0; i--) {
-                const date = new Date(currentYear, currentMonth - i, 1);
-                const monthBookings = allBookings.filter(booking => {
-                    const bookingDate = new Date(booking.createdAt);
-                    return (
-                        bookingDate.getMonth() === date.getMonth() && bookingDate.getFullYear() === date.getFullYear()
-                    );
-                });
-
-                const monthRevenue = monthBookings
-                    .filter(b => b.status === 'COMPLETED')
-                    .reduce((sum, booking) => sum + booking.totalPrice, 0);
-
-                monthlyTrends.push({
-                    month: date.toLocaleDateString('en-US', { month: 'short' }),
-                    bookings: monthBookings.length,
-                    revenue: monthRevenue,
-                });
-            }
-
-            setStats({
-                totalVillas: allVillas.length,
-                activeVillas,
-                inactiveVillas,
-                totalBookings: allBookings.length,
-                pendingBookings,
-                confirmedBookings,
-                completedBookings,
-                cancelledBookings,
-                totalRevenue,
-                monthlyRevenue,
-                weeklyRevenue,
-                averageBookingValue,
-            });
-
-            setMonthlyData(monthlyTrends);
-            setLastUpdated(new Date());
-        } catch (err: any) {
-            setError(err.message || 'Failed to fetch dashboard data');
-            console.error('Error fetching dashboard data:', err);
-        } finally {
-            setLoading(false);
-            setRefreshing(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchDashboardData();
-    }, []);
-
-    const handleRefresh = () => {
-        fetchDashboardData(true);
-    };
 
     const getStatusBadge = (status: Booking['status']) => {
         const statusConfig = {
@@ -286,11 +169,10 @@ export const AdminDashboard: React.FC = () => {
                     </p>
                 </div>
                 <button
-                    onClick={handleRefresh}
                     disabled={refreshing}
                     className='inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors'
                 >
-                    <User className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                    <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
                     {refreshing ? 'Refreshing...' : 'Refresh'}
                 </button>
             </div>
