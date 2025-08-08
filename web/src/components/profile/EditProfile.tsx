@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Edit3, Mail, User, Phone, Calendar, AlertCircle } from 'lucide-react';
 import { userApi, type UpdateProfileData } from '@/api/userApi';
-import type { User as ComponentUser } from '@/types/user.types';
+import type { User as ComponentUser } from '@/utils/types';
 
 interface EditProfileProps {
     user: ComponentUser;

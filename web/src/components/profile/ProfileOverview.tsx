@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User, Mail, Phone, Calendar, RefreshCw, CheckCircle } from 'lucide-react';
 import { userApi } from '@/api/userApi';
-import type { User as ComponentUser } from '@/types/user.types';
+import type { User as ComponentUser } from '@/utils/types';
 
 interface ProfileOverviewProps {
     user: ComponentUser;
