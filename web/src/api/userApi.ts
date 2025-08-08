@@ -49,6 +49,16 @@ class UserApi {
         throw new Error(response.message || 'Failed to get profile');
     }
 
+    async getAllUsers(): Promise<User> {
+        const response = await apiService.get<any>('/profile/all');
+        console.log('Response from all users: ', response)
+        if (response.success && response.data) {
+            return response.data;
+        }
+
+        throw new Error(response.message || 'Failed to get all users');
+    }
+
     // Update user profile
     async updateProfile(data: UpdateProfileData): Promise<User> {
         const response = await apiService.put<any>('/profile', data);

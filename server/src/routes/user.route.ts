@@ -5,7 +5,7 @@ import { changePassword, checkProfileComplete, deactivateAccount, getAllUsers, g
 const userRouter = Router();
 
 // All routes require authentication
-// userRouter.use(authenticate);
+userRouter.use(authenticate);
 
 // Get current user profile
 userRouter.get('/', getProfile);
