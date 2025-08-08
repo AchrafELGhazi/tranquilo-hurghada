@@ -1,4 +1,4 @@
-import type { Language } from "@/types/i18.types";
+import type { Language } from "./types";
 
 export const supportedLanguages = ['en', 'fr', 'ru', 'de'] as const;
 
