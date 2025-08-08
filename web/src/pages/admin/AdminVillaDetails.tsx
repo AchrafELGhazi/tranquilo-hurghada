@@ -52,10 +52,10 @@ export const AdminVillaDetails: React.FC = () => {
                 setVilla(villaResponse);
 
                 // Handle both possible response formats
-                if (Array.isArray(bookingsResponse)) {
-                    setBookings(bookingsResponse);
-                } else if (bookingsResponse && bookingsResponse.bookings) {
-                    setBookings(bookingsResponse.bookings);
+                if (Array.isArray(bookingsResponse.data)) {
+                    setBookings(bookingsResponse.data);
+                } else if (bookingsResponse && bookingsResponse.data) {
+                    setBookings(bookingsResponse.data);
                 } else {
                     setBookings([]);
                 }
