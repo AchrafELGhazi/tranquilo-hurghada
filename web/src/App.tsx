@@ -15,7 +15,6 @@ import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { Unauthorized } from './pages/guest/Unauthorized';
 import { Login } from './pages/guest/Login';
 import { Register } from './pages/guest/Register';
-import { VisitorInfo } from './pages/guest/VisitorInfo';
 import Home from './pages/guest/Home';
 import ScrollToTop from './utils/scrollToTop';
 import { supportedLanguages } from '@/utils/constants';
@@ -24,6 +23,7 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import Booking from './pages/guest/Booking';
 import MyBookings from './pages/guest/MyBookings';
 import Profile from './pages/guest/Profile';
+import PracticalInfo from './pages/guest/PracticalInfo';
 
 const RootRedirect: React.FC = () => {
     const storedLang = localStorage.getItem('preferred-language');
@@ -143,7 +143,7 @@ const App: React.FC = () => {
                                     <Route index element={<Home />} />
                                     <Route path='about' element={<About />} />
                                     <Route path='services' element={<Services />} />
-                                    <Route path='visitorInfo' element={<VisitorInfo />} />
+                                    <Route path='practical-info' element={<PracticalInfo />} />
                                     <Route path='contact' element={<Contact />} />
                                     <Route path='profile' element={<Profile />} />
                                     <Route path='booking' element={<Booking />} />

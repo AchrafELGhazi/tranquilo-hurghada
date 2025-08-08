@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { ChefHat, Car, Plane, Camera, Waves, Sparkles, Clock, Star, Check, ArrowRight } from 'lucide-react';
+import { Link, useParams } from 'react-router-dom';
 
 const ServicesSection = () => {
     const [selectedService, setSelectedService] = useState<string | null>(null);
+    const { lang } = useParams();
 
     const services = [
         {
@@ -200,8 +202,10 @@ const ServicesSection = () => {
                                         </div>
 
                                         <button className='w-full bg-gradient-to-r from-orange-600 to-orange-700 text-white font-semibold py-3 px-4 rounded-xl hover:from-orange-700 hover:to-orange-800 transition-all duration-300 flex items-center justify-center space-x-2'>
-                                            <span>Book Service</span>
-                                            <ArrowRight className='w-4 h-4' />
+                                            <Link to={`/${lang}/services`}>
+                                                <span>Book Service</span>
+                                                <ArrowRight className='w-4 h-4' />
+                                            </Link>
                                         </button>
                                     </div>
 

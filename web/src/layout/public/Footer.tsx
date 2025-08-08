@@ -7,13 +7,6 @@ export const Footer: React.FC = () => {
     const { t } = useTranslation();
     const { lang } = useParams();
 
-    const socialLinks = [
-        { icon: Facebook, href: '#', label: 'Facebook' },
-        { icon: Instagram, href: '#', label: 'Instagram' },
-        { icon: Twitter, href: '#', label: 'Twitter' },
-        { icon: Youtube, href: '#', label: 'YouTube' },
-    ];
-
     const quickLinks = [
         { label: t('navigation.home'), href: `/${lang}` },
         { label: t('navigation.about'), href: `/${lang}/about` },
@@ -164,23 +157,6 @@ export const Footer: React.FC = () => {
                 {/* Bottom Section */}
                 <div className='border-t border-[#F3E9DC]/20 py-4 sm:py-6 lg:py-8'>
                     <div className='flex flex-col lg:flex-row items-center justify-between space-y-4 lg:space-y-0'>
-                        {/* Social Links */}
-                        <div className='flex items-center space-x-3 sm:space-x-4'>
-                            <span className='text-[#F3E9DC]/70 text-sm font-medium mr-2 hidden sm:inline'>
-                                {t('footer.followUs')}
-                            </span>
-                            {socialLinks.map((social, index) => (
-                                <a
-                                    key={index}
-                                    href={social.href}
-                                    aria-label={social.label}
-                                    className='group p-2 sm:p-3 bg-[#F3E9DC]/10 backdrop-blur-sm rounded-full border border-[#F3E9DC]/20 hover:bg-[#F3E9DC]/20 hover:border-[#F3E9DC]/40 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-[#F8B259]/20'
-                                >
-                                    <social.icon className='w-4 h-4 text-[#F3E9DC]/70 group-hover:text-[#F3E9DC] transition-colors duration-300' />
-                                </a>
-                            ))}
-                        </div>
-
                         {/* Copyright and Legal Links combined */}
                         <div className='flex flex-col items-center lg:items-end space-y-2'>
                             <p className='text-[#F3E9DC]/60 text-sm text-center lg:text-right'>

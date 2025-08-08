@@ -119,7 +119,7 @@ export const NavigationBar: React.FC = () => {
                     e.stopPropagation();
                     setIsUserDropdownOpen(!isUserDropdownOpen);
                 }}
-                className='group relative flex items-center justify-center space-x-2 px-6 py-2.5 rounded-full font-semibold text-sm transition-all duration-400 overflow-hidden bg-white/40 backdrop-blur-md border-2 border-[#F8B259]/70 text-[#C75D2C] hover:bg-white/60 hover:border-[#D96F32] hover:-translate-y-0.5 shadow-lg hover:shadow-xl min-w-[8rem]'
+                className='group relative flex items-center cursor-pointer justify-center space-x-2 px-6 py-2.5 rounded-full font-semibold text-sm transition-all duration-400 overflow-hidden bg-white/40 backdrop-blur-md border-2 border-[#F8B259]/70 text-[#C75D2C] hover:bg-white/60 hover:border-[#D96F32] hover:-translate-y-0.5 shadow-lg hover:shadow-xl min-w-[8rem]'
             >
                 <UserCircle className='w-4 h-4 flex-shrink-0' />
                 <span className='font-semibold max-w-16 truncate'>{user?.fullName?.split(' ')[0]}</span>
@@ -175,7 +175,7 @@ export const NavigationBar: React.FC = () => {
 
                         {(isHost() || isAdmin()) && (
                             <Link
-                                to='/admin'
+                                to={`/${lang}/admin`}
                                 onClick={e => {
                                     e.stopPropagation();
                                     setIsUserDropdownOpen(false);
@@ -273,7 +273,7 @@ export const NavigationBar: React.FC = () => {
                             {/* Book Now Button */}
                             <button
                                 onClick={handleBookNowClick}
-                                className='group relative flex items-center justify-center space-x-2 px-6 py-2.5 rounded-full font-bold text-sm transition-all duration-500 bg-white/80 backdrop-blur-md border-2 border-[#F8B259]/70 text-[#C75D2C] hover:bg-white hover:border-[#D96F32] hover:text-[#D96F32] shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:scale-95 whitespace-nowrap overflow-hidden min-w-[8rem]'
+                                className='group relative cursor-pointer flex items-center justify-center space-x-2 px-6 py-2.5 rounded-full font-bold text-sm transition-all duration-500 bg-white/80 backdrop-blur-md border-2 border-[#F8B259]/70 text-[#C75D2C] hover:bg-white hover:border-[#D96F32] hover:text-[#D96F32] shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:scale-95 whitespace-nowrap overflow-hidden min-w-[8rem]'
                             >
                                 {/* Magic shine effect */}
                                 <div className='absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700'>
@@ -293,7 +293,7 @@ export const NavigationBar: React.FC = () => {
                                             key={item.href}
                                             to={item.href}
                                             onClick={item.onClick}
-                                            className='group relative flex items-center justify-center space-x-2 px-6 py-2.5 rounded-full font-semibold text-sm transition-all duration-500 overflow-hidden bg-gradient-to-r from-[#D96F32] via-[#C75D2C] to-[#D96F32] bg-size-200 bg-pos-0 hover:bg-pos-100 text-cream border-2 border-[#f8b359aa] hover:border-golden-yellow shadow-lg shadow-terracotta-30 hover:shadow-xl hover:shadow-golden-yellow/40 hover:-translate-y-0.5 active:scale-95 whitespace-nowrap min-w-[8rem]'
+                                            className='group relative flex  items-center justify-center space-x-2 px-6 py-2.5 rounded-full font-semibold text-sm transition-all duration-500 overflow-hidden bg-gradient-to-r from-[#D96F32] via-[#C75D2C] to-[#D96F32] bg-size-200 bg-pos-0 hover:bg-pos-100 text-cream border-2 border-[#f8b359aa] hover:border-golden-yellow shadow-lg shadow-terracotta-30 hover:shadow-xl hover:shadow-golden-yellow/40 hover:-translate-y-0.5 active:scale-95 whitespace-nowrap min-w-[8rem]'
                                         >
                                             {/* Magic shine effect */}
                                             <div className='absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700'>

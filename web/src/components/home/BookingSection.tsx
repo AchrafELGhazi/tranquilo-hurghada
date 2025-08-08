@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Calendar, Users, MapPin, ArrowRight, Star, Award } from 'lucide-react';
+import { Link, useParams } from 'react-router-dom';
 
 const BookingSection = () => {
     const [checkIn, setCheckIn] = useState('');
     const [checkOut, setCheckOut] = useState('');
     const [guests, setGuests] = useState('2');
+    const { lang } = useParams();
 
     return (
         <section className='relative py-20 px-6 bg-gradient-to-br from-orange-50 to-amber-50 overflow-hidden'>
@@ -70,7 +72,7 @@ const BookingSection = () => {
                                     onChange={e => setGuests(e.target.value)}
                                     className='w-full pl-10 pr-4 py-3 border-2 border-orange-200/60 rounded-xl bg-white/70 text-orange-900 focus:outline-none focus:border-orange-500 focus:bg-white transition-all duration-300 appearance-none'
                                 >
-                                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11,12].map(num => (
+                                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(num => (
                                         <option key={num} value={num}>
                                             {num} Guest{num > 1 ? 's' : ''}
                                         </option>
@@ -82,11 +84,13 @@ const BookingSection = () => {
                         {/* Book Now Button */}
                         <div className='flex items-end'>
                             <button className='w-full group relative px-6 py-3 bg-gradient-to-r from-orange-600 to-orange-700 transition-all duration-500 rounded-xl font-semibold text-white shadow-xl hover:shadow-2xl transform hover:scale-105'>
-                                <span className='relative z-10 flex items-center justify-center space-x-2'>
-                                    <span>Book Now</span>
-                                    <ArrowRight className='w-4 h-4 transition-transform duration-300 group-hover:translate-x-1' />
-                                </span>
-                                <div className='absolute inset-0 bg-gradient-to-r from-yellow-400/20 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
+                                <Link to={`/${lang}/booking`}>
+                                    <span className='relative z-10 flex items-center justify-center space-x-2'>
+                                        <span>Book Now</span>
+                                        <ArrowRight className='w-4 h-4 transition-transform duration-300 group-hover:translate-x-1' />
+                                    </span>
+                                    <div className='absolute inset-0 bg-gradient-to-r from-yellow-400/20 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
+                                </Link>
                             </button>
                         </div>
                     </div>

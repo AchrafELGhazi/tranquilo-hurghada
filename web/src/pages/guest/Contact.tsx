@@ -1,33 +1,35 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MapPin, Phone, Mail, Send, Calendar } from 'lucide-react';
+import { Link, useParams } from 'react-router-dom';
 
 export const Contact: React.FC = () => {
     const { t } = useTranslation();
     const [formData, setFormData] = useState({
         name: '',
         email: '',
-        message: ''
+        message: '',
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const { lang } = useParams();
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
-            [name]: value
+            [name]: value,
         }));
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
-        
+
         await new Promise(resolve => setTimeout(resolve, 2000));
-        
+
         setFormData({ name: '', email: '', message: '' });
         setIsSubmitting(false);
-        
+
         alert('Message sent successfully!');
     };
 
@@ -77,8 +79,6 @@ export const Contact: React.FC = () => {
                     <div className='absolute bottom-1/3 left-1/5 w-1.5 h-1.5 bg-[#F8B259]/40 rounded-full animate-pulse delay-2000'></div>
                 </div>
             </div>
-
-       
 
             {/* Main Content */}
             <div className='bg-[#E8DCC6] py-12 px-4 sm:px-6 lg:px-8 -mt-1'>
@@ -244,10 +244,12 @@ export const Contact: React.FC = () => {
                     <div className='bg-gradient-to-r from-[#D96F32] to-[#F8B259] rounded-2xl p-8 text-center border-2 border-[#F8B259]'>
                         <h3 className='text-xl font-bold text-white mb-4 font-butler'>{t('contact.cta.title')}</h3>
                         <p className='text-white/90 text-sm mb-6'>{t('contact.cta.subtitle')}</p>
-                        <button className='bg-white text-[#D96F32] font-bold py-3 px-8 rounded-xl hover:bg-white/90 hover:transform hover:-translate-y-0.5 transition-all duration-300 flex items-center space-x-2 mx-auto'>
-                            <Calendar className='w-4 h-4' />
-                            <span>{t('contact.cta.button')}</span>
-                        </button>
+                        <Link to={`/${lang}/booking`}>
+                            <button className='bg-white text-[#D96F32] font-bold py-3 px-8 rounded-xl hover:bg-white/90 hover:transform hover:-translate-y-0.5 transition-all duration-300 flex items-center space-x-2 mx-auto'>
+                                <Calendar className='w-4 h-4' />
+                                <span>{t('contact.cta.button')}</span>
+                            </button>
+                        </Link>
                     </div>
                 </div>
             </div>
