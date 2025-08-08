@@ -28,6 +28,7 @@ import { AdminVillas } from './pages/admin/AdminVillas';
 import { AdminVillaDetails } from './pages/admin/AdminVillaDetails';
 import AdminEditVilla from './pages/admin/AdminEditVilla';
 import { AdminBookings } from './pages/admin/AdminBookings';
+import AdminUsers from './pages/admin/AdminUsers';
 
 const RootRedirect: React.FC = () => {
     const storedLang = localStorage.getItem('preferred-language');
@@ -189,7 +190,8 @@ const App: React.FC = () => {
                                     <Route path='villas' element={<AdminVillas />} />
                                     <Route path='villas/:villaId' element={<AdminVillaDetails />} />
                                     <Route path='villas/:villaId/edit' element={<AdminEditVilla />} />
-                                    <Route path='bookings' element={<AdminBookings />} />{' '}
+                                    <Route path='bookings' element={<AdminBookings />} />
+                                    <Route path='users' element={<AdminUsers />} />
                                 </Route>
 
                                 <Route path='*' element={<NotFound />} />

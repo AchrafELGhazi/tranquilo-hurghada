@@ -30,7 +30,7 @@ export const AdminHeader: React.FC = () => {
     };
 
     return (
-        <header className='bg-white/40 backdrop-blur-md border-b-2 border-[#F8B259]/50 shadow-lg'>
+        <header className='bg-white/40 backdrop-blur-md border-b-2 border-[#F8B259]/50 shadow-lg relative z-50'>
             <div className='px-6 py-4'>
                 <div className='flex justify-between items-center'>
                     {/* Breadcrumb or Page Title */}
@@ -49,14 +49,6 @@ export const AdminHeader: React.FC = () => {
                             <span>{t('admin.backToSite')}</span>
                         </Link>
 
-                        {/* Notifications */}
-                        <button className='relative p-3 text-[#C75D2C] hover:text-[#D96F32] bg-white/30 hover:bg-white/50 border-2 border-[#F8B259]/50 rounded-xl transition-all duration-300 hover:scale-105'>
-                            <Bell className='w-5 h-5' />
-                            <span className='absolute -top-1 -right-1 h-4 w-4 rounded-full bg-gradient-to-r from-[#D96F32] to-[#C75D2C] text-white text-xs flex items-center justify-center font-bold'>
-                                3
-                            </span>
-                        </button>
-
                         {/* Language Selector */}
                         <div className='bg-white/30 border-2 border-[#F8B259]/50 rounded-xl p-1'>
                             <LanguageSelector />
@@ -66,7 +58,7 @@ export const AdminHeader: React.FC = () => {
                         <div className='relative'>
                             <button
                                 onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                                className='flex items-center space-x-3 p-3 text-sm font-medium text-[#C75D2C] hover:text-[#D96F32] bg-white/30 hover:bg-white/50 border-2 border-[#F8B259]/50 rounded-xl transition-all duration-300 hover:scale-105'
+                                className='flex items-center cursor-pointer space-x-3 p-3 text-sm font-medium text-[#C75D2C] hover:text-[#D96F32] bg-white/30 hover:bg-white/50 border-2 border-[#F8B259]/50 rounded-xl transition-all duration-300 hover:scale-105'
                             >
                                 <div className='w-8 h-8 bg-gradient-to-r from-[#D96F32] to-[#C75D2C] rounded-xl flex items-center justify-center shadow-lg'>
                                     <span className='text-sm font-bold text-white'>
@@ -82,7 +74,7 @@ export const AdminHeader: React.FC = () => {
                                     </div>
                                 </div>
                                 <ChevronDown
-                                    className={`w-4 h-4 transition-transform duration-200 ${
+                                    className={`w-4 h-4  transition-transform duration-200 ${
                                         showProfileDropdown ? 'rotate-180' : ''
                                     }`}
                                 />
@@ -90,7 +82,7 @@ export const AdminHeader: React.FC = () => {
 
                             {/* Dropdown Menu */}
                             {showProfileDropdown && (
-                                <div className='absolute right-0 mt-2 w-64 bg-white/90 backdrop-blur-md border-2 border-[#F8B259]/50 rounded-xl shadow-xl overflow-hidden z-50'>
+                                <div className='absolute right-0 mt-2 w-64 bg-white/90 backdrop-blur-md border-2 border-[#F8B259]/50 rounded-xl shadow-xl overflow-hidden z-[9999]'>
                                     {/* User Info Header */}
                                     <div className='px-4 py-3 bg-gradient-to-r from-[#F8B259]/20 to-[#D96F32]/20 border-b border-[#F8B259]/30'>
                                         <div className='flex items-center space-x-3'>
@@ -101,13 +93,10 @@ export const AdminHeader: React.FC = () => {
                                             </div>
                                             <div>
                                                 <div className='font-semibold text-[#C75D2C]'>
-                                                    {user ? `${user.fullName} ` : 'Admin User'}
+                                                    {user ? `${user.fullName}` : 'Admin User'}
                                                 </div>
                                                 <div className='text-sm text-[#C75D2C]/70'>
                                                     {user?.email || 'admin@example.com'}
-                                                </div>
-                                                <div className='text-xs text-[#C75D2C]/60 capitalize'>
-                                                    {user?.role.toLowerCase() || 'Administrator'}
                                                 </div>
                                             </div>
                                         </div>
@@ -115,14 +104,13 @@ export const AdminHeader: React.FC = () => {
 
                                     {/* Menu Items */}
                                     <div className='py-2'>
-                                        <button className='w-full flex items-center space-x-3 px-4 py-3 text-sm text-[#C75D2C] hover:bg-[#F8B259]/20 hover:text-[#D96F32] transition-colors'>
-                                            <User className='w-4 h-4' />
-                                            <span>Profile Settings</span>
-                                        </button>
-                                        <button className='w-full flex items-center space-x-3 px-4 py-3 text-sm text-[#C75D2C] hover:bg-[#F8B259]/20 hover:text-[#D96F32] transition-colors'>
-                                            <Settings className='w-4 h-4' />
-                                            <span>Account Settings</span>
-                                        </button>
+                                        <Link to={`/${lang}/profile`}>
+                                            <button className='w-full cursor-pointer flex items-center space-x-3 px-4 py-3 text-sm text-[#C75D2C] hover:bg-[#F8B259]/20 hover:text-[#D96F32] transition-colors'>
+                                                <User className='w-4 h-4' />
+                                                <span>Profile Settings</span>
+                                            </button>
+                                        </Link>
+
                                         <div className='border-t border-[#F8B259]/30 mt-2 pt-2'>
                                             <button
                                                 onClick={handleLogout}

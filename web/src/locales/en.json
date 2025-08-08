@@ -28,6 +28,13 @@
         "info": "Information",
         "chooseLanguage": "Choose Language"
     },
+    "admin": {
+        "dashboard": "Admin Dashboard",
+        "users": "Users",
+        "villas": "Villa",
+        "bookings": "Bookings",
+        "backToSite": "Back to Site"
+    },
     "footer": {
         "brandTitle": "Tranquilo Hurghada",
         "brandDescription": "Where ancient Egyptian mystique meets contemporary luxury along the crystal-clear Red Sea coast. Experience unparalleled hospitality and create unforgettable memories in paradise.",

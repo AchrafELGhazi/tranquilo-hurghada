@@ -53,7 +53,7 @@ export const AdminSidebar: React.FC = () => {
 
     return (
         <aside
-            className={`bg-gradient-to-b from-[#8B4513] to-[#A0522D] text-white transition-all duration-300 ${
+            className={`bg-gradient-to-b from-[#D4A574] to-[#C8956D] text-white transition-all duration-300 ${
                 isCollapsed ? 'w-20' : 'w-72'
             } min-h-screen flex flex-col shadow-2xl border-r-2 border-[#F8B259]/30`}
         >
@@ -66,24 +66,23 @@ export const AdminSidebar: React.FC = () => {
                             <img
                                 src='/images/tranquilo-hurghada-logo.png'
                                 alt='Tranquilo Hurghada'
-                                className='h-10 w-auto'
+                                className='h-12 w-auto'
                                 onError={e => {
                                     const target = e.target as HTMLImageElement;
                                     target.style.display = 'none';
                                 }}
                             />
-                            
                         </div>
                     )}
 
                     <button
                         onClick={() => setIsCollapsed(!isCollapsed)}
-                        className='p-2 rounded-xl bg-[#F8B259]/20 hover:bg-[#F8B259]/30 border border-[#F8B259]/50 transition-all duration-300 hover:scale-105'
+                        className='p-2 rounded-xl bg-[#8B4513]/20 hover:bg-[#8B4513]/30 border border-[#8B4513]/50 transition-all duration-300 hover:scale-105'
                     >
                         {isCollapsed ? (
-                            <ChevronRight className='w-5 h-5 text-[#F8B259]' />
+                            <ChevronRight className='w-5 h-5 text-[#8B4513]' />
                         ) : (
-                            <ChevronLeft className='w-5 h-5 text-[#F8B259]' />
+                            <ChevronLeft className='w-5 h-5 text-[#8B4513]' />
                         )}
                     </button>
                 </div>
@@ -102,13 +101,13 @@ export const AdminSidebar: React.FC = () => {
                             className={`flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 group ${
                                 active
                                     ? 'bg-gradient-to-r from-[#F8B259] to-[#D96F32] text-white shadow-lg scale-105'
-                                    : 'text-[#F8B259]/80 hover:text-white hover:bg-white/10 hover:scale-105'
+                                    : 'text-[#8B4513] hover:text-white hover:bg-white/20 hover:scale-105'
                             } ${isCollapsed ? 'justify-center' : ''}`}
                             title={isCollapsed ? item.name : undefined}
                         >
                             <IconComponent
                                 className={`w-5 h-5 ${
-                                    active ? 'text-white' : 'text-[#F8B259] group-hover:text-white'
+                                    active ? 'text-white' : 'text-[#8B4513] group-hover:text-white'
                                 } transition-colors`}
                             />
                             {!isCollapsed && <span className='font-semibold'>{item.name}</span>}
@@ -119,22 +118,20 @@ export const AdminSidebar: React.FC = () => {
             </nav>
 
             {/* User Info */}
-            <div className='p-4 border-t-2 border-[#F8B259]/30 bg-gradient-to-r from-[#8B4513]/50 to-[#A0522D]/50'>
+            <div className='p-4 border-t-2 border-[#F8B259]/30 bg-gradient-to-r from-[#D4A574]/50 to-[#C8956D]/50'>
                 <div className={`flex items-center space-x-3 ${isCollapsed ? 'justify-center' : ''}`}>
                     <div className='w-10 h-10 bg-gradient-to-r from-[#F8B259] to-[#D96F32] rounded-xl flex items-center justify-center shadow-lg border-2 border-white/20'>
-                        <span className='text-sm font-bold text-white'>
-                            {user ? getInitials(user.fullName) : 'A'}
-                        </span>
+                        <span className='text-sm font-bold text-white'>{user ? getInitials(user.fullName) : 'A'}</span>
                     </div>
                     {!isCollapsed && (
                         <div className='flex-1 min-w-0'>
-                            <p className='text-sm font-bold text-[#F8B259] truncate'>
+                            <p className='text-sm font-bold text-[#8B4513] truncate'>
                                 {user ? `${user.fullName}` : 'Admin User'}
                             </p>
-                            <p className='text-xs text-[#F8B259]/70 truncate'>{user?.email || 'admin@example.com'}</p>
+                            <p className='text-xs text-[#8B4513]/70 truncate'>{user?.email || 'admin@example.com'}</p>
                             <div className='flex items-center space-x-1 mt-1'>
                                 <div className='w-2 h-2 bg-green-400 rounded-full'></div>
-                                <span className='text-xs text-[#F8B259]/60 capitalize'>
+                                <span className='text-xs text-[#8B4513]/60 capitalize'>
                                     {user?.role.toLowerCase() || 'Administrator'}
                                 </span>
                             </div>
