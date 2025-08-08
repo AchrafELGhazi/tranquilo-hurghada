@@ -57,7 +57,8 @@ export const AdminBookings: React.FC = () => {
             }
 
             const response = await bookingApi.getAllBookings(filters);
-            setBookings(response.bookings);
+            console.log('Fetched bookings:', response);
+            setBookings(response.data);
             setTotalPages(response.pagination.totalPages);
             setTotalCount(response.pagination.totalCount);
         } catch (err: any) {

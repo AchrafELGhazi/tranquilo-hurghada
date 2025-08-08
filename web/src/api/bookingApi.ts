@@ -83,7 +83,7 @@ class BookingApi {
     /**
      * Get all bookings with filters (role-based access)
      */
-    async getAllBookings(filters?: BookingFilters): Promise<BookingsResponse> {
+    async getAllBookings(filters?: BookingFilters): Promise<any> {
         const queryParams = new URLSearchParams();
 
         if (filters) {
@@ -98,7 +98,7 @@ class BookingApi {
         const response = await apiService.get<BookingsResponse>(url);
 
         if (response.success && response.data) {
-            return response.data;
+            return response;
         }
 
         throw new Error(response.message || 'Failed to get bookings');
