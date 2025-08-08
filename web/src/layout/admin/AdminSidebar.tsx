@@ -1,4 +1,3 @@
-// AdminSidebar.tsx
 import React, { useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -80,7 +79,7 @@ export const AdminSidebar: React.FC = () => {
 
                     <button
                         onClick={() => setIsCollapsed(!isCollapsed)}
-                        className='p-2 rounded-xl bg-[#8B4513]/20 hover:bg-[#8B4513]/30 border border-[#8B4513]/50 transition-all duration-300 hover:scale-105 flex-shrink-0'
+                        className='p-2 rounded-xl cursor-pointer bg-[#8B4513]/20 hover:bg-[#8B4513]/30 border border-[#8B4513]/50 transition-all duration-300 hover:scale-105 flex-shrink-0'
                     >
                         <div className='transition-transform duration-500 ease-in-out'>
                             {isCollapsed ? (
