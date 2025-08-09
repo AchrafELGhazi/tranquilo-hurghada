@@ -1,7 +1,7 @@
 {
     "info": {
-        "name": "Server API",
-        "description": "",
+        "name": "Tranquilo Hurghada",
+        "description": "Complete API collection for Tranquilo Hurghada",
         "version": "1.0.0",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
@@ -18,11 +18,21 @@
     "variable": [
         {
             "key": "base_url",
-            "value": "http://localhost:5000/api",
+            "value": "http://localhost:5000/api/v1",
             "type": "string"
         },
         {
             "key": "auth_token",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "booking_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "villa_id",
             "value": "",
             "type": "string"
         }
@@ -69,6 +79,678 @@
                 }
             ],
             "description": "Basic health check endpoints"
+        },
+        {
+            "name": "Authentication",
+            "item": [
+                {
+                    "name": "Register User",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.status === 201) {",
+                                    "    const response = pm.response.json();",
+                                    "    if (response.data && response.data.accessToken) {",
+                                    "        pm.collectionVariables.set('auth_token', response.data.accessToken);",
+                                    "        console.log('Auth token saved:', response.data.accessToken);",
+                                    "    }",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"guest@example.com\",\n    \"password\": \"password123\",\n    \"fullName\": \"John Doe\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/auth/register",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "register"
+                            ]
+                        },
+                        "description": "Register a new user"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Login User",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.status === 200) {",
+                                    "    const response = pm.response.json();",
+                                    "    if (response.data && response.data.accessToken) {",
+                                    "        pm.collectionVariables.set('auth_token', response.data.accessToken);",
+                                    "        console.log('Auth token saved:', response.data.accessToken);",
+                                    "    }",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"karim.benzema@example.com\",\n    \"password\": \"karim123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/auth/login",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "description": "Login existing user"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Current User",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{auth_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/auth/me",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "me"
+                            ]
+                        },
+                        "description": "Get current authenticated user"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Profile",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{auth_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"fullName\": \"John Updated Doe\",\n    \"phone\": \"+1234567890\",\n    \"dateOfBirth\": \"1990-01-01\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/auth/profile",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "profile"
+                            ]
+                        },
+                        "description": "Update user profile"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Refresh Token",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"refreshToken\": \"your_refresh_token_here\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/auth/refresh",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "refresh"
+                            ]
+                        },
+                        "description": "Refresh access token"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Logout",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{auth_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/auth/logout",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "logout"
+                            ]
+                        },
+                        "description": "Logout user"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Authentication related endpoints"
+        },
+        {
+            "name": "Bookings",
+            "item": [
+                {
+                    "name": "Create Booking",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.status === 201) {",
+                                    "    const response = pm.response.json();",
+                                    "    if (response.data && response.data.id) {",
+                                    "        pm.collectionVariables.set('booking_id', response.data.id);",
+                                    "        console.log('Booking ID saved:', response.data.id);",
+                                    "    }",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"villaId\": \"{{villa_id}}\",\n    \"checkIn\": \"2024-12-01T15:00:00.000Z\",\n    \"checkOut\": \"2024-12-07T11:00:00.000Z\",\n    \"totalGuests\": 4,\n    \"paymentMethod\": \"BANK_TRANSFER\",\n    \"notes\": \"Special request: Late check-in expected\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/bookings",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "bookings"
+                            ]
+                        },
+                        "description": "Create a new booking for a villa"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get All Bookings",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/bookings?page=1&limit=10&sortBy=createdAt&sortOrder=desc",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "bookings"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "Page number"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10",
+                                    "description": "Results per page"
+                                },
+                                {
+                                    "key": "sortBy",
+                                    "value": "createdAt",
+                                    "description": "Sort field (createdAt, checkIn, checkOut, totalPrice)"
+                                },
+                                {
+                                    "key": "sortOrder",
+                                    "value": "desc",
+                                    "description": "Sort order (asc, desc)"
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "PENDING",
+                                    "description": "Filter by booking status",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "villaId",
+                                    "value": "{{villa_id}}",
+                                    "description": "Filter by villa ID",
+                                    "disabled": true
+                                }
+                            ]
+                        },
+                        "description": "Get all bookings with optional filters and pagination"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Bookings by Status",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/bookings?status=PENDING&page=1&limit=10",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "bookings"
+                            ],
+                            "query": [
+                                {
+                                    "key": "status",
+                                    "value": "PENDING",
+                                    "description": "PENDING, CONFIRMED, CANCELLED, REJECTED, COMPLETED"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10"
+                                }
+                            ]
+                        },
+                        "description": "Get bookings filtered by status"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Bookings by Date Range",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/bookings?startDate=2024-12-01&endDate=2024-12-31&page=1&limit=10",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "bookings"
+                            ],
+                            "query": [
+                                {
+                                    "key": "startDate",
+                                    "value": "2024-12-01",
+                                    "description": "Start date for filtering (YYYY-MM-DD)"
+                                },
+                                {
+                                    "key": "endDate",
+                                    "value": "2024-12-31",
+                                    "description": "End date for filtering (YYYY-MM-DD)"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10"
+                                }
+                            ]
+                        },
+                        "description": "Get bookings within a specific date range"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get My Bookings (Guest)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/bookings/my-bookings?page=1&limit=10",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "bookings",
+                                "my-bookings"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10"
+                                }
+                            ]
+                        },
+                        "description": "Get current user's bookings as a guest"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Villa Bookings (Host)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/bookings?ownerId={{user_id}}&page=1&limit=10",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "bookings"
+                            ],
+                            "query": [
+                                {
+                                    "key": "ownerId",
+                                    "value": "{{user_id}}",
+                                    "description": "Host's user ID to get their villa bookings"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10"
+                                }
+                            ]
+                        },
+                        "description": "Get bookings for villas owned by the current host"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Booking by ID",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/bookings/{{booking_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "bookings",
+                                "{{booking_id}}"
+                            ]
+                        },
+                        "description": "Get specific booking details by ID"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Confirm Booking (Host/Admin)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/bookings/{{booking_id}}/confirm",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "bookings",
+                                "{{booking_id}}",
+                                "confirm"
+                            ]
+                        },
+                        "description": "Confirm a pending booking (only host or admin)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Reject Booking (Host/Admin)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"rejectionReason\": \"Villa is under maintenance during requested dates\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/bookings/{{booking_id}}/reject",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "bookings",
+                                "{{booking_id}}",
+                                "reject"
+                            ]
+                        },
+                        "description": "Reject a pending booking with optional reason"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Cancel Booking",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"cancellationReason\": \"Change in travel plans\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/bookings/{{booking_id}}/cancel",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "bookings",
+                                "{{booking_id}}",
+                                "cancel"
+                            ]
+                        },
+                        "description": "Cancel a booking (guest, host, or admin can cancel)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Complete Booking (System/Admin)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PATCH",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/bookings/{{booking_id}}/complete",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "bookings",
+                                "{{booking_id}}",
+                                "complete"
+                            ]
+                        },
+                        "description": "Mark booking as completed after check-out date"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Booking management endpoints"
         }
     ],
     "event": [
@@ -89,7 +771,17 @@
                 "exec": [
                     "// Global test script runs after each request",
                     "console.log('Response status:', pm.response.status);",
-                    "console.log('Response time:', pm.response.responseTime + 'ms');"
+                    "console.log('Response time:', pm.response.responseTime + 'ms');",
+                    "",
+                    "// Check for successful responses",
+                    "if (pm.response.status >= 200 && pm.response.status < 300) {",
+                    "    console.log('✅ Request successful');",
+                    "} else {",
+                    "    console.log('❌ Request failed');",
+                    "    if (pm.response.json && pm.response.json().message) {",
+                    "        console.log('Error message:', pm.response.json().message);",
+                    "    }",
+                    "}"
                 ]
             }
         }

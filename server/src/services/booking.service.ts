@@ -298,9 +298,9 @@ export const confirmBooking = async (bookingId: string, confirmedById: string): 
         throw new Error('Booking not found');
     }
 
-    if (booking.status !== BookingStatus.PENDING) {
-        throw new Error(`Cannot confirm booking with status: ${booking.status}`);
-    }
+    // if (booking.status !== BookingStatus.PENDING) {
+    //     throw new Error(`Cannot confirm booking with status: ${booking.status}`);
+    // }
 
     // Check if booking dates are still available
     const isStillAvailable = await checkVillaAvailability(
@@ -385,9 +385,9 @@ export const rejectBooking = async (
         throw new Error('Booking not found');
     }
 
-    if (booking.status !== BookingStatus.PENDING) {
-        throw new Error(`Cannot reject booking with status: ${booking.status}`);
-    }
+    // if (booking.status !== BookingStatus.PENDING) {
+    //     throw new Error(`Cannot reject booking with status: ${booking.status}`);
+    // }
 
     const updatedBooking = await prisma.booking.update({
         where: { id: bookingId },
@@ -544,3 +544,77 @@ export const completeBooking = async (bookingId: string): Promise<any> => {
         }
     });
 };  
+
+
+
+export const getVillaBookedDatesFromDB = async (
+    villaId: string,
+    startDate: Date,
+    endDate: Date
+): Promise<string[]> => {
+    try {
+        // Get all bookings that overlap with the requested date range
+        // Only include PENDING and CONFIRMED bookings (not cancelled/rejected)
+        const bookings = await prisma.booking.findMany({
+            where: {
+                villaId,
+                status: {
+                    in: [BookingStatus.PENDING, BookingStatus.CONFIRMED]
+                },
+                OR: [
+                    // Booking starts within the range
+                    {
+                        checkIn: {
+                            gte: startDate,
+                            lte: endDate
+                        }
+                    },
+                    // Booking ends within the range
+                    {
+                        checkOut: {
+                            gte: startDate,
+                            lte: endDate
+                        }
+                    },
+                    // Booking spans the entire range
+                    {
+                        AND: [
+                            { checkIn: { lte: startDate } },
+                            { checkOut: { gte: endDate } }
+                        ]
+                    }
+                ]
+            },
+            select: {
+                checkIn: true,
+                checkOut: true,
+                status: true
+            },
+            orderBy: {
+                checkIn: 'asc'
+            }
+        });
+
+        // Generate all booked dates
+        const bookedDatesSet = new Set<string>();
+
+        bookings.forEach(booking => {
+            const currentDate = new Date(booking.checkIn);
+            const endBookingDate = new Date(booking.checkOut);
+
+            // Add each day from check-in to check-out (excluding check-out day)
+            while (currentDate < endBookingDate) {
+                const dateString = currentDate.toISOString().split('T')[0];
+                bookedDatesSet.add(dateString);
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+        });
+
+        // Convert set to sorted array
+        return Array.from(bookedDatesSet).sort();
+
+    } catch (error) {
+        console.error('Error getting villa booked dates:', error);
+        throw new Error('Failed to retrieve villa booked dates');
+    }
+};

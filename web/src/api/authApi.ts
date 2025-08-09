@@ -1,14 +1,5 @@
 import apiService from "@/utils/api";
-
-export interface User {
-    id: string;
-    email: string;
-    fullName: string;
-    role: 'GUEST' | 'HOST' | 'ADMIN';
-    isActive: boolean;
-    createdAt: string;
-    updatedAt: string;
-}
+import type { User } from "@/utils/types";
 
 export interface RegisterData {
     email: string;
@@ -74,7 +65,6 @@ class AuthApi {
 
     async register(data: RegisterData): Promise<User> {
         const response = await apiService.post<any>('/auth/register', data);
-        console.log('Registration response:', response);
         if (response.success && response.data) {
             this.storeTokens(response.data.accessToken, response.data.refreshToken);
             this.storeUserData(response.data.user);
@@ -85,10 +75,6 @@ class AuthApi {
 
     async login(data: LoginData): Promise<User> {
         const response = await apiService.post<any>('/auth/login', data);
-        console.log('Login response:', response);
-        console.log('Response data:', response.data);
-        console.log('Response success:', response.success);
-        console.log('Response message:', response.message);
         if (response.success && response.data) {
             this.storeTokens(response.data.accessToken, response.data.refreshToken);
             this.storeUserData(response.data.user);

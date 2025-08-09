@@ -85,6 +85,7 @@ model Booking {
     totalPrice         Decimal       @db.Decimal(10, 2)
     status             BookingStatus @default(PENDING)
     paymentMethod      PaymentMethod
+    isPaid             Boolean       @default(false)
     notes              String?
     confirmedAt        DateTime?
     cancelledAt        DateTime?

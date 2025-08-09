@@ -6,13 +6,30 @@ interface UpdateUserProfileParams {
     fullName?: string;
     email?: string;
 }
+export interface GetUsersQuery {
+    page?: number;
+    limit?: number;
+    search?: string;
+    role?: string;
+    sortBy?: 'fullName' | 'email' | 'createdAt' | 'updatedAt';
+    sortOrder?: 'asc' | 'desc';
+    isActive?: boolean;
+}
 
+export interface GetUsersResult {
+    users: any[];
+    pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        pages: number;
+    };
+}
 export const updateUserProfile = async (
     userId: string,
     updateData: UpdateUserProfileParams
 ): Promise<any> => {
     try {
-        // First check if user exists
         const existingUser = await prisma.user.findUnique({
             where: { id: userId },
             select: {
@@ -178,4 +195,80 @@ export const checkUserProfileComplete = async (userId: string): Promise<{ isComp
         console.error('Error checking user profile completeness:', error);
         throw error;
     }
+};
+
+
+
+export const getAllUsersService = async (query: GetUsersQuery): Promise<GetUsersResult> => {
+    // Set default values
+    const page = Math.max(1, Number(query.page) || 1);
+    const limit = Math.min(100, Math.max(1, Number(query.limit) || 10));
+    const skip = (page - 1) * limit;
+    const sortBy = query.sortBy || 'createdAt';
+    const sortOrder = query.sortOrder || 'desc';
+    const isActive = query.isActive !== undefined ? query.isActive : true;
+
+    // Build where clause
+    const where: any = {
+        isActive
+    };
+
+    // Add search functionality
+    if (query.search) {
+        where.OR = [
+            {
+                fullName: {
+                    contains: query.search,
+                    mode: 'insensitive'
+                }
+            },
+            {
+                email: {
+                    contains: query.search,
+                    mode: 'insensitive'
+                }
+            }
+        ];
+    }
+
+    // Add role filter
+    if (query.role) {
+        where.role = query.role;
+    }
+
+    // Execute queries in parallel
+    const [users, total] = await Promise.all([
+        prisma.user.findMany({
+            where,
+            select: {
+                id: true,
+                fullName: true,
+                email: true,
+                phone: true,
+                role: true,
+                isActive: true,
+                dateOfBirth: true,
+                createdAt: true,
+                updatedAt: true
+            },
+            orderBy: {
+                [sortBy]: sortOrder
+            },
+            skip,
+            take: limit
+        }),
+        prisma.user.count({ where })
+    ]);
+
+    const pages = Math.ceil(total / limit);
+
+    return {
+        users,
+        pagination: {
+            page,
+            limit,
+            total,
+            pages
+        }
+    };
 };

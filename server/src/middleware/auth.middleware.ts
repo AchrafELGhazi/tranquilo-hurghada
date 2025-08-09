@@ -42,7 +42,7 @@ export const authenticate = async (
         }
 
         req.user = user;
-        logger.info(`User authenticated: ${user}`);
+        logger.info(`User authenticated: ${req.user}`);
         next();
     } catch (error) {
         logger.error('Authentication error:', error);

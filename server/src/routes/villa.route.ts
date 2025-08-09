@@ -2,10 +2,12 @@ import { Router } from 'express';
 import {
     getAllVillas,
     getVillaDetails,
-    getMyVillas
+    getMyVillas,
+    updateVilla,
+    deleteVilla
 } from '../controllers/villa.controller';
-import { authenticate, requireHost } from '../middleware/auth.middleware';
-import { validatePaginationParams, validateDateParams } from '../middleware/validation.middleware';
+import { authenticate, requireHost, requireAdmin } from '../middleware/auth.middleware';
+import { validatePaginationParams, validateDateParams, validateVillaUpdate } from '../middleware/validation.middleware';
 
 const villaRouter = Router();
 
@@ -31,5 +33,19 @@ villaRouter.get('/my', authenticate, requireHost, validatePaginationParams, getM
  * @access  Public
  */
 villaRouter.get('/:villaId', getVillaDetails);
+
+/**
+ * @route   PUT /api/villas/:villaId
+ * @desc    Update villa details
+ * @access  Private (Villa Owner, Admins)
+ */
+villaRouter.put('/:villaId', authenticate, validateVillaUpdate, updateVilla);
+
+/**
+ * @route   DELETE /api/villas/:villaId
+ * @desc    Delete villa (soft delete - set isActive to false)
+ * @access  Private (Admins only)
+ */
+villaRouter.delete('/:villaId', authenticate, requireAdmin, deleteVilla);
 
 export default villaRouter;

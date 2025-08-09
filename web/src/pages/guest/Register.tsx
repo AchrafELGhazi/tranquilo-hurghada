@@ -1,0 +1,298 @@
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate, useLocation, Link, useParams } from 'react-router-dom';
+import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
+import { THToast, THToaster } from '@/components/common/Toast';
+
+export const Register = () => {
+    const [formData, setFormData] = useState({
+        email: '',
+        password: '',
+        fullName: '',
+    });
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+    const { register, isAuthenticated, isLoading, clearError } = useAuth();
+    const navigate = useNavigate();
+    const location = useLocation();
+    const { lang } = useParams();
+
+    useEffect(() => {
+        if (isAuthenticated) {
+            const from = (location.state as any)?.from?.pathname || '/';
+            navigate(from, { replace: true });
+            THToast.success('Welcome!', 'Your account has been created successfully');
+        }
+    }, [isAuthenticated, navigate, location]);
+
+    useEffect(() => {
+        clearError();
+    }, [clearError]);
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
+
+    const validateForm = (): boolean => {
+        if (!formData.email || !formData.password || !formData.fullName) {
+            THToast.warning('Missing Fields', 'Please fill in all required fields');
+            return false;
+        }
+
+        if (formData.password !== confirmPassword) {
+            THToast.error('Password Mismatch', 'Passwords do not match');
+            return false;
+        }
+
+        if (formData.password.length < 6) {
+            THToast.error('Weak Password', 'Password must be at least 6 characters long');
+            return false;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.email)) {
+            THToast.error('Invalid Email', 'Please enter a valid email address');
+            return false;
+        }
+
+        if (formData.fullName.trim().length < 2) {
+            THToast.error('Invalid Name', 'Full name must be at least 2 characters long');
+            return false;
+        }
+
+        return true;
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        clearError();
+
+        if (!validateForm()) {
+            return;
+        }
+
+        try {
+            const registerData = {
+                email: formData.email,
+                password: formData.password,
+                fullName: formData.fullName.trim(),
+            };
+
+            const registerPromise = register(registerData);
+
+            THToast.promise(registerPromise, {
+                loading: 'Creating your account...',
+                success: 'Account created successfully! Welcome aboard!',
+                error: (err: any) => err.message || 'Registration failed. Please try again.',
+            });
+
+            await registerPromise;
+        } catch (err: any) {
+            // Error is already handled by the promise toast
+        }
+    };
+
+    if (isAuthenticated) {
+        return (
+            <div className='min-h-screen bg-[#F3E9DC] flex items-center justify-center'>
+                <div className='text-lg text-[#C75D2C] font-medium'>Redirecting...</div>
+            </div>
+        );
+    }
+
+    return (
+        <div className='min-h-screen bg-[#F3E9DC] flex items-center justify-center px-4 py-4 -mt-5 sm:mt-0'>
+            <div className='w-full max-w-sm sm:max-w-md lg:max-w-lg'>
+                {/* Header - More compact on mobile */}
+                <div className='text-center mb-4 sm:mb-6'>
+                    <h2 className='text-2xl sm:text-3xl font-bold text-[#C75D2C] mb-1'>Create Your Account</h2>
+                    <p className='text-[#C75D2C]/70 text-xs sm:text-sm'>Join us today and get started</p>
+                </div>
+
+                {/* Register Form - Reduced padding and spacing on mobile */}
+                <div className='bg-white/40 backdrop-blur-md border-2 border-[#F8B259]/60 rounded-xl sm:rounded-2xl p-4 sm:p-6'>
+                    <form onSubmit={handleSubmit} className='space-y-4 sm:space-y-5'>
+                        {/* Full Name Field */}
+                        <div>
+                            <label
+                                htmlFor='fullName'
+                                className='block text-xs sm:text-sm font-semibold text-[#C75D2C] mb-1.5 sm:mb-2'
+                            >
+                                Full Name *
+                            </label>
+                            <div className='relative'>
+                                <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
+                                    <User className='h-4 w-4 sm:h-5 sm:w-5 text-[#D96F32]/60' />
+                                </div>
+                                <input
+                                    id='fullName'
+                                    name='fullName'
+                                    type='text'
+                                    value={formData.fullName}
+                                    onChange={handleInputChange}
+                                    className='w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-2.5 sm:py-3 border-2 border-[#F8B259]/60 rounded-lg sm:rounded-xl bg-white/50 text-[#C75D2C] placeholder-[#C75D2C]/50 focus:outline-none focus:border-[#D96F32] focus:bg-white/80 transition-all duration-300 text-sm sm:text-base'
+                                    required
+                                    disabled={isLoading}
+                                    placeholder='Enter your full name'
+                                />
+                            </div>
+                        </div>
+
+                        {/* Email Field */}
+                        <div>
+                            <label
+                                htmlFor='email'
+                                className='block text-xs sm:text-sm font-semibold text-[#C75D2C] mb-1.5 sm:mb-2'
+                            >
+                                Email Address *
+                            </label>
+                            <div className='relative'>
+                                <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
+                                    <Mail className='h-4 w-4 sm:h-5 sm:w-5 text-[#D96F32]/60' />
+                                </div>
+                                <input
+                                    id='email'
+                                    name='email'
+                                    type='email'
+                                    value={formData.email}
+                                    onChange={handleInputChange}
+                                    className='w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-2.5 sm:py-3 border-2 border-[#F8B259]/60 rounded-lg sm:rounded-xl bg-white/50 text-[#C75D2C] placeholder-[#C75D2C]/50 focus:outline-none focus:border-[#D96F32] focus:bg-white/80 transition-all duration-300 text-sm sm:text-base'
+                                    required
+                                    disabled={isLoading}
+                                    placeholder='Enter your email'
+                                />
+                            </div>
+                        </div>
+
+                        {/* Password Fields - Stack on mobile, side by side on larger screens */}
+                        <div className='space-y-4 sm:space-y-5 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0'>
+                            {/* Password Field */}
+                            <div>
+                                <label
+                                    htmlFor='password'
+                                    className='block text-xs sm:text-sm font-semibold text-[#C75D2C] mb-1.5 sm:mb-2'
+                                >
+                                    Password *
+                                </label>
+                                <div className='relative'>
+                                    <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
+                                        <Lock className='h-4 w-4 sm:h-5 sm:w-5 text-[#D96F32]/60' />
+                                    </div>
+                                    <input
+                                        id='password'
+                                        name='password'
+                                        type={showPassword ? 'text' : 'password'}
+                                        value={formData.password}
+                                        onChange={handleInputChange}
+                                        className='w-full pl-10 sm:pl-12 pr-10 sm:pr-12 py-2.5 sm:py-3 border-2 border-[#F8B259]/60 rounded-lg sm:rounded-xl bg-white/50 text-[#C75D2C] placeholder-[#C75D2C]/50 focus:outline-none focus:border-[#D96F32] focus:bg-white/80 transition-all duration-300 text-sm sm:text-base'
+                                        required
+                                        disabled={isLoading}
+                                        placeholder='Enter your password'
+                                        minLength={6}
+                                    />
+                                    <button
+                                        type='button'
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className='absolute inset-y-0 right-0 pr-3 flex items-center text-[#D96F32]/60 hover:text-[#D96F32] transition-colors duration-200'
+                                        disabled={isLoading}
+                                    >
+                                        {showPassword ? (
+                                            <EyeOff className='h-4 w-4 sm:h-5 sm:w-5' />
+                                        ) : (
+                                            <Eye className='h-4 w-4 sm:h-5 sm:w-5' />
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Confirm Password Field */}
+                            <div>
+                                <label
+                                    htmlFor='confirmPassword'
+                                    className='block text-xs sm:text-sm font-semibold text-[#C75D2C] mb-1.5 sm:mb-2'
+                                >
+                                    Confirm Password *
+                                </label>
+                                <div className='relative'>
+                                    <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
+                                        <Lock className='h-4 w-4 sm:h-5 sm:w-5 text-[#D96F32]/60' />
+                                    </div>
+                                    <input
+                                        id='confirmPassword'
+                                        type={showConfirmPassword ? 'text' : 'password'}
+                                        value={confirmPassword}
+                                        onChange={e => setConfirmPassword(e.target.value)}
+                                        className='w-full pl-10 sm:pl-12 pr-10 sm:pr-12 py-2.5 sm:py-3 border-2 border-[#F8B259]/60 rounded-lg sm:rounded-xl bg-white/50 text-[#C75D2C] placeholder-[#C75D2C]/50 focus:outline-none focus:border-[#D96F32] focus:bg-white/80 transition-all duration-300 text-sm sm:text-base'
+                                        required
+                                        disabled={isLoading}
+                                        placeholder='Confirm your password'
+                                        minLength={6}
+                                    />
+                                    <button
+                                        type='button'
+                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        className='absolute inset-y-0 right-0 pr-3 flex items-center text-[#D96F32]/60 hover:text-[#D96F32] transition-colors duration-200'
+                                        disabled={isLoading}
+                                    >
+                                        {showConfirmPassword ? (
+                                            <EyeOff className='h-4 w-4 sm:h-5 sm:w-5' />
+                                        ) : (
+                                            <Eye className='h-4 w-4 sm:h-5 sm:w-5' />
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Submit Button */}
+                        <button
+                            type='submit'
+                            disabled={isLoading}
+                            className={`w-full py-2.5 sm:py-3 px-4 rounded-lg sm:rounded-xl font-semibold text-white transition-all duration-300 text-sm sm:text-base ${
+                                isLoading
+                                    ? 'bg-[#C75D2C]/50 cursor-not-allowed'
+                                    : 'bg-gradient-to-r from-[#D96F32] to-[#C75D2C] hover:from-[#C75D2C] hover:to-[#D96F32] hover:transform hover:-translate-y-0.5 active:transform active:translate-y-0'
+                            }`}
+                        >
+                            {isLoading ? (
+                                <div className='flex items-center justify-center space-x-2'>
+                                    <div className='w-3 h-3 sm:w-4 sm:h-4 border-2 border-white/30 border-t-white rounded-full animate-spin'></div>
+                                    <span>Creating Account...</span>
+                                </div>
+                            ) : (
+                                'Create Account'
+                            )}
+                        </button>
+                    </form>
+
+                    {/* Sign In Link */}
+                    <div className='mt-5 sm:mt-6 text-center'>
+                        <p className='text-xs sm:text-sm text-[#C75D2C]/70'>
+                            Already have an account?{' '}
+                            <Link
+                                to={`/${lang}/signin`}
+                                className='font-semibold text-[#D96F32] hover:text-[#C75D2C] transition-colors duration-200 underline underline-offset-2 decoration-2 decoration-[#F8B259]/50 hover:decoration-[#F8B259]'
+                            >
+                                Sign in here
+                            </Link>
+                        </p>
+                    </div>
+                </div>
+
+                {/* Footer - Smaller on mobile */}
+                <div className='mt-4 sm:mt-6 text-center'>
+                    <p className='text-xs text-[#C75D2C]/50'>Your information is secure and protected</p>
+                </div>
+            </div>
+
+            {/* THToaster component */}
+            <THToaster position='bottom-right' />
+        </div>
+    );
+};

@@ -31,7 +31,7 @@ class ApiService {
     constructor() {
         this.api = axios.create({
             baseURL: import.meta.env.VITE_API_URL,
-            timeout: 30000, // Increased timeout for better reliability
+            timeout: 30000,
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -128,7 +128,7 @@ class ApiService {
 
     private async handleTokenRefresh(_error: any, originalRequest: any): Promise<any> {
         if (!this.refreshTokenFn) {
-            this.redirectToLogin();
+            // this.redirectToLogin();
             throw new Error('Session expired');
         }
 
@@ -172,7 +172,7 @@ class ApiService {
             this.isRefreshing = false;
             this.failedRequests = [];
             this.clearAuthDataFn?.();
-            this.redirectToLogin();
+            // this.redirectToLogin();
             throw new Error('Session expired - please login again');
         }
     }
@@ -201,13 +201,13 @@ class ApiService {
 
     private isLoginPage(): boolean {
         return typeof window !== 'undefined' &&
-            window.location?.pathname?.includes('/login');
+            window.location?.pathname?.includes('/signin');
     }
 
     private redirectToLogin(): void {
         if (typeof window !== 'undefined') {
             const language = i18n.language || 'en';
-            window.location.href = `/${language}/login`;
+            window.location.href = `/${language}/signin`;
         }
     }
 

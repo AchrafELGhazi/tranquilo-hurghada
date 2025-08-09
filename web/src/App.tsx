@@ -4,23 +4,31 @@ import { I18nextProvider } from 'react-i18next';
 import i18n from '@/utils/i18n';
 import { LoadingScreen } from '@/components/common/LoadingScreen';
 import { Layout } from './layout/public/Layout';
-import { About } from './pages/public/About';
-import { Services } from './pages/public/Services';
-import { Contact } from './pages/public/Contact';
-import { NotFound } from './pages/public/NotFound';
+import { About } from './pages/guest/About';
+import Services  from './pages/guest/Services';
+import { Contact } from './pages/guest/Contact';
+import { NotFound } from './pages/guest/NotFound';
 import { AdminLayout } from './layout/admin/AdminLayout';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
-import { Unauthorized } from './pages/public/Unauthorized';
-import { Login } from './pages/public/Login';
-import { Register } from './pages/public/Register';
-import { VisitorInfo } from './pages/public/VisitorInfo';
-import Home from './pages/public/Home';
+import { Unauthorized } from './pages/guest/Unauthorized';
+import { Login } from './pages/guest/Login';
+import { Register } from './pages/guest/Register';
+import Home from './pages/guest/Home';
 import ScrollToTop from './utils/scrollToTop';
 import { supportedLanguages } from '@/utils/constants';
 import { normalizeLanguageCode } from '@/utils/normalizeLanguageCode';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import Booking from './pages/guest/Booking';
+import MyBookings from './pages/guest/MyBookings';
+import Profile from './pages/guest/Profile';
+import PracticalInfo from './pages/guest/PracticalInfo';
+import { AdminVillas } from './pages/admin/AdminVillas';
+import { AdminVillaDetails } from './pages/admin/AdminVillaDetails';
+import AdminEditVilla from './pages/admin/AdminEditVilla';
+import { AdminBookings } from './pages/admin/AdminBookings';
+import AdminUsers from './pages/admin/AdminUsers';
 
 const RootRedirect: React.FC = () => {
     const storedLang = localStorage.getItem('preferred-language');
@@ -140,8 +148,11 @@ const App: React.FC = () => {
                                     <Route index element={<Home />} />
                                     <Route path='about' element={<About />} />
                                     <Route path='services' element={<Services />} />
-                                    <Route path='visitorInfo' element={<VisitorInfo />} />
+                                    <Route path='practical-info' element={<PracticalInfo />} />
                                     <Route path='contact' element={<Contact />} />
+                                    <Route path='profile' element={<Profile />} />
+                                    <Route path='booking' element={<Booking />} />
+                                    <Route path='my-bookings' element={<MyBookings />} />
                                     <Route path='signin' element={<Login />} />
                                     <Route path='register' element={<Register />} />
                                     <Route path='404' element={<NotFound />} />
@@ -176,6 +187,11 @@ const App: React.FC = () => {
                                     }
                                 >
                                     <Route index element={<AdminDashboard />} />
+                                    <Route path='villas' element={<AdminVillas />} />
+                                    <Route path='villas/:villaId' element={<AdminVillaDetails />} />
+                                    <Route path='villas/:villaId/edit' element={<AdminEditVilla />} />
+                                    <Route path='bookings' element={<AdminBookings />} />
+                                    <Route path='users' element={<AdminUsers />} />
                                 </Route>
 
                                 <Route path='*' element={<NotFound />} />

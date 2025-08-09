@@ -1,0 +1,14 @@
+when i change a booking from confirmed or cancelled (make attributes of confirmedby/at null ) vice versa
+
+allow host to edit data about their villas
+
+allow cron jobs to change to completed when checko out date is done
+
+allow email service to be sent to host-admin-guest about a certain booking
+
+profile section where teh user get their info (and can edit them), upcoming reservations, reservation history
+
+adding comments to villas and ratings
+
+profile picture (optional)
+
