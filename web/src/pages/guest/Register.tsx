@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useLocation, Link, useParams } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
+import { THToast, THToaster } from '@/components/common/Toast';
 
 export const Register = () => {
     const [formData, setFormData] = useState({
@@ -12,9 +13,8 @@ export const Register = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const [localError, setLocalError] = useState('');
 
-    const { register, isAuthenticated, isLoading, error, clearError } = useAuth();
+    const { register, isAuthenticated, isLoading, clearError } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
     const { lang } = useParams();
@@ -23,12 +23,12 @@ export const Register = () => {
         if (isAuthenticated) {
             const from = (location.state as any)?.from?.pathname || '/';
             navigate(from, { replace: true });
+            THToast.success('Welcome!', 'Your account has been created successfully');
         }
     }, [isAuthenticated, navigate, location]);
 
     useEffect(() => {
         clearError();
-        setLocalError('');
     }, [clearError]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,28 +41,28 @@ export const Register = () => {
 
     const validateForm = (): boolean => {
         if (!formData.email || !formData.password || !formData.fullName) {
-            setLocalError('Please fill in all required fields');
+            THToast.warning('Missing Fields', 'Please fill in all required fields');
             return false;
         }
 
         if (formData.password !== confirmPassword) {
-            setLocalError('Passwords do not match');
+            THToast.error('Password Mismatch', 'Passwords do not match');
             return false;
         }
 
         if (formData.password.length < 6) {
-            setLocalError('Password must be at least 6 characters long');
+            THToast.error('Weak Password', 'Password must be at least 6 characters long');
             return false;
         }
 
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(formData.email)) {
-            setLocalError('Please enter a valid email address');
+            THToast.error('Invalid Email', 'Please enter a valid email address');
             return false;
         }
 
         if (formData.fullName.trim().length < 2) {
-            setLocalError('Full name must be at least 2 characters long');
+            THToast.error('Invalid Name', 'Full name must be at least 2 characters long');
             return false;
         }
 
@@ -71,7 +71,6 @@ export const Register = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setLocalError('');
         clearError();
 
         if (!validateForm()) {
@@ -84,13 +83,20 @@ export const Register = () => {
                 password: formData.password,
                 fullName: formData.fullName.trim(),
             };
-            await register(registerData);
+
+            const registerPromise = register(registerData);
+
+            THToast.promise(registerPromise, {
+                loading: 'Creating your account...',
+                success: 'Account created successfully! Welcome aboard!',
+                error: (err: any) => err.message || 'Registration failed. Please try again.',
+            });
+
+            await registerPromise;
         } catch (err: any) {
-            setLocalError(err.message || 'Registration failed. Please try again.');
+            // Error is already handled by the promise toast
         }
     };
-
-    const displayError = localError || error;
 
     if (isAuthenticated) {
         return (
@@ -111,12 +117,6 @@ export const Register = () => {
 
                 {/* Register Form - Reduced padding and spacing on mobile */}
                 <div className='bg-white/40 backdrop-blur-md border-2 border-[#F8B259]/60 rounded-xl sm:rounded-2xl p-4 sm:p-6'>
-                    {displayError && (
-                        <div className='mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-xs sm:text-sm'>
-                            {displayError}
-                        </div>
-                    )}
-
                     <form onSubmit={handleSubmit} className='space-y-4 sm:space-y-5'>
                         {/* Full Name Field */}
                         <div>
@@ -290,6 +290,9 @@ export const Register = () => {
                     <p className='text-xs text-[#C75D2C]/50'>Your information is secure and protected</p>
                 </div>
             </div>
+
+            {/* THToaster component */}
+            <THToaster position='bottom-right' />
         </div>
     );
 };
