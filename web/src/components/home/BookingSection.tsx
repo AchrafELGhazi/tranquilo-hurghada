@@ -231,7 +231,7 @@ const BookingSection: React.FC = () => {
             <DateRangePickerModal
                 isOpen={showDatePicker}
                 onClose={() => setShowDatePicker(false)}
-                villaId='vil001'
+                villaId='tranquilo-hurghada'
                 onDateSelect={handleDateSelect}
                 initialCheckIn={checkIn}
                 initialCheckOut={checkOut}

@@ -14,8 +14,11 @@ import {
     CheckCircle,
     XCircle,
     Clock,
-    Loader,
     AlertCircle,
+    Home,
+    Mail,
+    Phone,
+    Shield,
 } from 'lucide-react';
 import { villaApi } from '@/api/villaApi';
 import { bookingApi } from '@/api/bookingApi';
@@ -72,9 +75,27 @@ export const AdminVillaDetails: React.FC = () => {
 
     const getStatusBadge = (status: Villa['status']) => {
         const statusConfig = {
-            AVAILABLE: { bg: 'bg-green-100', text: 'text-green-800', icon: CheckCircle, label: 'Available' },
-            UNAVAILABLE: { bg: 'bg-gray-100', text: 'text-gray-800', icon: XCircle, label: 'Unavailable' },
-            MAINTENANCE: { bg: 'bg-yellow-100', text: 'text-yellow-800', icon: Clock, label: 'Maintenance' },
+            AVAILABLE: {
+                bg: 'bg-green-100',
+                text: 'text-green-800',
+                border: 'border-green-200',
+                icon: CheckCircle,
+                label: 'Available',
+            },
+            UNAVAILABLE: {
+                bg: 'bg-gray-100',
+                text: 'text-gray-800',
+                border: 'border-gray-200',
+                icon: XCircle,
+                label: 'Unavailable',
+            },
+            MAINTENANCE: {
+                bg: 'bg-yellow-100',
+                text: 'text-yellow-800',
+                border: 'border-yellow-200',
+                icon: Clock,
+                label: 'Maintenance',
+            },
         };
 
         const config = statusConfig[status];
@@ -82,9 +103,9 @@ export const AdminVillaDetails: React.FC = () => {
 
         return (
             <span
-                className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${config.bg} ${config.text}`}
+                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${config.bg} ${config.text} ${config.border}`}
             >
-                <Icon className='w-4 h-4 mr-2' />
+                <Icon className='w-3 h-3 mr-1' />
                 {config.label}
             </span>
         );
@@ -92,19 +113,39 @@ export const AdminVillaDetails: React.FC = () => {
 
     const getBookingStatusBadge = (status: Booking['status']) => {
         const statusConfig = {
-            PENDING: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Pending' },
-            CONFIRMED: { bg: 'bg-green-100', text: 'text-green-800', label: 'Confirmed' },
-            CANCELLED: { bg: 'bg-red-100', text: 'text-red-800', label: 'Cancelled' },
-            REJECTED: { bg: 'bg-red-100', text: 'text-red-800', label: 'Rejected' },
-            COMPLETED: { bg: 'bg-blue-100', text: 'text-blue-800', label: 'Completed' },
+            PENDING: { bg: 'bg-yellow-100', text: 'text-yellow-800', border: 'border-yellow-200', label: 'Pending' },
+            CONFIRMED: { bg: 'bg-green-100', text: 'text-green-800', border: 'border-green-200', label: 'Confirmed' },
+            CANCELLED: { bg: 'bg-red-100', text: 'text-red-800', border: 'border-red-200', label: 'Cancelled' },
+            REJECTED: { bg: 'bg-red-100', text: 'text-red-800', border: 'border-red-200', label: 'Rejected' },
+            COMPLETED: { bg: 'bg-blue-100', text: 'text-blue-800', border: 'border-blue-200', label: 'Completed' },
         };
 
         const config = statusConfig[status];
         return (
             <span
-                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.bg} ${config.text}`}
+                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${config.bg} ${config.text} ${config.border}`}
             >
                 {config.label}
+            </span>
+        );
+    };
+
+    const getRoleBadge = (role: string) => {
+        const roleConfig = {
+            ADMIN: { color: 'bg-purple-100 text-purple-800 border-purple-200', icon: Shield },
+            HOST: { color: 'bg-blue-100 text-blue-800 border-blue-200', icon: Users },
+            GUEST: { color: 'bg-orange-100 text-orange-800 border-orange-200', icon: Shield },
+        };
+
+        const config = roleConfig[role as keyof typeof roleConfig] || roleConfig.GUEST;
+        const Icon = config.icon;
+
+        return (
+            <span
+                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${config.color}`}
+            >
+                <Icon className='w-3 h-3 mr-1' />
+                {role}
             </span>
         );
     };
@@ -119,10 +160,12 @@ export const AdminVillaDetails: React.FC = () => {
 
     if (loading) {
         return (
-            <div className='flex items-center justify-center min-h-96'>
-                <div className='text-center'>
-                    <Loader className='w-8 h-8 animate-spin text-blue-600 mx-auto mb-4' />
-                    <p className='text-gray-600'>Loading villa details...</p>
+            <div className='min-h-screen'>
+                <div className='max-w-7xl mx-auto space-y-6'>
+                    <div className='bg-white/40 backdrop-blur-md border-2 border-[#F8B259]/70 rounded-2xl p-8 text-center'>
+                        <div className='w-8 h-8 border-2 border-[#D96F32]/30 border-t-[#D96F32] rounded-full animate-spin mx-auto mb-4'></div>
+                        <p className='text-[#C75D2C]/70'>Loading villa details...</p>
+                    </div>
                 </div>
             </div>
         );
@@ -130,348 +173,340 @@ export const AdminVillaDetails: React.FC = () => {
 
     if (error || !villa) {
         return (
-            <div className='bg-red-50 border border-red-200 rounded-lg p-6'>
-                <div className='flex items-center'>
-                    <AlertCircle className='w-5 h-5 text-red-600 mr-2' />
-                    <p className='text-red-800'>{error || 'Villa not found'}</p>
+            <div className='min-h-screen'>
+                <div className='max-w-7xl mx-auto space-y-6'>
+                    <div className='bg-red-50/80 backdrop-blur-sm border-2 border-red-200/60 rounded-xl p-6 flex items-start space-x-3'>
+                        <AlertCircle className='w-5 h-5 text-red-600 mt-0.5 flex-shrink-0' />
+                        <div>
+                            <p className='text-red-800 font-semibold'>Error</p>
+                            <p className='text-red-700 text-sm mt-1'>{error || 'Villa not found'}</p>
+                            <Link
+                                to={`/${lang}/admin/villas`}
+                                className='inline-flex items-center mt-4 px-4 py-2 bg-gradient-to-r from-[#D96F32] to-[#C75D2C] text-white rounded-xl hover:from-[#C75D2C] hover:to-[#D96F32] transition-all duration-300 font-medium'
+                            >
+                                <ArrowLeft className='w-4 h-4 mr-2' />
+                                Back to Villas
+                            </Link>
+                        </div>
+                    </div>
                 </div>
-                <Link
-                    to={`/${lang}/admin/villas`}
-                    className='inline-flex items-center mt-4 text-blue-600 hover:text-blue-700'
-                >
-                    <ArrowLeft className='w-4 h-4 mr-2' />
-                    Back to Villas
-                </Link>
             </div>
         );
     }
 
     return (
-        <div className='space-y-6'>
-            {/* Header */}
-            <div className='flex items-center justify-between'>
-                <div className='flex items-center space-x-4'>
-                    <Link
-                        to={`/${lang}/admin/villas`}
-                        className='inline-flex items-center text-gray-600 hover:text-gray-900'
-                    >
-                        <ArrowLeft className='w-5 h-5 mr-2' />
-                        Back to Villas
-                    </Link>
-                    <div>
-                        <h1 className='text-2xl font-bold text-gray-900'>{villa.title}</h1>
-                        <div className='flex items-center space-x-4 mt-1'>
-                            <div className='flex items-center text-gray-600'>
-                                <MapPin className='w-4 h-4 mr-1' />
-                                {villa.address}, {villa.city}, {villa.country}
+        <div className='min-h-screen'>
+            <div className='max-w-7xl mx-auto space-y-6'>
+          
+                <div className='bg-white/40 backdrop-blur-md border-2 border-[#F8B259]/70 rounded-2xl p-6'>
+                    <div className='flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4'>
+                        <div className='flex items-start space-x-4'>
+                            <div>
+                                <h1 className='text-2xl font-bold text-[#C75D2C] font-butler'>{villa.title}</h1>
+                                <div className='flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-2'>
+                                    <div className='flex items-center text-[#C75D2C]/70'>
+                                        <MapPin className='w-4 h-4 mr-1 text-[#D96F32]' />
+                                        {villa.address}, {villa.city}, {villa.country}
+                                    </div>
+                                    {getStatusBadge(villa.status)}
+                                </div>
                             </div>
-                            {getStatusBadge(villa.status)}
                         </div>
+                        <Link
+                            to={`/${lang}/admin/villas/${villa.id}/edit`}
+                            className='inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#D96F32] to-[#C75D2C] text-white rounded-xl hover:from-[#C75D2C] hover:to-[#D96F32] transition-all duration-300 font-medium'
+                        >
+                            <Edit className='w-4 h-4 mr-2' />
+                            Edit Villa
+                        </Link>
                     </div>
                 </div>
-                <Link
-                    to={`/${lang}/admin/villas/${villa.id}/edit`}
-                    className='inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors'
-                >
-                    <Edit className='w-4 h-4 mr-2' />
-                    Edit Villa
-                </Link>
-            </div>
+                {/* Tabs */}
+                <div className='bg-white/40 backdrop-blur-md border-2 border-[#F8B259]/70 rounded-2xl overflow-hidden'>
+                    <div className='border-b-2 border-[#F8B259]/50'>
+                        <nav className='flex'>
+                            <button
+                                onClick={() => setActiveTab('details')}
+                                className={`py-4 px-6 font-medium text-sm transition-all duration-300 ${
+                                    activeTab === 'details'
+                                        ? 'border-b-2 border-[#D96F32] text-[#D96F32] bg-white/20'
+                                        : 'text-[#C75D2C]/70 hover:text-[#C75D2C] hover:bg-white/10'
+                                }`}
+                            >
+                                Villa Details
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('bookings')}
+                                className={`py-4 px-6 font-medium text-sm transition-all duration-300 ${
+                                    activeTab === 'bookings'
+                                        ? 'border-b-2 border-[#D96F32] text-[#D96F32] bg-white/20'
+                                        : 'text-[#C75D2C]/70 hover:text-[#C75D2C] hover:bg-white/10'
+                                }`}
+                            >
+                                Bookings ({bookings?.length || 0})
+                            </button>
+                        </nav>
+                    </div>
 
-            {/* Tabs */}
-            <div className='border-b border-gray-200'>
-                <nav className='-mb-px flex space-x-8'>
-                    <button
-                        onClick={() => setActiveTab('details')}
-                        className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                            activeTab === 'details'
-                                ? 'border-blue-500 text-blue-600'
-                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                        }`}
-                    >
-                        Villa Details
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('bookings')}
-                        className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                            activeTab === 'bookings'
-                                ? 'border-blue-500 text-blue-600'
-                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                        }`}
-                    >
-                        Bookings ({bookings?.length || 0})
-                    </button>
-                </nav>
-            </div>
-
-            {/* Tab Content */}
-            {activeTab === 'details' ? (
-                <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
-                    {/* Images */}
-                    <div className='lg:col-span-2'>
-                        <div className='bg-white rounded-lg border border-gray-200 overflow-hidden'>
-                            <div className='aspect-video bg-gray-200'>
-                                {villa.images && villa.images.length > 0 ? (
-                                    <img
-                                        src={villa.images[0]}
-                                        alt={villa.title}
-                                        className='w-full h-full object-cover'
-                                        onError={e => {
-                                            e.currentTarget.style.display = 'none';
-                                        }}
-                                    />
-                                ) : null}
-                             
-                            </div>
-
-                            {villa.images && villa.images.length > 1 && (
-                                <div className='p-4'>
-                                    <h3 className='font-medium text-gray-900 mb-3'>
-                                        Additional Images ({villa.images.length - 1})
-                                    </h3>
-                                    <div className='grid grid-cols-3 gap-3'>
-                                        {villa.images.slice(1).map((image, index) => (
-                                            <div
-                                                key={index}
-                                                className='aspect-square bg-gray-200 rounded-lg overflow-hidden'
-                                            >
+                    {/* Tab Content */}
+                    <div className='p-6'>
+                        {activeTab === 'details' ? (
+                            <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
+                                {/* Images */}
+                                <div className='lg:col-span-2'>
+                                    <div className='bg-white/60 backdrop-blur-sm border-2 border-[#F8B259]/50 rounded-2xl overflow-hidden'>
+                                        <div className='aspect-video bg-gradient-to-br from-[#F8B259]/20 to-[#DEB887]/20 relative'>
+                                            {villa.images && villa.images.length > 0 ? (
                                                 <img
-                                                    src={image}
-                                                    alt={`${villa.title} ${index + 2}`}
+                                                    src={villa.images[0]}
+                                                    alt={villa.title}
                                                     className='w-full h-full object-cover'
                                                     onError={e => {
                                                         e.currentTarget.style.display = 'none';
                                                     }}
                                                 />
-                                                <div className='w-full h-full flex items-center justify-center text-gray-400 text-xs'>
-                                                    Failed to load
+                                            ) : (
+                                                <div className='w-full h-full flex items-center justify-center text-[#C75D2C]/50'>
+                                                    <Home className='w-16 h-16' />
+                                                </div>
+                                            )}
+                                            <div className='absolute top-3 right-3'>
+                                                <div className='bg-white/90 backdrop-blur-sm px-3 py-1 rounded-lg'>
+                                                    <span className='text-xs font-medium text-[#C75D2C]'>
+                                                        ID: {villa.id.substring(0, 8)}...
+                                                    </span>
                                                 </div>
                                             </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
+                                        </div>
 
-                    {/* Villa Info */}
-                    <div className='space-y-6'>
-                        {/* Basic Info */}
-                        <div className='bg-white rounded-lg border border-gray-200 p-6'>
-                            <h3 className='font-semibold text-lg text-gray-900 mb-4'>Basic Information</h3>
-
-                            <div className='space-y-4'>
-                                <div className='grid grid-cols-2 gap-4'>
-                                    <div className='flex items-center'>
-                                        <BedDouble className='w-5 h-5 text-gray-400 mr-3' />
-                                        <div>
-                                            <p className='text-sm text-gray-600'>Bedrooms</p>
-                                            <p className='font-medium'>{villa.bedrooms}</p>
-                                        </div>
-                                    </div>
-                                    <div className='flex items-center'>
-                                        <Bath className='w-5 h-5 text-gray-400 mr-3' />
-                                        <div>
-                                            <p className='text-sm text-gray-600'>Bathrooms</p>
-                                            <p className='font-medium'>{villa.bathrooms}</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className='grid grid-cols-2 gap-4'>
-                                    <div className='flex items-center'>
-                                        <Users className='w-5 h-5 text-gray-400 mr-3' />
-                                        <div>
-                                            <p className='text-sm text-gray-600'>Max Guests</p>
-                                            <p className='font-medium'>{villa.maxGuests}</p>
-                                        </div>
-                                    </div>
-                                    <div className='flex items-center'>
-                                        <DollarSign className='w-5 h-5 text-gray-400 mr-3' />
-                                        <div>
-                                            <p className='text-sm text-gray-600'>Price per Night</p>
-                                            <p className='font-medium'>
-                                                {villaApi.formatPrice(Number(villa.pricePerNight))}
-                                            </p>
-                                        </div>
+                                        {villa.images && villa.images.length > 1 && (
+                                            <div className='p-4'>
+                                                <h3 className='font-semibold text-[#C75D2C] mb-3'>
+                                                    Additional Images ({villa.images.length - 1})
+                                                </h3>
+                                                <div className='grid grid-cols-3 gap-3'>
+                                                    {villa.images.slice(1).map((image, index) => (
+                                                        <div
+                                                            key={index}
+                                                            className='aspect-square bg-gradient-to-br from-[#F8B259]/20 to-[#DEB887]/20 rounded-xl overflow-hidden border border-[#F8B259]/30'
+                                                        >
+                                                            <img
+                                                                src={image}
+                                                                alt={`${villa.title} ${index + 2}`}
+                                                                className='w-full h-full object-cover'
+                                                                onError={e => {
+                                                                    e.currentTarget.style.display = 'none';
+                                                                }}
+                                                            />
+                                                            <div className='w-full h-full flex items-center justify-center text-[#C75D2C]/50 text-xs'>
+                                                                <Home className='w-6 h-6' />
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 
-                                <div className='flex items-center'>
-                                    {villa.isActive ? (
-                                        <Eye className='w-5 h-5 text-green-500 mr-3' />
-                                    ) : (
-                                        <EyeOff className='w-5 h-5 text-red-500 mr-3' />
+                                {/* Villa Info */}
+                                <div className='space-y-6'>
+                                    {/* Basic Info */}
+                                    <div className='bg-white/30 border border-[#F8B259]/50 rounded-xl p-6'>
+                                        <h3 className='font-semibold text-[#C75D2C] mb-4'>Basic Information</h3>
+                                        <div className='space-y-4'>
+                                            <div className='grid grid-cols-2 gap-4'>
+                                                <div className='flex items-center'>
+                                                    <BedDouble className='w-5 h-5 text-[#D96F32] mr-3' />
+                                                    <div>
+                                                        <p className='text-xs text-[#C75D2C]/60'>Bedrooms</p>
+                                                        <p className='font-semibold text-[#C75D2C]'>{villa.bedrooms}</p>
+                                                    </div>
+                                                </div>
+                                                <div className='flex items-center'>
+                                                    <Bath className='w-5 h-5 text-[#D96F32] mr-3' />
+                                                    <div>
+                                                        <p className='text-xs text-[#C75D2C]/60'>Bathrooms</p>
+                                                        <p className='font-semibold text-[#C75D2C]'>
+                                                            {villa.bathrooms}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className='grid grid-cols-2 gap-4'>
+                                                <div className='flex items-center'>
+                                                    <Users className='w-5 h-5 text-[#D96F32] mr-3' />
+                                                    <div>
+                                                        <p className='text-xs text-[#C75D2C]/60'>Max Guests</p>
+                                                        <p className='font-semibold text-[#C75D2C]'>
+                                                            {villa.maxGuests}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div className='flex items-center'>
+                                                    <DollarSign className='w-5 h-5 text-[#D96F32] mr-3' />
+                                                    <div>
+                                                        <p className='text-xs text-[#C75D2C]/60'>Price/Night</p>
+                                                        <p className='font-semibold text-[#C75D2C]'>
+                                                            {villaApi.formatPrice(Number(villa.pricePerNight))}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className='flex items-center'>
+                                                {villa.isActive ? (
+                                                    <Eye className='w-5 h-5 text-green-500 mr-3' />
+                                                ) : (
+                                                    <EyeOff className='w-5 h-5 text-red-500 mr-3' />
+                                                )}
+                                                <div>
+                                                    <p className='text-xs text-[#C75D2C]/60'>Visibility</p>
+                                                    <p className='font-semibold text-[#C75D2C]'>
+                                                        {villa.isActive ? 'Active' : 'Inactive'}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Description and Amenities */}
+                                <div className='lg:col-span-3 space-y-6'>
+                                    {/* Description */}
+                                    {villa.description && (
+                                        <div className='bg-white/30 border border-[#F8B259]/50 rounded-xl p-6'>
+                                            <h3 className='font-semibold text-[#C75D2C] mb-4'>Description</h3>
+                                            <p className='text-[#C75D2C]/80 leading-relaxed'>{villa.description}</p>
+                                        </div>
                                     )}
-                                    <div>
-                                        <p className='text-sm text-gray-600'>Visibility</p>
-                                        <p className='font-medium'>{villa.isActive ? 'Active' : 'Inactive'}</p>
+
+                                    {/* Amenities */}
+                                    <div className='bg-white/30 border border-[#F8B259]/50 rounded-xl p-6'>
+                                        <h3 className='font-semibold text-[#C75D2C] mb-4'>
+                                            Amenities ({villa.amenities?.length || 0})
+                                        </h3>
+                                        {villa.amenities && villa.amenities.length > 0 ? (
+                                            <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3'>
+                                                {villa.amenities.map((amenity, index) => (
+                                                    <div
+                                                        key={index}
+                                                        className='flex items-center p-3 bg-white/40 rounded-lg border border-[#F8B259]/30'
+                                                    >
+                                                        <span className='text-sm font-medium text-[#C75D2C]'>
+                                                            {villaApi.getAmenityDisplayName(amenity)}
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <p className='text-[#C75D2C]/60'>No amenities listed</p>
+                                        )}
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        ) : (
+                            /* Bookings Tab */
+                            <div className='space-y-6'>
+                                <div className='text-center'>
+                                    <h3 className='font-semibold text-lg text-[#C75D2C] mb-2'>Booking History</h3>
+                                    <p className='text-[#C75D2C]/70'>All bookings for this villa</p>
+                                </div>
 
-                        {/* Owner Info */}
-                        <div className='bg-white rounded-lg border border-gray-200 p-6'>
-                            <h3 className='font-semibold text-lg text-gray-900 mb-4'>Owner Information</h3>
-                            <div className='space-y-3'>
-                                <div>
-                                    <p className='text-sm text-gray-600'>Name</p>
-                                    <p className='font-medium'>{villa.owner.fullName}</p>
-                                </div>
-                                <div>
-                                    <p className='text-sm text-gray-600'>Email</p>
-                                    <p className='font-medium'>{villa.owner.email}</p>
-                                </div>
-                                {villa.owner.phone && (
-                                    <div>
-                                        <p className='text-sm text-gray-600'>Phone</p>
-                                        <p className='font-medium'>{villa.owner.phone}</p>
+                                {bookings && bookings.length > 0 ? (
+                                    <div className='bg-white/60 backdrop-blur-sm border-2 border-[#F8B259]/50 rounded-2xl overflow-hidden'>
+                                        <div className='overflow-x-auto'>
+                                            <table className='w-full'>
+                                                <thead className='bg-gradient-to-r from-[#F8B259]/20 to-[#DEB887]/20 border-b-2 border-[#F8B259]/50'>
+                                                    <tr>
+                                                        <th className='px-6 py-4 text-left text-xs font-bold text-[#C75D2C] uppercase tracking-wider'>
+                                                            Guest
+                                                        </th>
+                                                        <th className='px-6 py-4 text-left text-xs font-bold text-[#C75D2C] uppercase tracking-wider'>
+                                                            Check-in
+                                                        </th>
+                                                        <th className='px-6 py-4 text-left text-xs font-bold text-[#C75D2C] uppercase tracking-wider'>
+                                                            Check-out
+                                                        </th>
+                                                        <th className='px-6 py-4 text-left text-xs font-bold text-[#C75D2C] uppercase tracking-wider'>
+                                                            Guests
+                                                        </th>
+                                                        <th className='px-6 py-4 text-left text-xs font-bold text-[#C75D2C] uppercase tracking-wider'>
+                                                            Total Price
+                                                        </th>
+                                                        <th className='px-6 py-4 text-left text-xs font-bold text-[#C75D2C] uppercase tracking-wider'>
+                                                            Status
+                                                        </th>
+                                                        <th className='px-6 py-4 text-left text-xs font-bold text-[#C75D2C] uppercase tracking-wider'>
+                                                            Created
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className='divide-y divide-[#F8B259]/30'>
+                                                    {bookings.map(booking => (
+                                                        <tr
+                                                            key={booking.id}
+                                                            className='hover:bg-white/20 transition-colors duration-200'
+                                                        >
+                                                            <td className='px-6 py-4'>
+                                                                <div className='flex items-center space-x-3'>
+                                                                    <div className='w-10 h-10 bg-gradient-to-br from-[#F8B259]/30 to-[#DEB887]/30 rounded-lg flex items-center justify-center'>
+                                                                        <span className='text-sm font-medium text-[#8B4513]'>
+                                                                            {booking.guest?.fullName
+                                                                                ?.charAt(0)
+                                                                                ?.toUpperCase() || 'G'}
+                                                                        </span>
+                                                                    </div>
+                                                                    <div>
+                                                                        <p className='font-semibold text-[#C75D2C]'>
+                                                                            {booking.guest?.fullName || 'Unknown Guest'}
+                                                                        </p>
+                                                                        <p className='text-xs text-[#C75D2C]/60'>
+                                                                            {booking.guest?.email || 'No email'}
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td className='px-6 py-4 whitespace-nowrap text-sm text-[#C75D2C]'>
+                                                                {formatDate(booking.checkIn)}
+                                                            </td>
+                                                            <td className='px-6 py-4 whitespace-nowrap text-sm text-[#C75D2C]'>
+                                                                {formatDate(booking.checkOut)}
+                                                            </td>
+                                                            <td className='px-6 py-4 whitespace-nowrap text-sm text-[#C75D2C]'>
+                                                                {booking.totalGuests} guests
+                                                            </td>
+                                                            <td className='px-6 py-4 whitespace-nowrap'>
+                                                                <div className='flex items-center text-sm font-medium text-[#C75D2C]'>
+                                                                    <DollarSign className='w-4 h-4 mr-1' />
+                                                                    {bookingApi.formatPrice(Number(booking.totalPrice))}
+                                                                </div>
+                                                            </td>
+                                                            <td className='px-6 py-4 whitespace-nowrap'>
+                                                                {getBookingStatusBadge(booking.status)}
+                                                            </td>
+                                                            <td className='px-6 py-4 whitespace-nowrap text-sm text-[#C75D2C]/60'>
+                                                                {formatDate(booking.createdAt)}
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className='bg-white/30 border border-[#F8B259]/50 rounded-xl p-12 text-center'>
+                                        <Calendar className='w-12 h-12 text-[#D96F32]/50 mx-auto mb-4' />
+                                        <h3 className='text-lg font-semibold text-[#C75D2C] mb-2'>No Bookings Yet</h3>
+                                        <p className='text-[#C75D2C]/70'>This villa hasn't received any bookings.</p>
                                     </div>
                                 )}
-                                <div>
-                                    <p className='text-sm text-gray-600'>Role</p>
-                                    <p className='font-medium'>{villa.owner.role}</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Dates */}
-                        <div className='bg-white rounded-lg border border-gray-200 p-6'>
-                            <h3 className='font-semibold text-lg text-gray-900 mb-4'>Important Dates</h3>
-                            <div className='space-y-3'>
-                                <div className='flex items-center'>
-                                    <Calendar className='w-5 h-5 text-gray-400 mr-3' />
-                                    <div>
-                                        <p className='text-sm text-gray-600'>Created</p>
-                                        <p className='font-medium'>{formatDate(villa.createdAt)}</p>
-                                    </div>
-                                </div>
-                                <div className='flex items-center'>
-                                    <Calendar className='w-5 h-5 text-gray-400 mr-3' />
-                                    <div>
-                                        <p className='text-sm text-gray-600'>Last Updated</p>
-                                        <p className='font-medium'>{formatDate(villa.updatedAt)}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Description and Amenities */}
-                    <div className='lg:col-span-3 space-y-6'>
-                        {/* Description */}
-                        {villa.description && (
-                            <div className='bg-white rounded-lg border border-gray-200 p-6'>
-                                <h3 className='font-semibold text-lg text-gray-900 mb-4'>Description</h3>
-                                <p className='text-gray-700 leading-relaxed'>{villa.description}</p>
                             </div>
                         )}
-
-                        {/* Amenities */}
-                        <div className='bg-white rounded-lg border border-gray-200 p-6'>
-                            <h3 className='font-semibold text-lg text-gray-900 mb-4'>
-                                Amenities ({villa.amenities?.length || 0})
-                            </h3>
-                            {villa.amenities && villa.amenities.length > 0 ? (
-                                <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3'>
-                                    {villa.amenities.map((amenity, index) => (
-                                        <div key={index} className='flex items-center p-3 bg-gray-50 rounded-lg'>
-                                            <span className='text-sm font-medium'>
-                                                {villaApi.getAmenityDisplayName(amenity)}
-                                            </span>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <p className='text-gray-500'>No amenities listed</p>
-                            )}
-                        </div>
                     </div>
                 </div>
-            ) : (
-                /* Bookings Tab */
-                <div className='bg-white rounded-lg border border-gray-200'>
-                    <div className='p-6 border-b border-gray-200'>
-                        <h3 className='font-semibold text-lg text-gray-900'>Booking History</h3>
-                        <p className='text-gray-600'>All bookings for this villa</p>
-                    </div>
-
-                    {bookings && bookings.length > 0 ? (
-                        <div className='overflow-x-auto'>
-                            <table className='w-full'>
-                                <thead className='bg-gray-50'>
-                                    <tr>
-                                        <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                                            Guest
-                                        </th>
-                                        <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                                            Dates
-                                        </th>
-                                        <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                                            Guests
-                                        </th>
-                                        <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                                            Total Price
-                                        </th>
-                                        <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                                            Status
-                                        </th>
-                                        <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                                            Created
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody className='bg-white divide-y divide-gray-200'>
-                                    {bookings.map(booking => (
-                                        <tr key={booking.id} className='hover:bg-gray-50'>
-                                            <td className='px-6 py-4 whitespace-nowrap'>
-                                                <div>
-                                                    <div className='text-sm font-medium text-gray-900'>
-                                                        {booking.guest?.fullName || 'Unknown Guest'}
-                                                    </div>
-                                                    <div className='text-sm text-gray-500'>
-                                                        {booking.guest?.email || 'No email'}
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className='px-6 py-4 whitespace-nowrap'>
-                                                <div className='text-sm text-gray-900'>
-                                                    {formatDate(booking.checkIn)} - {formatDate(booking.checkOut)}
-                                                </div>
-                                                <div className='text-sm text-gray-500'>
-                                                    {bookingApi.getStayDuration(booking.checkIn, booking.checkOut)}{' '}
-                                                    nights
-                                                </div>
-                                            </td>
-                                            <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
-                                                {booking.totalGuests} guests
-                                            </td>
-                                            <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
-                                                {bookingApi.formatPrice(Number(booking.totalPrice))}
-                                            </td>
-                                            <td className='px-6 py-4 whitespace-nowrap'>
-                                                {getBookingStatusBadge(booking.status)}
-                                            </td>
-                                            <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
-                                                {formatDate(booking.createdAt)}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    ) : (
-                        <div className='p-6 text-center'>
-                            <div className='w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4'>
-                                <Calendar className='w-8 h-8 text-gray-400' />
-                            </div>
-                            <h3 className='text-lg font-medium text-gray-900 mb-2'>No Bookings Yet</h3>
-                            <p className='text-gray-600'>This villa hasn't received any bookings.</p>
-                        </div>
-                    )}
-                </div>
-            )}
+            </div>
         </div>
     );
 };
