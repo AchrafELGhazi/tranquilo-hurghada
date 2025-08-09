@@ -8,7 +8,8 @@ import {
     cancelBookingRequest,
     completeBookingRequest,
     getMyBookings,
-    getVillaBookedDates
+    getVillaBookedDates,
+    toggleBookingPaidStatus
 } from '../controllers/booking.controller';
 import { authenticate, requireGuest, requireHost, requireAdmin } from '../middleware/auth.middleware';
 import {
@@ -36,6 +37,7 @@ bookingRouter.get('/my', validatePaginationParams, validateBookingFilters, getMy
 // Get villa booked dates
 bookingRouter.get('/villa/:villaId/booked-dates', validateVillaBookedDatesParams, getVillaBookedDates);
 
+
 // Get specific booking details
 bookingRouter.get('/:bookingId', getBookingDetails);
 
@@ -47,6 +49,7 @@ bookingRouter.put('/:bookingId/reject', validateBookingAction, requireHost, reje
 
 // Cancel a booking (guests, hosts, and admins)
 bookingRouter.put('/:bookingId/cancel', validateBookingAction, cancelBookingRequest);
+bookingRouter.put('/:bookingId/toggle-payment', toggleBookingPaidStatus);
 
 // Complete a booking (admins only)
 bookingRouter.put('/:bookingId/complete', requireAdmin, completeBookingRequest);

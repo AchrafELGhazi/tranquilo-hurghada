@@ -364,6 +364,58 @@ class BookingApi {
             maximumFractionDigits: 0
         }).format(price);
     }
+
+    /**
+     * Toggle booking payment status (villa owners and admins only)
+     */
+    async toggleBookingPaymentStatus(bookingId: string): Promise<Booking> {
+        if (!bookingId) {
+            throw new Error('Booking ID is required');
+        }
+
+        const response = await apiService.put<Booking>(`/bookings/${bookingId}/toggle-payment`);
+
+        if (response.success && response.data) {
+            return response.data;
+        }
+
+        throw new Error(response.message || 'Failed to toggle booking payment status');
+    }
+
+    /**
+     * Check if payment status can be toggled by the current user
+     */
+    canTogglePayment(booking: Booking, currentUserId: string, userRole: UserRole): boolean {
+        if (booking.status !== 'CONFIRMED') {
+            return false;
+        }
+
+        const isVillaOwner = booking.villa.ownerId === currentUserId;
+        const isAdmin = userRole === 'ADMIN';
+
+        return isVillaOwner || isAdmin;
+    }
+
+    /**
+     * Get payment status badge color and text
+     */
+    getPaymentStatusInfo(isPaid: boolean): { color: string; text: string; bgColor: string; textColor: string } {
+        if (isPaid) {
+            return {
+                color: 'green',
+                text: 'Paid',
+                bgColor: 'bg-green-100',
+                textColor: 'text-green-800'
+            };
+        } else {
+            return {
+                color: 'red',
+                text: 'Unpaid',
+                bgColor: 'bg-red-100',
+                textColor: 'text-red-800'
+            };
+        }
+    }
 }
 
 export const bookingApi = new BookingApi();

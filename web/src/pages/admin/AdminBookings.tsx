@@ -11,12 +11,15 @@ import {
     ChevronRight,
     RefreshCw,
     Eye,
+    CreditCard,
 } from 'lucide-react';
 import { bookingApi, type BookingFilters } from '@/api/bookingApi';
 import { THToast, THToaster } from '@/components/common/Toast';
 import type { Booking, BookingStatus } from '@/utils/types';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const AdminBookings: React.FC = () => {
+    const { user } = useAuth();
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
@@ -34,6 +37,7 @@ export const AdminBookings: React.FC = () => {
     const [actionType, setActionType] = useState<'confirm' | 'reject' | 'complete' | null>(null);
     const [actionReason, setActionReason] = useState('');
     const [actionLoading, setActionLoading] = useState(false);
+    const [paymentToggleLoading, setPaymentToggleLoading] = useState<string | null>(null);
 
     const fetchBookings = async () => {
         try {
@@ -118,7 +122,9 @@ export const AdminBookings: React.FC = () => {
 
             THToast.promise(actionPromise(), {
                 loading: `${actionType.charAt(0).toUpperCase() + actionType.slice(1)}ing booking...`,
-                success: `Booking ${actionType === 'confirm' ? 'confirmed' : actionType === 'reject' ? 'rejected' : 'completed'} successfully!`,
+                success: `Booking ${
+                    actionType === 'confirm' ? 'confirmed' : actionType === 'reject' ? 'rejected' : 'completed'
+                } successfully!`,
                 error: (err: any) => err.message || `Failed to ${actionType} booking`,
             });
 
@@ -129,6 +135,34 @@ export const AdminBookings: React.FC = () => {
             // Error is already handled by THToast.promise
         } finally {
             setActionLoading(false);
+        }
+    };
+
+    const handleTogglePayment = async (booking: Booking) => {
+        if (!user || !bookingApi.canTogglePayment(booking, user.id, user.role)) {
+            THToast.error('Access Denied', 'You do not have permission to update payment status');
+            return;
+        }
+
+        try {
+            setPaymentToggleLoading(booking.id);
+
+            const togglePromise = async () => {
+                await bookingApi.toggleBookingPaymentStatus(booking.id);
+            };
+
+            THToast.promise(togglePromise(), {
+                loading: 'Updating payment status...',
+                success: `Payment status updated successfully!`,
+                error: (err: any) => err.message || 'Failed to update payment status',
+            });
+
+            await togglePromise();
+            fetchBookings(); // Refresh the list
+        } catch (err: any) {
+            // Error is already handled by THToast.promise
+        } finally {
+            setPaymentToggleLoading(null);
         }
     };
 
@@ -185,6 +219,19 @@ export const AdminBookings: React.FC = () => {
             >
                 <Icon className='w-3 h-3 mr-1' />
                 {config.label}
+            </span>
+        );
+    };
+
+    const getPaymentBadge = (isPaid: boolean) => {
+        const paymentInfo = bookingApi.getPaymentStatusInfo(isPaid);
+
+        return (
+            <span
+                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${paymentInfo.bgColor} ${paymentInfo.textColor} border-current/20`}
+            >
+                <DollarSign className='w-3 h-3 mr-1' />
+                {paymentInfo.text}
             </span>
         );
     };
@@ -396,6 +443,9 @@ export const AdminBookings: React.FC = () => {
                                                     Status
                                                 </th>
                                                 <th className='px-6 py-4 text-left text-xs font-bold text-[#C75D2C] uppercase tracking-wider'>
+                                                    Payment
+                                                </th>
+                                                <th className='px-6 py-4 text-left text-xs font-bold text-[#C75D2C] uppercase tracking-wider'>
                                                     Created
                                                 </th>
                                                 <th className='px-6 py-4 text-left text-xs font-bold text-[#C75D2C] uppercase tracking-wider'>
@@ -460,6 +510,39 @@ export const AdminBookings: React.FC = () => {
 
                                                     <td className='px-6 py-4 whitespace-nowrap'>
                                                         {getStatusBadge(booking.status)}
+                                                    </td>
+
+                                                    <td className='px-6 py-4 whitespace-nowrap'>
+                                                        <div className='flex items-center space-x-2'>
+                                                            {getPaymentBadge(booking.isPaid)}
+                                                            {user &&
+                                                                bookingApi.canTogglePayment(
+                                                                    booking,
+                                                                    user.id,
+                                                                    user.role
+                                                                ) && (
+                                                                    <button
+                                                                        onClick={() => handleTogglePayment(booking)}
+                                                                        disabled={paymentToggleLoading === booking.id}
+                                                                        className={`p-1 rounded-lg text-xs font-medium transition-colors duration-200 ${
+                                                                            booking.isPaid
+                                                                                ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                                                                                : 'bg-green-100 text-green-700 hover:bg-green-200'
+                                                                        } disabled:opacity-50 disabled:cursor-not-allowed`}
+                                                                        title={`Mark as ${
+                                                                            booking.isPaid ? 'unpaid' : 'paid'
+                                                                        }`}
+                                                                    >
+                                                                        {paymentToggleLoading === booking.id ? (
+                                                                            <div className='w-3 h-3 border border-current/30 border-t-current rounded-full animate-spin'></div>
+                                                                        ) : booking.isPaid ? (
+                                                                            'Mark Unpaid'
+                                                                        ) : (
+                                                                            'Mark Paid'
+                                                                        )}
+                                                                    </button>
+                                                                )}
+                                                        </div>
                                                     </td>
 
                                                     <td className='px-6 py-4 whitespace-nowrap text-sm text-[#C75D2C]/60'>
@@ -642,7 +725,37 @@ export const AdminBookings: React.FC = () => {
                                                 </p>
                                             </div>
                                             <div>
-                                                <p className='text-[#C75D2C]/60'>Status</p>
+                                                <p className='text-[#C75D2C]/60'>Payment Status</p>
+                                                <div className='mt-1 flex items-center space-x-2'>
+                                                    {getPaymentBadge(selectedBooking.isPaid)}
+                                                    {user &&
+                                                        bookingApi.canTogglePayment(
+                                                            selectedBooking,
+                                                            user.id,
+                                                            user.role
+                                                        ) && (
+                                                            <button
+                                                                onClick={() => handleTogglePayment(selectedBooking)}
+                                                                disabled={paymentToggleLoading === selectedBooking.id}
+                                                                className={`px-2 py-1 rounded-lg text-xs font-medium transition-colors duration-200 ${
+                                                                    selectedBooking.isPaid
+                                                                        ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                                                                        : 'bg-green-100 text-green-700 hover:bg-green-200'
+                                                                } disabled:opacity-50 disabled:cursor-not-allowed`}
+                                                            >
+                                                                {paymentToggleLoading === selectedBooking.id ? (
+                                                                    <div className='w-3 h-3 border border-current/30 border-t-current rounded-full animate-spin'></div>
+                                                                ) : selectedBooking.isPaid ? (
+                                                                    'Mark Unpaid'
+                                                                ) : (
+                                                                    'Mark Paid'
+                                                                )}
+                                                            </button>
+                                                        )}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <p className='text-[#C75D2C]/60'>Booking Status</p>
                                                 <div className='mt-1'>{getStatusBadge(selectedBooking.status)}</div>
                                             </div>
                                         </div>
@@ -798,4 +911,3 @@ export const AdminBookings: React.FC = () => {
         </>
     );
 };
-                                                       

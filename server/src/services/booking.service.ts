@@ -298,9 +298,9 @@ export const confirmBooking = async (bookingId: string, confirmedById: string): 
         throw new Error('Booking not found');
     }
 
-    if (booking.status !== BookingStatus.PENDING) {
-        throw new Error(`Cannot confirm booking with status: ${booking.status}`);
-    }
+    // if (booking.status !== BookingStatus.PENDING) {
+    //     throw new Error(`Cannot confirm booking with status: ${booking.status}`);
+    // }
 
     // Check if booking dates are still available
     const isStillAvailable = await checkVillaAvailability(

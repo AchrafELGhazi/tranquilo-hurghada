@@ -492,3 +492,85 @@ export const getVillaBookedDates = async (req: AuthenticatedRequest, res: Respon
         ApiResponse.serverError(res, errorMessage);
     }
 };
+
+
+export const toggleBookingPaidStatus = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+        const { bookingId } = req.params;
+        const user = req.user!;
+
+        if (!bookingId) {
+            ApiResponse.badRequest(res, 'Booking ID is required');
+            return;
+        }
+
+        // Check if user has permission to toggle payment status
+        const existingBooking = await getBookingById(bookingId, user.id, user.role);
+        if (!existingBooking) {
+            ApiResponse.notFound(res, 'Booking not found');
+            return;
+        }
+
+        // Only villa owners and admins can toggle payment status
+        const isVillaOwner = existingBooking.villa.ownerId === user.id;
+        const isAdmin = user.role === 'ADMIN';
+
+        if (!isVillaOwner && !isAdmin) {
+            ApiResponse.forbidden(res, 'Access denied: Only villa owners or admins can update payment status');
+            return;
+        }
+
+        // Only allow payment status update for confirmed bookings
+        if (existingBooking.status !== BookingStatus.CONFIRMED) {
+            ApiResponse.badRequest(res, 'Payment status can only be updated for confirmed bookings');
+            return;
+        }
+
+        // Toggle the current payment status
+        const newPaidStatus = !existingBooking.isPaid;
+
+        // Update payment status
+        const updatedBooking = await prisma.booking.update({
+            where: { id: bookingId },
+            data: {
+                isPaid: newPaidStatus,
+                updatedAt: new Date()
+            },
+            include: {
+                guest: {
+                    select: {
+                        id: true,
+                        fullName: true,
+                        email: true,
+                        phone: true
+                    }
+                },
+                villa: {
+                    select: {
+                        id: true,
+                        title: true,
+                        address: true,
+                        city: true,
+                        pricePerNight: true,
+                        ownerId: true
+                    }
+                },
+                confirmedBy: {
+                    select: {
+                        id: true,
+                        fullName: true
+                    }
+                }
+            }
+        });
+
+        const statusMessage = newPaidStatus ? 'marked as paid' : 'marked as unpaid';
+        logger.info(`Booking ${bookingId} payment status toggled to ${newPaidStatus} by user ${user.id}`);
+
+        ApiResponse.success(res, updatedBooking, `Booking payment status ${statusMessage} successfully`);
+    } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to toggle booking payment status';
+        logger.error('Toggle booking payment status error:', errorMessage);
+        ApiResponse.serverError(res, errorMessage);
+    }
+};

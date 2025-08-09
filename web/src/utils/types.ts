@@ -60,6 +60,7 @@ export interface Booking {
     totalPrice: number;
     paymentMethod: PaymentMethod;
     status: BookingStatus;
+    isPaid: boolean; 
     notes?: string;
     rejectionReason?: string;
     cancellationReason?: string;
