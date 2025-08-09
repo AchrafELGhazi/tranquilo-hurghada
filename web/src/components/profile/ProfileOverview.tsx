@@ -5,10 +5,9 @@ import type { User as ComponentUser } from '@/utils/types';
 
 interface ProfileOverviewProps {
     user: ComponentUser;
-    onAlert: (type: 'success' | 'error' | 'info', message: string) => void;
 }
 
-const ProfileOverview: React.FC<ProfileOverviewProps> = ({ user, onAlert }) => {
+const ProfileOverview: React.FC<ProfileOverviewProps> = ({ user }) => {
     const [profileStatus, setProfileStatus] = useState<{
         isComplete: boolean;
         missing: string[];
@@ -36,9 +35,7 @@ const ProfileOverview: React.FC<ProfileOverviewProps> = ({ user, onAlert }) => {
                 const status = await userApi.checkProfileComplete();
                 setProfileStatus(status);
             }
-            onAlert('success', 'Profile refreshed successfully!');
         } catch (error: any) {
-            onAlert('error', error.message || 'Failed to refresh profile');
         } finally {
             setLoading(false);
         }

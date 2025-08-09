@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Save, Plus, X, Eye, EyeOff, Home, AlertCircle, Check } from 'lucide-react';
+import { ArrowLeft, Save, Plus, X, Eye, EyeOff, Home } from 'lucide-react';
+import { toast, Toaster } from 'sonner';
 import { villaApi, type UpdateVillaData } from '@/api/villaApi';
 import type { Villa, VillaStatus } from '@/utils/types';
 import { POPULAR_CITIES, POPULAR_AMENITIES } from '@/utils/constants';
@@ -13,8 +14,6 @@ const AdminEditVilla: React.FC = () => {
     const [villa, setVilla] = useState<Villa | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [success, setSuccess] = useState<string | null>(null);
 
     // Form state
     const [formData, setFormData] = useState({
@@ -64,8 +63,11 @@ const AdminEditVilla: React.FC = () => {
                     status: villaData.status,
                     isActive: villaData.isActive,
                 });
+                toast.success('Villa loaded successfully! 🏡');
             } catch (err: any) {
-                setError(err.message || 'Failed to fetch villa');
+                toast.error('Failed to load villa', {
+                    description: err.message || 'Please try again or contact support.',
+                });
             } finally {
                 setLoading(false);
             }
@@ -90,11 +92,17 @@ const AdminEditVilla: React.FC = () => {
 
     const handleAddImage = () => {
         const url = newImageUrl.trim();
-        if (!url) return;
+        if (!url) {
+            toast.warning('Please enter an image URL');
+            return;
+        }
 
         if (!formData.images.includes(url)) {
             setFormData(prev => ({ ...prev, images: [...prev.images, url] }));
             setNewImageUrl('');
+            toast.success('Image added successfully! 📸');
+        } else {
+            toast.info('This image is already added');
         }
     };
 
@@ -103,6 +111,7 @@ const AdminEditVilla: React.FC = () => {
             ...prev,
             images: prev.images.filter((_, i) => i !== index),
         }));
+        toast.success('Image removed');
     };
 
     const toggleImagePreview = (url: string) => {
@@ -114,18 +123,21 @@ const AdminEditVilla: React.FC = () => {
 
         // Simple validation
         if (!formData.title.trim() || !formData.address.trim() || !formData.city) {
-            setError('Please fill in all required fields');
+            toast.error('Missing required fields', {
+                description: 'Please fill in title, address, and city',
+            });
             return;
         }
 
         if (formData.pricePerNight <= 0) {
-            setError('Price must be greater than 0');
+            toast.error('Invalid price', {
+                description: 'Price must be greater than 0',
+            });
             return;
         }
 
         try {
             setSaving(true);
-            setError(null);
 
             const updateData: UpdateVillaData = {
                 title: formData.title.trim(),
@@ -143,13 +155,18 @@ const AdminEditVilla: React.FC = () => {
                 isActive: formData.isActive,
             };
 
-            await villaApi.updateVilla(villaId, updateData);
-            setSuccess('Villa updated successfully!');
+            // Show loading toast
+            const promise = villaApi.updateVilla(villaId, updateData);
 
-            // Auto-clear success message
-            setTimeout(() => setSuccess(null), 3000);
+            toast.promise(promise, {
+                loading: 'Saving villa changes... ',
+                success: 'Villa updated successfully! ',
+                error: (err: any) => err.message || 'Failed to update villa',
+            });
+
+            await promise;
         } catch (err: any) {
-            setError(err.message || 'Failed to update villa');
+            // Error is already handled by toast.promise
         } finally {
             setSaving(false);
         }
@@ -172,17 +189,15 @@ const AdminEditVilla: React.FC = () => {
         return (
             <div className='min-h-screen'>
                 <div className='max-w-7xl mx-auto space-y-6'>
-                    <div className='bg-red-50/80 backdrop-blur-sm border-2 border-red-200/60 rounded-xl p-6 flex items-start space-x-3'>
-                        <div>
-                            <p className='text-red-800 font-semibold'>Villa not found</p>
-                            <Link
-                                to='/admin/villas'
-                                className='inline-flex items-center mt-4 px-4 py-2 bg-gradient-to-r from-[#D96F32] to-[#C75D2C] text-white rounded-xl hover:from-[#C75D2C] hover:to-[#D96F32] transition-all duration-300 font-medium'
-                            >
-                                <ArrowLeft className='w-4 h-4 mr-2' />
-                                Back to Villas
-                            </Link>
-                        </div>
+                    <div className='bg-white/40 backdrop-blur-md border-2 border-[#F8B259]/70 rounded-2xl p-8 text-center'>
+                        <p className='text-[#C75D2C] font-semibold mb-4'>Villa not found</p>
+                        <Link
+                            to='/admin/villas'
+                            className='inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#D96F32] to-[#C75D2C] text-white rounded-xl hover:from-[#C75D2C] hover:to-[#D96F32] transition-all duration-300 font-medium'
+                        >
+                            <ArrowLeft className='w-4 h-4 mr-2' />
+                            Back to Villas
+                        </Link>
                     </div>
                 </div>
             </div>
@@ -234,27 +249,6 @@ const AdminEditVilla: React.FC = () => {
                         </div>
                     </div>
                 </div>
-
-                {/* Messages */}
-                {success && (
-                    <div className='bg-green-50/80 backdrop-blur-sm border-2 border-green-200/60 rounded-xl p-4 flex items-start space-x-3'>
-                        <Check className='w-5 h-5 text-green-600 mt-0.5 flex-shrink-0' />
-                        <div>
-                            <p className='text-green-800 font-semibold'>Success</p>
-                            <p className='text-green-700 text-sm mt-1'>{success}</p>
-                        </div>
-                    </div>
-                )}
-
-                {error && (
-                    <div className='bg-red-50/80 backdrop-blur-sm border-2 border-red-200/60 rounded-xl p-4 flex items-start space-x-3'>
-                        <AlertCircle className='w-5 h-5 text-red-600 mt-0.5 flex-shrink-0' />
-                        <div>
-                            <p className='text-red-800 font-semibold'>Error</p>
-                            <p className='text-red-700 text-sm mt-1'>{error}</p>
-                        </div>
-                    </div>
-                )}
 
                 {/* Form */}
                 <div className='bg-white/40 backdrop-blur-md border-2 border-[#F8B259]/70 rounded-2xl p-6 space-y-8'>
@@ -530,6 +524,7 @@ const AdminEditVilla: React.FC = () => {
                                                 e.currentTarget.style.display = 'none';
                                                 const errorDiv = e.currentTarget.nextElementSibling as HTMLElement;
                                                 if (errorDiv) errorDiv.style.display = 'block';
+                                                toast.error('Failed to load image preview');
                                             }}
                                         />
                                         <div style={{ display: 'none' }} className='text-center py-4 text-red-500'>
@@ -542,6 +537,22 @@ const AdminEditVilla: React.FC = () => {
                     </div>
                 </div>
             </div>
+
+            <Toaster
+                position='bottom-right'
+                richColors
+                expand={false}
+                visibleToasts={5}
+                toastOptions={{
+                    style: {
+                        background: 'rgba(255, 255, 255, 0.95)',
+                        backdropFilter: 'blur(8px)',
+                        border: '1px solid rgba(248, 178, 89, 0.3)',
+                        borderRadius: '12px',
+                        fontSize: '14px',
+                    },
+                }}
+            />
         </div>
     );
 };

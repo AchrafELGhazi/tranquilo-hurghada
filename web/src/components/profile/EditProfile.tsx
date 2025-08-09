@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Edit3, Mail, User, Phone, Calendar, AlertCircle } from 'lucide-react';
 import { userApi, type UpdateProfileData } from '@/api/userApi';
 import type { User as ComponentUser } from '@/utils/types';
+import { THToast } from '@/components/common/Toast';
 
 interface EditProfileProps {
     user: ComponentUser;
-    onAlert: (type: 'success' | 'error' | 'info', message: string) => void;
 }
 
 interface FormFieldProps {
@@ -56,7 +56,7 @@ const FormField: React.FC<FormFieldProps> = ({
     </div>
 );
 
-const EditProfile: React.FC<EditProfileProps> = ({ user, onAlert }) => {
+const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [profileForm, setProfileForm] = useState<UpdateProfileData>({
@@ -66,14 +66,9 @@ const EditProfile: React.FC<EditProfileProps> = ({ user, onAlert }) => {
         dateOfBirth: '',
     });
 
-    // Helper function to convert Date to YYYY-MM-DD string for input
     const formatDateForInput = (date: Date | string | undefined): string => {
         if (!date) return '';
-
-        // If it's already a string, return it
         if (typeof date === 'string') return date;
-
-        // If it's a Date object, convert to YYYY-MM-DD format
         return date.toISOString().split('T')[0];
     };
 
@@ -94,16 +89,20 @@ const EditProfile: React.FC<EditProfileProps> = ({ user, onAlert }) => {
         setErrors({});
 
         try {
-            const result = await userApi.updateProfileSafe(profileForm);
+            const updatePromise = userApi.updateProfileSafe(profileForm);
 
-            if (result.success) {
-                onAlert('success', 'Profile updated successfully!');
-            } else {
-                const errorMessages = result.errors?.join(', ') || 'Failed to update profile';
-                onAlert('error', errorMessages);
+            THToast.promise(updatePromise, {
+                loading: 'Updating profile...',
+                success: 'Profile updated successfully!',
+                error: 'Failed to update profile',
+            });
+
+            const result = await updatePromise;
+
+            if (!result.success && result.errors) {
+                THToast.error('Update failed', result.errors.join(', '));
             }
         } catch (error: any) {
-            onAlert('error', error.message || 'Failed to update profile');
         } finally {
             setLoading(false);
         }

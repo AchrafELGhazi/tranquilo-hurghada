@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useLocation, Link, useParams } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import { THToast, THToaster } from '@/components/common/Toast';
 
 export const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-    const [localError, setLocalError] = useState('');
-    const { login, isAuthenticated, isLoading, error, clearError } = useAuth();
+    const { login, isAuthenticated, isLoading, clearError } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
     const { lang } = useParams();
@@ -16,33 +16,42 @@ export const Login = () => {
     useEffect(() => {
         if (isAuthenticated) {
             const from = (location.state as any)?.from?.pathname || '/';
-            navigate(from, { replace: true });
+            navigate(-1);
+            THToast.success('Welcome back!', 'You have been successfully logged in');
         }
     }, [isAuthenticated, navigate, location]);
 
     useEffect(() => {
         clearError();
-        setLocalError('');
     }, [clearError]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setLocalError('');
         clearError();
 
         if (!email || !password) {
-            setLocalError('Please fill in all fields');
+            THToast.warning('Missing Fields', 'Please fill in all fields');
+            return;
+        }
+
+        if (!email.includes('@')) {
+            THToast.error('Invalid Email', 'Please enter a valid email address');
             return;
         }
 
         try {
-            await login({ email, password });
+            const loginPromise = login({ email, password });
+
+            THToast.promise(loginPromise, {
+                loading: 'Signing you in...',
+                success: 'Login successful! Redirecting...',
+                error: (err: any) => err.message || 'Login failed. Please check your credentials.',
+            });
+
+            await loginPromise;
         } catch (err: any) {
-            setLocalError(err.message || 'Login failed. Please check your credentials.');
         }
     };
-
-    const displayError = localError || error;
 
     if (isAuthenticated) {
         return (
@@ -63,12 +72,6 @@ export const Login = () => {
 
                 {/* Login Form - Reduced padding and spacing on mobile */}
                 <div className='bg-white/40 backdrop-blur-md border-2 border-[#F8B259]/60 rounded-xl sm:rounded-2xl p-4 sm:p-6'>
-                    {displayError && (
-                        <div className='mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-xs sm:text-sm'>
-                            {displayError}
-                        </div>
-                    )}
-
                     <form onSubmit={handleSubmit} className='space-y-4 sm:space-y-5'>
                         {/* Email Field */}
                         <div>
@@ -172,6 +175,9 @@ export const Login = () => {
                     <p className='text-xs text-[#C75D2C]/50'>Secure login powered by modern encryption</p>
                 </div>
             </div>
+
+            {/* THToaster component */}
+            <THToaster position='bottom-right' />
         </div>
     );
 };

@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { Lock, Eye, EyeOff } from 'lucide-react';
 import { userApi, type ChangePasswordData } from '@/api/userApi';
+import { THToast } from '@/components/common/Toast';
 
 interface ChangePasswordProps {
-    onAlert: (type: 'success' | 'error' | 'info', message: string) => void;
 }
 
-const ChangePassword: React.FC<ChangePasswordProps> = ({ onAlert }) => {
+const ChangePassword: React.FC<ChangePasswordProps> = () => {
     const [loading, setLoading] = useState(false);
     const [passwordForm, setPasswordForm] = useState<ChangePasswordData>({
         currentPassword: '',
@@ -14,7 +14,6 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ onAlert }) => {
         confirmPassword: '',
     });
 
-    // Password visibility state
     const [passwordVisibility, setPasswordVisibility] = useState({
         current: false,
         new: false,
@@ -30,24 +29,40 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ onAlert }) => {
 
     const handlePasswordChange = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+            THToast.error('Password mismatch', 'New passwords do not match');
+            return;
+        }
+
+        if (passwordForm.newPassword.length < 8) {
+            THToast.warning('Password too short', 'Password must be at least 8 characters long');
+            return;
+        }
+
         setLoading(true);
 
         try {
-            const result = await userApi.changePasswordSafe(passwordForm);
+            const changePasswordPromise = userApi.changePasswordSafe(passwordForm);
+
+            THToast.promise(changePasswordPromise, {
+                loading: 'Changing password...',
+                success: 'Password changed successfully!',
+                error: 'Failed to change password',
+            });
+
+            const result = await changePasswordPromise;
 
             if (result.success) {
-                onAlert('success', 'Password changed successfully!');
                 setPasswordForm({
                     currentPassword: '',
                     newPassword: '',
                     confirmPassword: '',
                 });
-            } else {
-                const errorMessages = result.errors?.join(', ') || 'Failed to change password';
-                onAlert('error', errorMessages);
+            } else if (result.errors) {
+                THToast.error('Password change failed', result.errors.join(', '));
             }
         } catch (error: any) {
-            onAlert('error', error.message || 'Failed to change password');
         } finally {
             setLoading(false);
         }

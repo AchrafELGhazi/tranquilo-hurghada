@@ -1,26 +1,43 @@
 import React, { useState } from 'react';
 import { Trash2, AlertCircle } from 'lucide-react';
 import { userApi } from '@/api/userApi';
+import { THToast } from '@/components/common/Toast';
+import { useNavigate, useParams } from 'react-router-dom';
 
 interface AccountSettingsProps {
-    onAlert: (type: 'success' | 'error' | 'info', message: string) => void;
     onLogout: () => void;
 }
 
-const AccountSettings: React.FC<AccountSettingsProps> = ({ onAlert, onLogout }) => {
+const AccountSettings: React.FC<AccountSettingsProps> = ({ onLogout }) => {
     const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
+    const { lang } = useParams();
 
     const handleAccountDeactivation = async () => {
         const password = prompt('Please enter your password to confirm account deactivation:');
-        if (!password) return;
+        if (!password) {
+            THToast.info('Deactivation cancelled', 'Account deactivation was cancelled');
+            return;
+        }
 
         setLoading(true);
         try {
-            await userApi.deactivateAccount(password);
-            onAlert('success', 'Account deactivated successfully. You will be logged out.');
-            setTimeout(() => onLogout(), 2000);
+            const deactivatePromise = userApi.deactivateAccount(password);
+
+            THToast.promise(deactivatePromise, {
+                loading: 'Deactivating account...',
+                success: 'Account deactivated successfully. Logging out...',
+                error: 'Failed to deactivate account',
+            });
+
+            await deactivatePromise;
+
+            setTimeout(() => {
+                onLogout();
+                THToast.info('Logged out', 'You have been logged out successfully');
+                navigate(`/${lang}/signin`);
+            }, 2000);
         } catch (error: any) {
-            onAlert('error', error.message || 'Failed to deactivate account');
         } finally {
             setLoading(false);
         }

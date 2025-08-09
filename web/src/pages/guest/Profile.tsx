@@ -1,14 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import {
-    User,
-    CheckCircle,
-    AlertCircle,
-    Mail,
-    Crown,
-    Shield,
-    X,
-} from 'lucide-react';
+import { User, AlertCircle, Mail, Crown, Shield } from 'lucide-react';
+import { THToaster } from '@/components/common/Toast';
 import ProfileOverview from '@/components/profile/ProfileOverview';
 import EditProfile from '@/components/profile/EditProfile';
 import ChangePassword from '@/components/profile/ChangePassword';
@@ -24,7 +17,7 @@ interface TabProps {
 const Tab: React.FC<TabProps> = ({ label, isActive, onClick }) => (
     <button
         onClick={onClick}
-        className={`px-6 py-3  cursor-pointer font-medium text-sm rounded-xl transition-all duration-300 ${
+        className={`px-6 py-3 cursor-pointer font-medium text-sm rounded-xl transition-all duration-300 ${
             isActive
                 ? 'bg-gradient-to-r from-[#D96F32] to-[#C75D2C] text-white shadow-lg'
                 : 'bg-white/50 text-[#C75D2C] hover:bg-white/70 border-2 border-[#F8B259]/50'
@@ -34,49 +27,9 @@ const Tab: React.FC<TabProps> = ({ label, isActive, onClick }) => (
     </button>
 );
 
-interface AlertProps {
-    type: 'success' | 'error' | 'info';
-    message: string;
-    onClose: () => void;
-}
-
-const Alert: React.FC<AlertProps> = ({ type, message, onClose }) => {
-    const bgColor =
-        type === 'success'
-            ? 'bg-green-50/80 border-green-200/60'
-            : type === 'error'
-            ? 'bg-red-50/80 border-red-200/60'
-            : 'bg-blue-50/80 border-blue-200/60';
-
-    const textColor = type === 'success' ? 'text-green-800' : type === 'error' ? 'text-red-800' : 'text-blue-800';
-
-    const Icon = type === 'success' ? CheckCircle : AlertCircle;
-
-    return (
-        <div className={`${bgColor} backdrop-blur-sm border-2 rounded-xl p-4 flex items-start space-x-3 mb-6`}>
-            <Icon className={`w-5 h-5 ${textColor} mt-0.5 flex-shrink-0`} />
-            <div className='flex-1'>
-                <p className={`${textColor} font-semibold`}>
-                    {type === 'success' ? 'Success' : type === 'error' ? 'Error' : 'Info'}
-                </p>
-                <p className={`${textColor} text-sm mt-1`}>{message}</p>
-            </div>
-            <button onClick={onClose} className={`${textColor} hover:opacity-70 transition-opacity`}>
-                <X className='w-5 h-5' />
-            </button>
-        </div>
-    );
-};
-
 const Profile: React.FC = () => {
     const { user: authUser, logout } = useAuth();
     const [activeTab, setActiveTab] = useState('overview');
-    const [alert, setAlert] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
-
-    const showAlert = (type: 'success' | 'error' | 'info', message: string) => {
-        setAlert({ type, message });
-        setTimeout(() => setAlert(null), 5000);
-    };
 
     const getRoleIcon = (role: string) => {
         switch (role) {
@@ -117,18 +70,22 @@ const Profile: React.FC = () => {
 
     const renderTabContent = () => {
         if (!authUser) return null;
-        
+
         switch (activeTab) {
             case 'overview':
-                return <ProfileOverview user={authUser} onAlert={showAlert} />;
+                return <ProfileOverview user={authUser} />;
+
             case 'profile':
-                return <EditProfile user={authUser} onAlert={showAlert} />;
+                return <EditProfile user={authUser} />;
+
             case 'password':
-                return <ChangePassword onAlert={showAlert} />;
+                return <ChangePassword />;
+
             case 'account':
-                return <AccountSettings onAlert={showAlert} onLogout={logout} />;
+                return <AccountSettings onLogout={logout} />;
+
             default:
-                return <ProfileOverview user={authUser} onAlert={showAlert} />;
+                return <ProfileOverview user={authUser} />;
         }
     };
 
@@ -166,10 +123,6 @@ const Profile: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Alert */}
-                {alert && <Alert type={alert.type} message={alert.message} onClose={() => setAlert(null)} />}
-
-                {/* Tabs */}
                 <div className='flex flex-wrap gap-3'>
                     {tabs.map(tab => (
                         <Tab
@@ -182,11 +135,12 @@ const Profile: React.FC = () => {
                     ))}
                 </div>
 
-                {/* Tab Content */}
                 <div className='bg-white/40 backdrop-blur-md border-2 border-[#F8B259]/70 rounded-2xl p-6'>
                     {renderTabContent()}
                 </div>
             </div>
+
+            <THToaster position='bottom-right' />
         </div>
     );
 };
