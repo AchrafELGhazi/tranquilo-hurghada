@@ -37,6 +37,31 @@ export interface ApiResponse {
     data?: any;
 }
 
+// New interfaces for pagination
+export interface GetUsersQuery {
+    page?: number;
+    limit?: number;
+    search?: string;
+    role?: string;
+    sortBy?: 'fullName' | 'email' | 'createdAt' | 'updatedAt';
+    sortOrder?: 'asc' | 'desc';
+    isActive?: boolean;
+}
+
+export interface PaginationData {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+}
+
+export interface GetUsersResponse {
+    success: boolean;
+    message: string;
+    data: User[];
+    pagination: PaginationData;
+}
+
 class UserApi {
     // Get current user profile
     async getProfile(): Promise<User> {
@@ -49,16 +74,31 @@ class UserApi {
         throw new Error(response.message || 'Failed to get profile');
     }
 
-    async getAllUsers(): Promise<User> {
-        const response = await apiService.get<any>('/profile/all');
-        console.log('Response from all users: ', response)
+    // Updated getAllUsers with pagination support
+    async getAllUsers(query?: GetUsersQuery): Promise<any> {
+        // Build query string from parameters
+        const params = new URLSearchParams();
+
+        if (query?.page) params.append('page', query.page.toString());
+        if (query?.limit) params.append('limit', query.limit.toString());
+        if (query?.search) params.append('search', query.search);
+        if (query?.role) params.append('role', query.role);
+        if (query?.sortBy) params.append('sortBy', query.sortBy);
+        if (query?.sortOrder) params.append('sortOrder', query.sortOrder);
+        if (query?.isActive !== undefined) params.append('isActive', query.isActive.toString());
+
+        const queryString = params.toString();
+        const endpoint = queryString ? `/profile/all?${queryString}` : '/users';
+
+        const response = await apiService.get<GetUsersResponse>(endpoint);
+        console.log('Response from all users: ', response);
+
         if (response.success && response.data) {
-            return response.data;
+            return response;
         }
 
         throw new Error(response.message || 'Failed to get all users');
     }
-
     // Update user profile
     async updateProfile(data: UpdateProfileData): Promise<User> {
         const response = await apiService.put<any>('/profile', data);
@@ -249,6 +289,17 @@ class UserApi {
             return { success: true };
         } catch (error: any) {
             return { success: false, errors: [error.message || 'Failed to change password'] };
+        }
+    }
+
+    // Safe version of getAllUsers with error handling
+    async getAllUsersSafe(query?: GetUsersQuery): Promise<{ success: boolean; data?: GetUsersResponse; error?: string }> {
+        try {
+            const data = await this.getAllUsers(query);
+            return { success: true, data };
+        } catch (error: any) {
+            console.error('Failed to get all users:', error);
+            return { success: false, error: error.message || 'Failed to get all users' };
         }
     }
 }

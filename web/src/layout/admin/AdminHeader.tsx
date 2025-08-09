@@ -30,7 +30,7 @@ export const AdminHeader: React.FC = () => {
     };
 
     return (
-        <header className='bg-white/40 backdrop-blur-md border-b-2 border-[#F8B259]/50 shadow-lg relative z-50'>
+        <header className='bg-white/40 backdrop-blur-md border-b-2 border-[#F8B259]/50 shadow-lg relative z-10'>
             <div className='px-6 py-4'>
                 <div className='flex justify-between items-center'>
                     {/* Breadcrumb or Page Title */}
