@@ -1,11 +1,3 @@
 id,email,password,fullName,dateOfBirth,phone,role,isActive,createdAt,updatedAt
-usr001,karim.benzema@example.com,karim123,Karim Benzema,1987-12-19,+212600123456,GUEST,true,2023-01-15T10:00:00Z,2023-01-15T10:00:00Z
-usr002,noura.alami@example.com,noura456,Noura Alami,1995-03-08,+212700234567,GUEST,true,2023-02-20T11:30:00Z,2023-02-20T11:30:00Z
-usr003,youssef.mansouri@example.com,youssef789,Youssef Mansouri,1985-11-15,,ADMIN,true,2023-03-05T09:15:00Z,2023-03-05T09:15:00Z
-usr004,fatima.ezzahra@example.com,fatima101,Fatima Ezzahra,1992-07-22,+212650345678,GUEST,true,2023-04-10T14:20:00Z,2023-04-10T14:20:00Z
-usr005,mehdi.oufkir@example.com,mehdi202,Mehdi Oufkir,1990-01-30,+212750456789,GUEST,false,2023-05-12T16:45:00Z,2023-05-12T16:45:00Z
-usr006,amina.belcadi@example.com,amina303,Amina Belcadi,1988-09-12,,GUEST,true,2023-06-18T08:10:00Z,2023-06-18T08:10:00Z
-usr007,rachid.elwali@example.com,rachid404,Rachid Elwali,1982-05-03,+212680567890,ADMIN,true,2023-07-22T13:25:00Z,2023-07-22T13:25:00Z
-usr008,hassan.hamdi@example.com,hassan505,Hassan Hamdi,1979-12-28,+212720678901,HOST,true,2023-08-30T10:50:00Z,2023-08-30T10:50:00Z
-usr009,sanaa.maarouf@example.com,sanaa606,Sanaa Maarouf,1993-04-17,,HOST,false,2023-09-05T15:35:00Z,2023-09-05T15:35:00Z
-usr010,omar.cherkaoui@example.com,omar707,Omar Cherkaoui,1986-10-11,+212660789012,HOST,true,2023-10-11T12:00:00Z,2023-10-11T12:00:00Z
+cme1mzesx0000cvr4tc85n5nx,achrafelghazi81@gmail.com,Achraf123,Achraf Admin,2005-04-27,+212698204560,ADMIN,true,2023-01-15T10:00:00Z,2023-01-15T10:00:00Z
+k9g30dasx0dsa0cvr4tc8pskn,a.elghazi@aui.ma,Achraf123,Achraf Guest,,,GUEST,true,2023-02-20T11:30:00Z,2023-02-20T11:30:00Z
