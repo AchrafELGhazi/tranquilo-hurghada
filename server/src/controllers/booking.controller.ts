@@ -11,7 +11,9 @@ import {
     rejectBooking,
     cancelBooking,
     completeBooking,
-    getVillaBookedDatesFromDB
+    getVillaBookedDatesFromDB,
+    getVillaServices,
+    updateBookingServices
 } from '../services/booking.service';
 import { parseQueryDates } from '../utils/booking.utils';
 import { updateUserProfile } from '../services/user.service';
@@ -19,7 +21,17 @@ import prisma from '../config/database';
 
 export const createBookingRequest = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-        const { villaId, checkIn, checkOut, totalGuests, paymentMethod, notes, phone, dateOfBirth } = req.body;
+        const {
+            villaId,
+            checkIn,
+            checkOut,
+            totalGuests,
+            paymentMethod,
+            notes,
+            phone,
+            dateOfBirth,
+            selectedServices // New field for services
+        } = req.body;
         const guestId = req.user!.id;
 
         if (!villaId || !checkIn || !checkOut || !totalGuests || !paymentMethod) {
@@ -61,7 +73,7 @@ export const createBookingRequest = async (req: AuthenticatedRequest, res: Respo
 
         // Validate guest count
         if (totalGuests < 1 || totalGuests > 12) {
-            ApiResponse.badRequest(res, 'Total guests must be between 1 and 50');
+            ApiResponse.badRequest(res, 'Total guests must be between 1 and 12');
             return;
         }
 
@@ -72,6 +84,39 @@ export const createBookingRequest = async (req: AuthenticatedRequest, res: Respo
         if (isNaN(checkInDate.getTime()) || isNaN(checkOutDate.getTime())) {
             ApiResponse.badRequest(res, 'Invalid date format');
             return;
+        }
+
+        // Validate selected services if provided
+        if (selectedServices && Array.isArray(selectedServices)) {
+            for (const service of selectedServices) {
+                if (!service.serviceId) {
+                    ApiResponse.badRequest(res, 'Service ID is required for each selected service');
+                    return;
+                }
+
+                if (service.quantity && (service.quantity < 1 || service.quantity > 50)) {
+                    ApiResponse.badRequest(res, 'Service quantity must be between 1 and 50');
+                    return;
+                }
+
+                if (service.numberOfGuests && (service.numberOfGuests < 1 || service.numberOfGuests > totalGuests)) {
+                    ApiResponse.badRequest(res, 'Number of guests for service cannot exceed total booking guests');
+                    return;
+                }
+
+                if (service.scheduledDate) {
+                    const scheduledDate = new Date(service.scheduledDate);
+                    if (isNaN(scheduledDate.getTime())) {
+                        ApiResponse.badRequest(res, 'Invalid scheduled date format for service');
+                        return;
+                    }
+                    // Service should be scheduled within the booking period
+                    if (scheduledDate < checkInDate || scheduledDate >= checkOutDate) {
+                        ApiResponse.badRequest(res, 'Service scheduled date must be within the booking period');
+                        return;
+                    }
+                }
+            }
         }
 
         // Update user profile with phone and date of birth if not already set
@@ -89,7 +134,8 @@ export const createBookingRequest = async (req: AuthenticatedRequest, res: Respo
             checkOut: checkOutDate,
             totalGuests: parseInt(totalGuests),
             paymentMethod,
-            notes
+            notes,
+            selectedServices: selectedServices || []
         });
 
         ApiResponse.created(res, booking, 'Booking request created successfully');
@@ -97,7 +143,7 @@ export const createBookingRequest = async (req: AuthenticatedRequest, res: Respo
         const errorMessage = error instanceof Error ? error.message : 'Failed to create booking';
         logger.error('Create booking error:', errorMessage);
 
-        if (errorMessage.includes('not found') || errorMessage.includes('not available')) {
+        if (errorMessage.includes('not found') || errorMessage.includes('not available') || errorMessage.includes('Service')) {
             ApiResponse.badRequest(res, errorMessage);
         } else {
             ApiResponse.serverError(res, errorMessage);
@@ -130,7 +176,7 @@ export const getAllBookings = async (req: AuthenticatedRequest, res: Response): 
         const filters: any = {
             page: parsedPage,
             limit: parsedLimit,
-            sortBy: ['createdAt', 'checkIn', 'checkOut', 'totalPrice'].includes(sortBy as string)
+            sortBy: ['createdAt', 'checkIn', 'checkOut', 'totalPrice', 'grandTotal'].includes(sortBy as string)
                 ? sortBy as string
                 : 'createdAt',
             sortOrder: ['asc', 'desc'].includes(sortOrder as string) ? sortOrder as string : 'desc'
@@ -395,7 +441,7 @@ export const getMyBookings = async (req: AuthenticatedRequest, res: Response): P
             guestId: user.id, // Only user's bookings
             page: Math.max(1, parseInt(page as string) || 1),
             limit: Math.min(50, Math.max(1, parseInt(limit as string) || 10)),
-            sortBy: ['createdAt', 'checkIn', 'checkOut', 'totalPrice'].includes(sortBy as string)
+            sortBy: ['createdAt', 'checkIn', 'checkOut', 'totalPrice', 'grandTotal'].includes(sortBy as string)
                 ? sortBy as string
                 : 'createdAt',
             sortOrder: ['asc', 'desc'].includes(sortOrder as string) ? sortOrder as string : 'desc'
@@ -419,7 +465,6 @@ export const getMyBookings = async (req: AuthenticatedRequest, res: Response): P
         ApiResponse.serverError(res, errorMessage);
     }
 };
-
 
 export const getVillaBookedDates = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
@@ -493,7 +538,6 @@ export const getVillaBookedDates = async (req: AuthenticatedRequest, res: Respon
     }
 };
 
-
 export const toggleBookingPaidStatus = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
         const { bookingId } = req.params;
@@ -560,6 +604,20 @@ export const toggleBookingPaidStatus = async (req: AuthenticatedRequest, res: Re
                         id: true,
                         fullName: true
                     }
+                },
+                bookingServices: {
+                    include: {
+                        service: {
+                            select: {
+                                id: true,
+                                title: true,
+                                category: true,
+                                price: true,
+                                duration: true,
+                                image: true
+                            }
+                        }
+                    }
                 }
             }
         });
@@ -572,5 +630,124 @@ export const toggleBookingPaidStatus = async (req: AuthenticatedRequest, res: Re
         const errorMessage = error instanceof Error ? error.message : 'Failed to toggle booking payment status';
         logger.error('Toggle booking payment status error:', errorMessage);
         ApiResponse.serverError(res, errorMessage);
+    }
+};
+
+// New endpoint to get available services for a villa
+export const getVillaServicesEndpoint = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+        const { villaId } = req.params;
+
+        if (!villaId) {
+            ApiResponse.badRequest(res, 'Villa ID is required');
+            return;
+        }
+
+        // Check if villa exists
+        const villa = await prisma.villa.findUnique({
+            where: { id: villaId },
+            select: { id: true, title: true, isActive: true }
+        });
+
+        if (!villa) {
+            ApiResponse.notFound(res, 'Villa not found');
+            return;
+        }
+
+        if (!villa.isActive) {
+            ApiResponse.badRequest(res, 'Villa is not active');
+            return;
+        }
+
+        const services = await getVillaServices(villaId);
+
+        ApiResponse.success(res, {
+            villaId,
+            villaTitle: villa.title,
+            services
+        }, 'Villa services retrieved successfully');
+    } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to get villa services';
+        logger.error('Get villa services error:', errorMessage);
+        ApiResponse.serverError(res, errorMessage);
+    }
+};
+
+// New endpoint to update booking services
+export const updateBookingServicesEndpoint = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+        const { bookingId } = req.params;
+        const { selectedServices } = req.body;
+        const user = req.user!;
+
+        if (!bookingId) {
+            ApiResponse.badRequest(res, 'Booking ID is required');
+            return;
+        }
+
+        if (!Array.isArray(selectedServices)) {
+            ApiResponse.badRequest(res, 'Selected services must be an array');
+            return;
+        }
+
+        // Check if user has permission to update services
+        const existingBooking = await getBookingById(bookingId, user.id, user.role);
+        if (!existingBooking) {
+            ApiResponse.notFound(res, 'Booking not found');
+            return;
+        }
+
+        const isGuest = existingBooking.guestId === user.id;
+        const isVillaOwner = existingBooking.villa.ownerId === user.id;
+        const isAdmin = user.role === 'ADMIN';
+
+        if (!isGuest && !isVillaOwner && !isAdmin) {
+            ApiResponse.forbidden(res, 'Access denied: You can only update your own booking services');
+            return;
+        }
+
+        // Validate selected services
+        for (const service of selectedServices) {
+            if (!service.serviceId) {
+                ApiResponse.badRequest(res, 'Service ID is required for each selected service');
+                return;
+            }
+
+            if (service.quantity && (service.quantity < 1 || service.quantity > 50)) {
+                ApiResponse.badRequest(res, 'Service quantity must be between 1 and 50');
+                return;
+            }
+
+            if (service.numberOfGuests && (service.numberOfGuests < 1 || service.numberOfGuests > existingBooking.totalGuests)) {
+                ApiResponse.badRequest(res, 'Number of guests for service cannot exceed total booking guests');
+                return;
+            }
+
+            if (service.scheduledDate) {
+                const scheduledDate = new Date(service.scheduledDate);
+                if (isNaN(scheduledDate.getTime())) {
+                    ApiResponse.badRequest(res, 'Invalid scheduled date format for service');
+                    return;
+                }
+                // Service should be scheduled within the booking period
+                if (scheduledDate < existingBooking.checkIn || scheduledDate >= existingBooking.checkOut) {
+                    ApiResponse.badRequest(res, 'Service scheduled date must be within the booking period');
+                    return;
+                }
+            }
+        }
+
+        const updatedBooking = await updateBookingServices(bookingId, selectedServices);
+
+        ApiResponse.success(res, updatedBooking, 'Booking services updated successfully');
+    } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to update booking services';
+        logger.error('Update booking services error:', errorMessage);
+
+        if (errorMessage.includes('not found') || errorMessage.includes('Can only update')) {
+            ApiResponse.badRequest(res, errorMessage);
+        } else {
+            ApiResponse.serverError(res, errorMessage);
+        }
     }
 };

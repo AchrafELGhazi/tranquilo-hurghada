@@ -35,7 +35,7 @@ interface BookingEmailData {
             id: string;
             fullName: string;
             email: string;
-        };
+        }; bookingServices?: any[];
     };
     type: 'NEW_BOOKING' | 'BOOKING_CONFIRMED' | 'BOOKING_REJECTED' | 'BOOKING_CANCELLED';
 }

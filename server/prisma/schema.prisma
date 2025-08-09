@@ -32,6 +32,21 @@ enum VillaStatus {
     MAINTENANCE
 }
 
+enum ServiceCategory {
+    INCLUDED
+    ADVENTURE
+    WELLNESS
+    CULTURAL
+    TRANSPORT
+    CUSTOM
+}
+
+enum ServiceDifficulty {
+    EASY
+    MODERATE
+    CHALLENGING
+}
+
 model User {
     id          String    @id @default(cuid())
     email       String    @unique
@@ -58,7 +73,7 @@ model Villa {
     description   String?
     address       String
     city          String
-    country       String      @default("Morocco")
+    country       String      @default("Egypt")
     pricePerNight Decimal     @db.Decimal(10, 2)
     maxGuests     Int
     bedrooms      Int
@@ -73,8 +88,35 @@ model Villa {
     ownerId  String
     owner    User      @relation("VillaOwner", fields: [ownerId], references: [id], onDelete: Cascade)
     bookings Booking[]
+    services Service[]
 
     @@map("villas")
+}
+
+model Service {
+    id              String            @id @default(cuid())
+    title           String
+    description     String
+    longDescription String?
+    category        ServiceCategory
+    price           Decimal           @db.Decimal(10, 2)
+    duration        String
+    difficulty      ServiceDifficulty?
+    maxGroupSize    Int?
+    highlights      String[]
+    included        String[]
+    image           String?
+    isActive        Boolean           @default(true)
+    isFeatured      Boolean           @default(false)
+    createdAt       DateTime          @default(now())
+    updatedAt       DateTime          @updatedAt
+
+    villaId String?
+    villa   Villa?  @relation(fields: [villaId], references: [id], onDelete: Cascade)
+
+    bookingServices BookingService[]
+
+    @@map("services")
 }
 
 model Booking {
@@ -83,6 +125,8 @@ model Booking {
     checkOut           DateTime
     totalGuests        Int
     totalPrice         Decimal       @db.Decimal(10, 2)
+    servicesTotal      Decimal       @db.Decimal(10, 2) @default(0)
+    grandTotal         Decimal       @db.Decimal(10, 2)
     status             BookingStatus @default(PENDING)
     paymentMethod      PaymentMethod
     isPaid             Boolean       @default(false)
@@ -108,5 +152,29 @@ model Booking {
     cancelledById String?
     cancelledBy   User?   @relation("BookingCancelledBy", fields: [cancelledById], references: [id])
 
+    bookingServices BookingService[]
+
     @@map("bookings")
+}
+
+model BookingService {
+    id               String   @id @default(cuid())
+    quantity         Int      @default(1)
+    unitPrice        Decimal  @db.Decimal(10, 2)
+    totalPrice       Decimal  @db.Decimal(10, 2)
+    scheduledDate    DateTime?
+    scheduledTime    String?
+    specialRequests  String?
+    numberOfGuests   Int?
+    createdAt        DateTime @default(now())
+    updatedAt        DateTime @updatedAt
+
+    bookingId String
+    booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+    serviceId String
+    service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+    @@unique([bookingId, serviceId])
+    @@map("booking_services")
 }
