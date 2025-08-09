@@ -180,5 +180,268 @@
     "errors": {
         "pageNotFound": "Page Not Found",
         "resourceNotFound": "The requested resource could not be found"
+    },
+    "practicalInfo": {
+        "hero": {
+            "title": "Practical Information",
+            "subtitle": "Our team is at your service"
+        },
+        "categories": "Categories",
+        "tabs": {
+            "accommodation": "Your Accommodation",
+            "location": "Location",
+            "activities": "Activities in Hurghada",
+            "entertainment": "Entertainment in Hurghada"
+        },
+        "accommodation": {
+            "included": {
+                "title": "Included",
+                "subtitle": "Everything included in your stay",
+                "items": {
+                    "villa": "Stylish, fully furnished villa with kitchen-free concept and private pool",
+                    "pool": "Daily pool maintenance and cleaning service",
+                    "housekeeping": "Daily housekeeping and villa maintenance",
+                    "wifi": "High-speed WiFi throughout the villa",
+                    "transfer": "Free airport pickup and drop-off service",
+                    "concierge": "24/7 personalized concierge assistance",
+                    "welcome": "Welcome plate of fresh seasonal fruits and refreshing drinks",
+                    "security": "24/7 security monitoring and support"
+                }
+            },
+            "notIncluded": {
+                "title": "Not Included",
+                "subtitle": "Additional services available for booking",
+                "items": {
+                    "meals": "Meals and beverages (catering services available)",
+                    "activities": "Water sports, diving, and adventure activities",
+                    "spa": "Spa treatments and wellness services",
+                    "transport": "Additional transportation beyond airport transfers",
+                    "shopping": "Personal shopping and souvenirs",
+                    "tours": "Guided tours and cultural excursions"
+                }
+            },
+            "bookingConditions": {
+                "title": "Booking Conditions",
+                "subtitle": "Important information for your reservation",
+                "payment": {
+                    "title": "Payment Terms",
+                    "details": "50% deposit required upon booking confirmation. Remaining balance due 30 days before arrival. We accept major credit cards, bank transfers, and PayPal."
+                },
+                "cancellation": {
+                    "title": "Cancellation Policy",
+                    "details": "Free cancellation up to 14 days before arrival. Cancellations within 14 days are subject to a 50% charge. No refund for cancellations within 72 hours of arrival."
+                },
+                "checkin": {
+                    "title": "Check-in",
+                    "details": "Check-in time is from 3:00 PM onwards. Early check-in may be available upon request and subject to availability."
+                },
+                "checkout": {
+                    "title": "Check-out",
+                    "details": "Check-out time is until 11:00 AM. Late check-out may be available upon request for an additional fee."
+                }
+            },
+            "houseRules": {
+                "title": "House Rules - Tranquilo Hurghada",
+                "subtitle": "Guidelines for a pleasant stay",
+                "rules": {
+                    "smoking": "No smoking inside the villa. Designated outdoor smoking areas available.",
+                    "parties": "No loud parties or events. Quiet hours from 10:00 PM to 8:00 AM.",
+                    "pets": "Pets are not allowed in the villa.",
+                    "noise": "Please respect neighbors and maintain reasonable noise levels.",
+                    "capacity": "Maximum occupancy: 10 guests. Additional guests not permitted.",
+                    "pool": "Pool usage at your own risk. Children must be supervised at all times.",
+                    "damages": "Guests are responsible for any damages during their stay."
+                }
+            }
+        },
+        "location": {
+            "gettingThere": {
+                "title": "How to Get to the Villa",
+                "subtitle": "Transportation options to Tranquilo Hurghada",
+                "airport": {
+                    "title": "From Hurghada Airport",
+                    "details": "Hurghada International Airport is 25 minutes away by car. We provide complimentary airport transfers for all guests."
+                },
+                "transfer": {
+                    "title": "Complimentary Transfer",
+                    "details": "Our professional drivers will meet you at the airport with a welcome sign and transport you directly to the villa in comfort."
+                },
+                "taxi": {
+                    "title": "Taxi & Private Transport",
+                    "details": "Licensed taxis available at the airport. Journey takes approximately 25-30 minutes. Cost ranges from 200-300 EGP ($6-10 USD)."
+                },
+                "driving": {
+                    "title": "Self-Driving",
+                    "details": "Car rental available at the airport. Villa has private parking. GPS coordinates provided upon booking confirmation."
+                }
+            },
+            "destination": {
+                "title": "Destination Hurghada",
+                "subtitle": "Discover the magic of the Red Sea",
+                "description": "Hurghada is Egypt's premier Red Sea destination, renowned for its crystal-clear waters, vibrant coral reefs, and year-round sunshine. Our villa is perfectly positioned to enjoy both the tranquil beaches and exciting activities this magical destination offers.",
+                "highlights": {
+                    "title": "Why Hurghada?",
+                    "redSea": "World-class diving and snorkeling in pristine coral reefs",
+                    "weather": "Perfect climate with 300+ days of sunshine annually",
+                    "diving": "Access to some of the world's best dive sites",
+                    "culture": "Rich Egyptian culture and Bedouin heritage",
+                    "convenience": "Modern amenities with authentic charm"
+                },
+                "nearby": {
+                    "title": "Nearby Attractions",
+                    "marina": "Hurghada Marina - 15 minutes",
+                    "oldTown": "Old Town Hurghada - 20 minutes",
+                    "elGouna": "El Gouna Resort - 30 minutes",
+                    "makadi": "Makadi Bay - 45 minutes"
+                }
+            }
+        },
+        "activities": {
+            "marina": {
+                "title": "Hurghada Marina",
+                "subtitle": "Modern waterfront destination",
+                "description": "A vibrant waterfront promenade featuring luxury yachts, international restaurants, cafes, and boutique shopping. Perfect for evening strolls and dining with marina views.",
+                "location": "Distance: 15 minutes by car",
+                "hours": "Open daily: 10:00 AM - 2:00 AM",
+                "highlights": "Yacht charters, fine dining, shopping, entertainment"
+            },
+            "oldTown": {
+                "title": "Old Town Hurghada (El Dahar)",
+                "subtitle": "Authentic Egyptian experience",
+                "description": "Explore traditional Egyptian culture in the historic heart of Hurghada. Visit local markets, traditional restaurants, and experience authentic Egyptian hospitality.",
+                "highlights": "Traditional souks, local cuisine, cultural sites, authentic crafts",
+                "tips": "Best visited in the evening when temperatures are cooler"
+            },
+            "elGouna": {
+                "title": "El Gouna",
+                "subtitle": "Venice of the Red Sea",
+                "description": "A luxury resort town built on lagoons, featuring championship golf courses, luxury hotels, and upscale dining. Known for its unique architecture and sophisticated atmosphere.",
+                "distance": "30 minutes north of our villa",
+                "highlights": "Golf courses, luxury dining, nightlife, water sports"
+            },
+            "desertSafari": {
+                "title": "Eastern Desert Safari",
+                "subtitle": "Adventure in the Egyptian desert",
+                "description": "Experience the magic of the Eastern Desert with quad biking, camel rides, Bedouin village visits, and unforgettable sunset views over the Red Sea mountains.",
+                "included": "Transportation, guide, refreshments, traditional dinner",
+                "duration": "Half-day or full-day options available"
+            },
+            "snorkeling": {
+                "title": "Snorkeling & Diving Sites",
+                "subtitle": "Underwater paradise",
+                "description": "Discover world-renowned dive sites including Giftun Island, Abu Ramada, and the famous shipwrecks. Perfect for both beginners and experienced divers."
+            },
+            "shopping": {
+                "title": "Shopping in Hurghada",
+                "subtitle": "From traditional to modern",
+                "description": "Explore traditional souks for authentic crafts, spices, and textiles, or visit modern shopping centers for international brands and dining."
+            }
+        },
+        "entertainment": {
+            "redSeaFestival": {
+                "title": "Red Sea International Film Festival",
+                "subtitle": "Annual cultural celebration",
+                "description": "A prestigious international film festival showcasing cinema from the Arab world and beyond. Features screenings, workshops, and cultural events.",
+                "dates": "Usually held in December",
+                "location": "Various venues across Hurghada and El Gouna"
+            },
+            "divingCompetition": {
+                "title": "International Diving Championships",
+                "subtitle": "World-class underwater sports",
+                "description": "Annual diving competitions attracting professionals and enthusiasts from around the world. Spectacular underwater photography and videography contests.",
+                "when": "Typically held in spring and autumn seasons"
+            },
+            "culturalNights": {
+                "title": "Traditional Cultural Nights",
+                "subtitle": "Authentic Egyptian entertainment",
+                "description": "Experience traditional Egyptian folklore, Sufi dancing, and Bedouin music. Many hotels and cultural centers host regular performances.",
+                "schedule": "Usually Thursday and Friday evenings at various venues"
+            },
+            "ramadan": {
+                "title": "Ramadan 2025",
+                "subtitle": "Sacred month of reflection",
+                "description": "Experience the spiritual atmosphere of Ramadan in Egypt. Special Iftar dinners, traditional celebrations, and unique cultural experiences available.",
+                "dates": "Expected: March 1 - March 30, 2025 (dates may vary)",
+                "experience": "Traditional Iftar meals, evening prayers, special cultural programs"
+            },
+            "nightlife": {
+                "title": "Hurghada Nightlife",
+                "subtitle": "Evening entertainment",
+                "description": "From rooftop bars overlooking the Red Sea to traditional shisha cafes and live music venues, Hurghada offers diverse nighttime entertainment."
+            },
+            "festivals": {
+                "title": "Local Festivals & Events",
+                "subtitle": "Year-round celebrations",
+                "description": "Hurghada hosts various festivals throughout the year including music festivals, food celebrations, and cultural events celebrating Egyptian heritage."
+            }
+        },
+        "contact": {
+            "title": "Can't Find an Answer?",
+            "subtitle": "Our concierge team is here to help",
+            "form": {
+                "name": "Your Name",
+                "email": "Email Address",
+                "question": "Your Question",
+                "questionPlaceholder": "Ask us anything about your stay, activities, or local recommendations...",
+                "howDidYouKnow": "How did you hear about Tranquilo Hurghada?",
+                "selectOption": "Please select an option",
+                "recommendation": "Recommendation from a friend",
+                "other": "Other",
+                "privacy": "We undertake not to disclose your personal information to any third party.",
+                "send": "Send Message"
+            }
+        },
+        "cta": {
+            "title": "Ready to Experience Tranquilo Hurghada?",
+            "subtitle": "Book your luxury villa experience today",
+            "bookNow": "Reserve Your Stay",
+            "contact": "Contact Concierge",
+            "support": {
+                "phone": {
+                    "title": "24/7 Phone Support",
+                    "description": "Call us anytime for assistance"
+                },
+                "email": {
+                    "title": "Email Support",
+                    "description": "Response within 2 hours"
+                },
+                "hours": {
+                    "title": "Concierge Hours",
+                    "description": "Available around the clock"
+                }
+            }
+        },
+        "news": {
+            "title": "Our Latest News",
+            "subtitle": "Articles about Hurghada and travel tips",
+            "readMore": "Read More",
+            "viewAll": "View All Articles",
+            "posts": {
+                "hurghadaGuide": {
+                    "title": "Hurghada: Pearl of the Red Sea",
+                    "excerpt": "Discover why Hurghada is Egypt's premier beach destination, with crystal-clear waters, world-class diving, and luxury accommodations...",
+                    "author": "Nabil Laaouina",
+                    "date": "February 16, 2024"
+                },
+                "redSeaDiving": {
+                    "title": "🤿 Ultimate Red Sea Diving Guide 2025",
+                    "excerpt": "Explore the underwater wonders of the Red Sea with our comprehensive diving guide. From beginner spots to advanced dive sites...",
+                    "author": "Nabil Laaouina",
+                    "date": "January 15, 2025"
+                },
+                "desertAdventure": {
+                    "title": "🏜️ Desert Adventures from Hurghada",
+                    "excerpt": "Experience the magic of the Eastern Desert with quad biking, camel rides, and Bedouin cultural experiences...",
+                    "author": "Nabil Laaouina",
+                    "date": "December 20, 2024"
+                },
+                "culturalExperience": {
+                    "title": "🎭 Cultural Experiences in Hurghada",
+                    "excerpt": "Immerse yourself in authentic Egyptian culture through traditional music, dance, and culinary experiences...",
+                    "author": "Nabil Laaouina",
+                    "date": "November 28, 2024"
+                }
+            }
+        }
     }
 }
