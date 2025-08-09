@@ -265,7 +265,7 @@ const DateRangePickerModal: React.FC<DateRangePickerModalProps> = ({
                         </div>
                         <button
                             onClick={onClose}
-                            className='p-2 hover:bg-[#F8B259]/20 rounded-xl transition-colors group'
+                            className='p-2  cursor-pointer hover:bg-[#F8B259]/20 rounded-xl transition-colors group'
                         >
                             <X className='w-5 h-5 text-[#C75D2C] group-hover:rotate-90 transition-transform duration-200' />
                         </button>
@@ -405,7 +405,7 @@ const DateRangePickerModal: React.FC<DateRangePickerModalProps> = ({
                             {(checkInDate || checkOutDate) && (
                                 <button
                                     onClick={clearDates}
-                                    className='px-3 py-2 text-[#C75D2C] hover:bg-[#F8B259]/20 rounded-xl transition-colors font-medium text-sm'
+                                    className='px-3 py-2 text-[#C75D2C] cursor-pointer hover:bg-[#F8B259]/20 rounded-xl transition-colors font-medium text-sm'
                                 >
                                     Clear dates
                                 </button>
@@ -413,7 +413,7 @@ const DateRangePickerModal: React.FC<DateRangePickerModalProps> = ({
                             <button
                                 onClick={handleConfirm}
                                 disabled={!checkInDate || !checkOutDate}
-                                className={`px-6 py-2 rounded-xl font-bold transition-all duration-300 text-sm ${
+                                className={`px-6 py-2 rounded-xl cursor-pointer font-bold transition-all duration-300 text-sm ${
                                     checkInDate && checkOutDate
                                         ? 'bg-gradient-to-r from-[#D96F32] to-[#C75D2C] text-white hover:from-[#C75D2C] hover:to-[#D96F32] hover:transform hover:-translate-y-0.5 shadow-lg'
                                         : 'bg-[#C75D2C]/30 text-[#C75D2C]/50 cursor-not-allowed'

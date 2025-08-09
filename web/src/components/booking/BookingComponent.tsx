@@ -1,22 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import {
-    Calendar,
-    Users,
-    Phone,
-    CreditCard,
-    FileText,
-    AlertCircle,
-    Check,
-    Star,
-    Award,
-    Shield,
-    Clock,
-    LogIn,
-    X,
-} from 'lucide-react';
+import { Calendar, Users, Phone, CreditCard, FileText, Star, Award, Shield, Clock, LogIn, X } from 'lucide-react';
 import bookingApi from '@/api/bookingApi';
 import villaApi from '@/api/villaApi';
 import DateRangePickerModal from './DateRangePickerModal';
+import { THToast, THToaster } from '@/components/common/Toast';
 import type { PaymentMethod, User, Villa } from '@/utils/types';
 
 interface FormData {
@@ -48,10 +35,8 @@ const FORM_STORAGE_KEY = 'booking_form_data';
 
 const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBookingSuccess }) => {
     const [submitting, setSubmitting] = useState(false);
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
     const [showSignInModal, setShowSignInModal] = useState(false);
-    const [showDatePicker, setShowDatePicker] = useState(false); // New state for date picker modal
+    const [showDatePicker, setShowDatePicker] = useState(false);
 
     const [formData, setFormData] = useState<FormData>({
         checkIn: '',
@@ -133,7 +118,7 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
         }
     };
 
-    // New function to handle date selection from modal
+    // Handle date selection from modal
     const handleDateSelect = (checkIn: string, checkOut: string) => {
         const newFormData = {
             ...formData,
@@ -156,20 +141,34 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
     const validateForm = (): boolean => {
         const errors: FormErrors = {};
 
-        if (!formData.checkIn) errors.checkIn = 'Check-in date required';
-        if (!formData.checkOut) errors.checkOut = 'Check-out date required';
-        if (!formData.phone) errors.phone = 'Phone number required';
-        if (!formData.dateOfBirth) errors.dateOfBirth = 'Date of birth required';
+        if (!formData.checkIn) {
+            errors.checkIn = 'Check-in date required';
+            THToast.error('Missing Check-in Date', 'Please select your check-in date');
+        }
+        if (!formData.checkOut) {
+            errors.checkOut = 'Check-out date required';
+            THToast.error('Missing Check-out Date', 'Please select your check-out date');
+        }
+        if (!formData.phone) {
+            errors.phone = 'Phone number required';
+            THToast.error('Missing Phone Number', 'Please enter your phone number');
+        }
+        if (!formData.dateOfBirth) {
+            errors.dateOfBirth = 'Date of birth required';
+            THToast.error('Missing Date of Birth', 'Please enter your date of birth');
+        }
 
         if (formData.checkIn && formData.checkOut) {
             const dateValidation = bookingApi.validateBookingDates(formData.checkIn, formData.checkOut);
             if (!dateValidation.isValid) {
                 errors.dates = dateValidation.error;
+                THToast.error('Invalid Dates', dateValidation.error);
             }
         }
 
         if (formData.phone && !/^[\+]?[1-9][\d]{8,14}$/.test(formData.phone.replace(/[\s\-\(\)]/g, ''))) {
             errors.phone = 'Invalid phone number';
+            THToast.error('Invalid Phone Number', 'Please enter a valid phone number');
         }
 
         if (formData.dateOfBirth) {
@@ -179,11 +178,13 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
 
             if (age < 18) {
                 errors.dateOfBirth = 'Must be 18 or older';
+                THToast.error('Age Requirement', 'You must be 18 or older to make a booking');
             }
         }
 
         if (formData.totalGuests < 1 || formData.totalGuests > villa.maxGuests) {
             errors.totalGuests = `Must be 1-${villa.maxGuests} guests`;
+            THToast.error('Invalid Guest Count', `Number of guests must be between 1 and ${villa.maxGuests}`);
         }
 
         setFormErrors(errors);
@@ -196,13 +197,12 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
         // Check if user is authenticated
         if (!user) {
             setShowSignInModal(true);
+            THToast.warning('Sign In Required', 'Please sign in to complete your booking');
             return;
         }
 
         try {
             setSubmitting(true);
-            setError('');
-            setSuccess('');
 
             const bookingData = {
                 villaId: villa.id,
@@ -215,8 +215,15 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
                 notes: formData.notes,
             };
 
-            await bookingApi.createBooking(bookingData);
-            setSuccess('Booking request submitted successfully!');
+            const bookingPromise = bookingApi.createBooking(bookingData);
+
+            THToast.promise(bookingPromise, {
+                loading: 'Submitting your booking request...',
+                success: 'Booking request submitted successfully! We will contact you within 24 hours.',
+                error: (err: any) => err.message || 'Failed to submit booking request. Please try again.',
+            });
+
+            await bookingPromise;
 
             // Clear form data from localStorage after successful booking
             localStorage.removeItem(FORM_STORAGE_KEY);
@@ -230,9 +237,8 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
             }));
 
             onBookingSuccess?.();
-        } catch (err) {
-            const errorMsg = err instanceof Error ? err.message : 'Failed to create booking';
-            setError(errorMsg);
+        } catch (err: any) {
+            // Error is already handled by THToast.promise
         } finally {
             setSubmitting(false);
         }
@@ -296,26 +302,6 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
 
                     {/* Booking Form */}
                     <div className='p-6'>
-                        {success && (
-                            <div className='bg-green-50/80 backdrop-blur-sm border-2 border-green-200/60 rounded-xl p-4 mb-6 flex items-start space-x-3'>
-                                <Check className='w-5 h-5 text-green-600 mt-0.5 flex-shrink-0' />
-                                <div>
-                                    <p className='text-green-800 font-semibold'>Booking Submitted!</p>
-                                    <p className='text-green-700 text-sm mt-1'>{success}</p>
-                                </div>
-                            </div>
-                        )}
-
-                        {error && (
-                            <div className='bg-red-50/80 backdrop-blur-sm border-2 border-red-200/60 rounded-xl p-4 mb-6 flex items-start space-x-3'>
-                                <AlertCircle className='w-5 h-5 text-red-600 mt-0.5 flex-shrink-0' />
-                                <div>
-                                    <p className='text-red-800 font-semibold'>Booking Error</p>
-                                    <p className='text-red-700 text-sm mt-1'>{error}</p>
-                                </div>
-                            </div>
-                        )}
-
                         {!user && (
                             <div className='bg-blue-50/80 backdrop-blur-sm border-2 border-blue-200/60 rounded-xl p-4 mb-6 flex items-start space-x-3'>
                                 <LogIn className='w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0' />
@@ -329,7 +315,7 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
                         )}
 
                         <div className='space-y-6'>
-                            {/* Date Selection - Updated to use modal */}
+                            {/* Date Selection */}
                             <div
                                 className='bg-white/30 border-2 border-[#F8B259]/50 rounded-xl overflow-hidden cursor-pointer hover:bg-white/40 transition-colors'
                                 onClick={() => setShowDatePicker(true)}
@@ -613,6 +599,9 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
                     </div>
                 </div>
             )}
+
+            {/* THToaster component */}
+            <THToaster position='bottom-right' />
         </>
     );
 };

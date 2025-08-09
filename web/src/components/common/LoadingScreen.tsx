@@ -38,11 +38,6 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ progress = 0, clas
                 </p>
             </div>
 
-            <div className='mb-8 sm:mb-12'>
-                <PropagateLoader color='#D96F32' size={8} speedMultiplier={0.6} className='sm:hidden' />
-                <PropagateLoader color='#D96F32' size={12} speedMultiplier={0.6} className='hidden sm:block' />
-            </div>
-
             <div className='w-72 sm:w-96 h-1 bg-white/30 backdrop-blur-sm rounded-full mb-6 sm:mb-8 border border-[#F8B259]/20 overflow-hidden shadow-inner relative'>
                 <div
                     className='h-full bg-gradient-to-r from-[#D96F32] via-[#F8B259] to-[#D96F32] rounded-full transition-all duration-700 ease-out shadow-sm'
@@ -68,32 +63,6 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ progress = 0, clas
                 {progress >= 50 && progress < 75 && 'Preparing Interface...'}
                 {progress >= 75 && progress < 95 && 'Finalizing...'}
                 {progress >= 95 && 'Ready'}
-            </div>
-
-            {/* Background decorative elements - reduced for mobile */}
-            <div className='absolute inset-0 overflow-hidden pointer-events-none'>
-                <div className='absolute top-1/4 left-1/6 w-1 h-1 bg-[#F8B259]/30 rounded-full animate-pulse'></div>
-                <div className='absolute top-1/3 right-1/5 w-1.5 h-1.5 bg-[#D96F32]/20 rounded-full animate-pulse delay-1000'></div>
-                <div className='absolute bottom-1/3 left-1/4 w-1 h-1 bg-[#F8B259]/25 rounded-full animate-pulse delay-2000'></div>
-                <div className='absolute bottom-1/4 right-1/3 w-1.5 h-1.5 bg-[#D96F32]/15 rounded-full animate-pulse delay-3000'></div>
-
-                {/* Corner decorations - hidden on mobile for cleaner look */}
-                <div className='absolute top-8 left-8 hidden sm:block'>
-                    <div className='w-16 h-px bg-[#F8B259]/20 transform rotate-45'></div>
-                    <div className='w-px h-16 bg-[#F8B259]/20 transform -translate-y-8 translate-x-8 -rotate-45'></div>
-                </div>
-                <div className='absolute top-8 right-8 hidden sm:block'>
-                    <div className='w-16 h-px bg-[#F8B259]/20 transform -rotate-45'></div>
-                    <div className='w-px h-16 bg-[#F8B259]/20 transform -translate-y-8 -translate-x-8 rotate-45'></div>
-                </div>
-                <div className='absolute bottom-8 left-8 hidden sm:block'>
-                    <div className='w-16 h-px bg-[#F8B259]/20 transform -rotate-45'></div>
-                    <div className='w-px h-16 bg-[#F8B259]/20 transform translate-y-8 translate-x-8 rotate-45'></div>
-                </div>
-                <div className='absolute bottom-8 right-8 hidden sm:block'>
-                    <div className='w-16 h-px bg-[#F8B259]/20 transform rotate-45'></div>
-                    <div className='w-px h-16 bg-[#F8B259]/20 transform translate-y-8 -translate-x-8 -rotate-45'></div>
-                </div>
             </div>
 
             <div className='absolute inset-0 opacity-3'>
