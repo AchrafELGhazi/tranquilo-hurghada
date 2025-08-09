@@ -5,7 +5,7 @@ import i18n from '@/utils/i18n';
 import { LoadingScreen } from '@/components/common/LoadingScreen';
 import { Layout } from './layout/public/Layout';
 import { About } from './pages/guest/About';
-import { Services } from './pages/guest/Services';
+import Services  from './pages/guest/Services';
 import { Contact } from './pages/guest/Contact';
 import { NotFound } from './pages/guest/NotFound';
 import { AdminLayout } from './layout/admin/AdminLayout';
