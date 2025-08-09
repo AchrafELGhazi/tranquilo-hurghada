@@ -276,7 +276,7 @@ const MyBookings: React.FC = () => {
                                                 <td className='px-6 py-4'>
                                                     <div className='text-sm'>
                                                         <p className='font-bold text-[#C75D2C]'>
-                                                            {bookingApi.formatPrice(booking.totalPrice, 'MAD')}
+                                                            {bookingApi.formatPrice(booking.totalPrice, 'EUR')}
                                                         </p>
                                                         <div className='flex items-center space-x-1 text-xs text-[#C75D2C]/60'>
                                                             <CreditCard className='w-3 h-3' />
@@ -359,7 +359,7 @@ const MyBookings: React.FC = () => {
                                             <div>
                                                 <p className='text-[#C75D2C]/60'>Total</p>
                                                 <p className='font-bold text-[#C75D2C]'>
-                                                    {bookingApi.formatPrice(booking.totalPrice, 'MAD')}
+                                                    {bookingApi.formatPrice(booking.totalPrice, 'EUR')}
                                                 </p>
                                             </div>
                                         </div>
@@ -493,7 +493,7 @@ const MyBookings: React.FC = () => {
                                     <div>
                                         <p className='text-[#C75D2C]/60'>Total Amount</p>
                                         <p className='font-bold text-[#C75D2C] text-lg'>
-                                            {bookingApi.formatPrice(selectedBooking.totalPrice, 'MAD')}
+                                            {bookingApi.formatPrice(selectedBooking.totalPrice, 'EUR')}
                                         </p>
                                     </div>
                                     <div>

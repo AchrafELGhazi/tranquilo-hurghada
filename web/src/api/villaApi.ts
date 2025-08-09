@@ -366,14 +366,14 @@ class VillaApi {
     /**
      * Format price for display
      */
-    formatPrice(price: number, currency: string = 'MAD'): string {
+    formatPrice(price: number, currency: string = 'EUR'): string {
         const currencyOptions: Record<string, { locale: string; currency: string }> = {
             MAD: { locale: 'ar-MA', currency: 'MAD' },
             USD: { locale: 'en-US', currency: 'USD' },
             EUR: { locale: 'en-GB', currency: 'EUR' }
         };
 
-        const options = currencyOptions[currency] || currencyOptions.MAD;
+        const options = currencyOptions[currency] || currencyOptions.EUR;
 
         return new Intl.NumberFormat(options.locale, {
             style: 'currency',

@@ -286,7 +286,7 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
                     <div className='p-6 border-b border-[#F8B259]/50 bg-gradient-to-r from-[#F8B259]/20 to-[#D96F32]/20'>
                         <div className='flex items-baseline space-x-2 mb-2'>
                             <span className='text-3xl font-bold text-[#C75D2C]'>{villa.pricePerNight}</span>
-                            <span className='text-[#C75D2C]/70 font-medium'>MAD</span>
+                            <span className='text-[#C75D2C]/70 font-medium'>EUR</span>
                             <span className='text-[#C75D2C]/70'>/ night</span>
                         </div>
                         <div className='flex items-center space-x-4 text-sm'>
@@ -470,22 +470,22 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
                                     <div className='space-y-3 text-sm'>
                                         <div className='flex justify-between items-center'>
                                             <span className='text-[#C75D2C]/80'>
-                                                {villa.pricePerNight} MAD × {calculateNights()} nights
+                                                {villa.pricePerNight} EUR × {calculateNights()} nights
                                             </span>
-                                            <span className='font-semibold text-[#C75D2C]'>{calculateTotal()} MAD</span>
+                                            <span className='font-semibold text-[#C75D2C]'>{calculateTotal()} EUR</span>
                                         </div>
                                         <div className='flex justify-between items-center'>
                                             <span className='text-[#C75D2C]/80'>Cleaning fee</span>
-                                            <span className='font-semibold text-[#C75D2C]'>{cleaningFee} MAD</span>
+                                            <span className='font-semibold text-[#C75D2C]'>{cleaningFee} EUR</span>
                                         </div>
                                         <div className='flex justify-between items-center'>
                                             <span className='text-[#C75D2C]/80'>Service fee</span>
-                                            <span className='font-semibold text-[#C75D2C]'>{serviceFee} MAD</span>
+                                            <span className='font-semibold text-[#C75D2C]'>{serviceFee} EUR</span>
                                         </div>
                                         <div className='border-t-2 border-[#F8B259]/50 pt-3 flex justify-between items-center'>
                                             <span className='font-bold text-[#C75D2C] text-lg'>Total</span>
                                             <span className='font-bold text-[#C75D2C] text-lg'>
-                                                {totalWithFees} MAD
+                                                {totalWithFees} EUR
                                             </span>
                                         </div>
                                     </div>

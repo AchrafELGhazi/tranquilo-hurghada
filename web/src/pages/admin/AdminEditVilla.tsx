@@ -359,7 +359,7 @@ const AdminEditVilla: React.FC = () => {
 
                             <div>
                                 <label className='block text-sm font-medium text-[#C75D2C] mb-1'>
-                                    Price/Night (MAD)
+                                    Price/Night (EUR)
                                 </label>
                                 <input
                                     type='number'

@@ -68,8 +68,36 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
 
     const formatDateForInput = (date: Date | string | undefined): string => {
         if (!date) return '';
-        if (typeof date === 'string') return date;
-        return date.toISOString().split('T')[0];
+
+        let dateObj: Date;
+
+        if (typeof date === 'string') {
+            // Handle various string formats
+            if (date.includes('T')) {
+                // ISO string format like "2005-04-27T00:00:00.000Z"
+                dateObj = new Date(date);
+            } else if (date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                // Already in yyyy-MM-dd format
+                return date;
+            } else {
+                // Try to parse as general date string
+                dateObj = new Date(date);
+            }
+        } else {
+            dateObj = date;
+        }
+
+        // Check if date is valid
+        if (isNaN(dateObj.getTime())) {
+            return '';
+        }
+
+        // Format as yyyy-MM-dd for input[type="date"]
+        const year = dateObj.getFullYear();
+        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const day = String(dateObj.getDate()).padStart(2, '0');
+
+        return `${year}-${month}-${day}`;
     };
 
     useEffect(() => {
@@ -90,7 +118,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
 
         try {
             const updatePromise = userApi.updateProfileSafe(profileForm);
-
+            console.log('Update Profile Data:', profileForm);
             THToast.promise(updatePromise, {
                 loading: 'Updating profile...',
                 success: 'Profile updated successfully!',
