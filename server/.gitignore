@@ -72,11 +72,3 @@ tmp/
 temp/
 .cache/
 *.tgz
-
-# ----------------------
-# Local runtime files
-# ----------------------
-.nodemon.json
-pidfile
-*.pid
-*.seed.ts
