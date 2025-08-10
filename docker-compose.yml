@@ -1,67 +1,20 @@
-version: '3.8'
-
 services:
-  # Backend API
-  backend:
-    build: 
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: backend-api
+  server:
+    build: ./server
+    container_name: tranquilo_server
+    restart: unless-stopped
+    env_file:
+      - ./server/.env
     ports:
       - "5000:5000"
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=${DATABASE_URL}
-      - JWT_SECRET=${JWT_SECRET}
-    env_file:
-      - ./backend/.env
-    networks:
-      - app-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "node", "healthcheck.js"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
 
-  # Frontend React App
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: frontend-web
+  web:
+    build: ./web
+    container_name: tranquilo_web
+    restart: unless-stopped
     ports:
-      - "3000:3000"
-    environment:
-      - VITE_API_URL=http://localhost:5000/api
+      - "80:80"
     depends_on:
-      backend:
-        condition: service_healthy
-    networks:
-      - app-network
-    restart: unless-stopped
-
-networks:
-  app-network:
-    driver: bridge
-
-
-
-# Build and start all services
-# docker-compose up --build
-
-# Run in background
-# docker-compose up -d --build
-
-# Stop all services
-# docker-compose down
-
-# View logs
-# docker-compose logs -f
-
-# Rebuild specific service
-# docker-compose up --build frontend
-
-
-
+      - server

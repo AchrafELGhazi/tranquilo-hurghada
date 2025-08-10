@@ -1,11 +1,20 @@
-FROM node:18-alpine
+FROM node:20-alpine
+
 WORKDIR /app
+
 COPY package*.json ./
+COPY prisma ./prisma
+
 RUN npm ci
+
+RUN npx prisma generate
+
 COPY . .
-RUN npx prisma generate && npm run build
-RUN adduser -D -s /bin/sh nodejs
-RUN chown -R nodejs:nodejs /app
-USER nodejs
+
+RUN npm run build
+
+RUN npm prune --production
+
 EXPOSE 5000
-CMD ["npm", "start"]
+
+CMD ["node", "dist/server.js"]
