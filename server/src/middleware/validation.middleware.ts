@@ -101,85 +101,19 @@ export const validateBookingRequest = (req: Request, res: Response, next: NextFu
         return;
     }
 
-    // Notes validation (optional)
-    if (req.body.notes && typeof req.body.notes !== 'string') {
-        ApiResponse.validationError(res, { notes: 'Notes must be a string' });
+    // Basic validation for selected services if provided
+    if (selectedServices !== undefined && !Array.isArray(selectedServices)) {
+        ApiResponse.validationError(res, { selectedServices: 'Selected services must be an array' });
         return;
     }
 
-    // Limit notes length
-    if (req.body.notes && req.body.notes.length > 500) {
-        ApiResponse.validationError(res, { notes: 'Notes cannot exceed 500 characters' });
-        return;
-    }
-
-    // Validate selected services if provided
-    if (selectedServices !== undefined) {
-        if (!Array.isArray(selectedServices)) {
-            ApiResponse.validationError(res, { selectedServices: 'Selected services must be an array' });
-            return;
-        }
-
+    // Basic service validation - detailed validation will be in service layer
+    if (selectedServices && Array.isArray(selectedServices)) {
         for (let i = 0; i < selectedServices.length; i++) {
             const service = selectedServices[i];
-
             if (!service.serviceId || typeof service.serviceId !== 'string') {
                 ApiResponse.validationError(res, { selectedServices: `Service ID is required for service at index ${i}` });
                 return;
-            }
-
-            if (service.quantity !== undefined) {
-                if (typeof service.quantity !== 'number' || service.quantity < 1 || service.quantity > 50) {
-                    ApiResponse.validationError(res, { selectedServices: `Service quantity must be between 1 and 50 for service at index ${i}` });
-                    return;
-                }
-            }
-
-            if (service.numberOfGuests !== undefined) {
-                if (typeof service.numberOfGuests !== 'number' || service.numberOfGuests < 1 || service.numberOfGuests > guestCount) {
-                    ApiResponse.validationError(res, { selectedServices: `Number of guests for service must be between 1 and total booking guests for service at index ${i}` });
-                    return;
-                }
-            }
-
-            if (service.scheduledDate !== undefined) {
-                const scheduledDate = new Date(service.scheduledDate);
-                if (isNaN(scheduledDate.getTime())) {
-                    ApiResponse.validationError(res, { selectedServices: `Invalid scheduled date format for service at index ${i}` });
-                    return;
-                }
-
-                // Service should be scheduled within the booking period
-                if (scheduledDate < checkInDate || scheduledDate >= checkOutDate) {
-                    ApiResponse.validationError(res, { selectedServices: `Service scheduled date must be within the booking period for service at index ${i}` });
-                    return;
-                }
-            }
-
-            if (service.scheduledTime !== undefined) {
-                if (typeof service.scheduledTime !== 'string') {
-                    ApiResponse.validationError(res, { selectedServices: `Scheduled time must be a string for service at index ${i}` });
-                    return;
-                }
-
-                // Basic time format validation (HH:MM)
-                const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
-                if (!timeRegex.test(service.scheduledTime)) {
-                    ApiResponse.validationError(res, { selectedServices: `Invalid time format (use HH:MM) for service at index ${i}` });
-                    return;
-                }
-            }
-
-            if (service.specialRequests !== undefined) {
-                if (typeof service.specialRequests !== 'string') {
-                    ApiResponse.validationError(res, { selectedServices: `Special requests must be a string for service at index ${i}` });
-                    return;
-                }
-
-                if (service.specialRequests.length > 500) {
-                    ApiResponse.validationError(res, { selectedServices: `Special requests cannot exceed 500 characters for service at index ${i}` });
-                    return;
-                }
             }
         }
     }

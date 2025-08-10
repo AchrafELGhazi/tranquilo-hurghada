@@ -30,97 +30,16 @@ export const createBookingRequest = async (req: AuthenticatedRequest, res: Respo
             notes,
             phone,
             dateOfBirth,
-            selectedServices // New field for services
+            selectedServices
         } = req.body;
         const guestId = req.user!.id;
 
-        if (!villaId || !checkIn || !checkOut || !totalGuests || !paymentMethod) {
-            ApiResponse.badRequest(res, 'Missing required fields: villaId, checkIn, checkOut, totalGuests, paymentMethod');
-            return;
-        }
-
-        if (!phone) {
-            ApiResponse.badRequest(res, 'Phone number is required for booking');
-            return;
-        }
-
-        if (!dateOfBirth) {
-            ApiResponse.badRequest(res, 'Date of birth is required for booking');
-            return;
-        }
-
-        const dobDate = new Date(dateOfBirth);
-        if (isNaN(dobDate.getTime())) {
-            ApiResponse.badRequest(res, 'Invalid date of birth format');
-            return;
-        }
-
-        const today = new Date();
-        const age = today.getFullYear() - dobDate.getFullYear();
-        const monthDiff = today.getMonth() - dobDate.getMonth();
-        const finalAge = monthDiff < 0 || (monthDiff === 0 && today.getDate() < dobDate.getDate()) ? age - 1 : age;
-
-        if (finalAge < 18) {
-            ApiResponse.badRequest(res, 'You must be at least 18 years old to make a booking');
-            return;
-        }
-
-        // Validate payment method
-        if (!Object.values(PaymentMethod).includes(paymentMethod)) {
-            ApiResponse.badRequest(res, 'Invalid payment method');
-            return;
-        }
-
-        // Validate guest count
-        if (totalGuests < 1 || totalGuests > 12) {
-            ApiResponse.badRequest(res, 'Total guests must be between 1 and 12');
-            return;
-        }
-
-        // Parse dates
-        const checkInDate = new Date(checkIn);
-        const checkOutDate = new Date(checkOut);
-
-        if (isNaN(checkInDate.getTime()) || isNaN(checkOutDate.getTime())) {
-            ApiResponse.badRequest(res, 'Invalid date format');
-            return;
-        }
-
-        // Validate selected services if provided
-        if (selectedServices && Array.isArray(selectedServices)) {
-            for (const service of selectedServices) {
-                if (!service.serviceId) {
-                    ApiResponse.badRequest(res, 'Service ID is required for each selected service');
-                    return;
-                }
-
-                if (service.quantity && (service.quantity < 1 || service.quantity > 50)) {
-                    ApiResponse.badRequest(res, 'Service quantity must be between 1 and 50');
-                    return;
-                }
-
-                if (service.numberOfGuests && (service.numberOfGuests < 1 || service.numberOfGuests > totalGuests)) {
-                    ApiResponse.badRequest(res, 'Number of guests for service cannot exceed total booking guests');
-                    return;
-                }
-
-                if (service.scheduledDate) {
-                    const scheduledDate = new Date(service.scheduledDate);
-                    if (isNaN(scheduledDate.getTime())) {
-                        ApiResponse.badRequest(res, 'Invalid scheduled date format for service');
-                        return;
-                    }
-                    // Service should be scheduled within the booking period
-                    if (scheduledDate < checkInDate || scheduledDate >= checkOutDate) {
-                        ApiResponse.badRequest(res, 'Service scheduled date must be within the booking period');
-                        return;
-                    }
-                }
-            }
-        }
+        // The validation middleware should have already handled most validation
+        // Only do minimal additional validation here
 
         // Update user profile with phone and date of birth if not already set
         try {
+            const dobDate = new Date(dateOfBirth);
             await updateUserProfile(guestId, { phone, dateOfBirth: dobDate });
         } catch (profileError) {
             logger.error('Failed to update user profile:', profileError);
@@ -130,8 +49,8 @@ export const createBookingRequest = async (req: AuthenticatedRequest, res: Respo
         const booking = await createBooking({
             villaId,
             guestId,
-            checkIn: checkInDate,
-            checkOut: checkOutDate,
+            checkIn: new Date(checkIn),
+            checkOut: new Date(checkOut),
             totalGuests: parseInt(totalGuests),
             paymentMethod,
             notes,
@@ -140,10 +59,28 @@ export const createBookingRequest = async (req: AuthenticatedRequest, res: Respo
 
         ApiResponse.created(res, booking, 'Booking request created successfully');
     } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : 'Failed to create booking';
-        logger.error('Create booking error:', errorMessage);
+        // Enhanced error logging
+        logger.error('Create booking error - Full Details:', {
+            error: error instanceof Error ? {
+                message: error.message,
+                stack: error.stack,
+                name: error.name
+            } : error,
+            requestBody: req.body,
+            userId: req.user?.id,
+            timestamp: new Date().toISOString()
+        });
 
-        if (errorMessage.includes('not found') || errorMessage.includes('not available') || errorMessage.includes('Service')) {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to create booking';
+
+        if (errorMessage.includes('not found') ||
+            errorMessage.includes('not available') ||
+            errorMessage.includes('Service') ||
+            errorMessage.includes('validation') ||
+            errorMessage.includes('Invalid') ||
+            errorMessage.includes('must be') ||
+            errorMessage.includes('cannot be') ||
+            errorMessage.includes('required')) {
             ApiResponse.badRequest(res, errorMessage);
         } else {
             ApiResponse.serverError(res, errorMessage);
