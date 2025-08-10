@@ -12,7 +12,7 @@ import { startBookingAutoCompletionJob } from './jobs/booking.job';
 import path from 'path';
 
 const app = express();
-const apiPrefix = `/api/${env.API_VERSION}`;
+const apiPrefix = `/api`;
 
 const allowedOrigins = [
     "http://localhost:3000",
