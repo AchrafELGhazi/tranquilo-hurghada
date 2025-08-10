@@ -46,6 +46,7 @@ if (env.isDevelopment) {
     console.log('Environment variables loaded successfully');
     console.log({
         NODE_ENV: env.NODE_ENV,
+        DATABASE_URL: env.DATABASE_URL,
         PORT: env.PORT,
         API_VERSION: env.API_VERSION,
         LOG_LEVEL: env.LOG_LEVEL,

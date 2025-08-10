@@ -9,6 +9,7 @@ import { notFoundHandler } from './middleware/notFoundHandler';
 import { env } from './config/env';
 import apiRouter from './routes/api';
 import { startBookingAutoCompletionJob } from './jobs/booking.job';
+import path from 'path';
 
 const app = express();
 const apiPrefix = `/api/${env.API_VERSION}`;
@@ -22,6 +23,9 @@ const allowedOrigins = [
 if (env.NODE_ENV === "production") {
     allowedOrigins.push('https://tranquilo-hurghada.combine');
 }
+
+app.use(express.static(path.join(__dirname, 'client/build')));
+
 app.use(cors({
     origin: allowedOrigins,
     credentials: true,
