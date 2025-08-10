@@ -9,7 +9,6 @@ import { notFoundHandler } from './middleware/notFoundHandler';
 import { env } from './config/env';
 import apiRouter from './routes/api';
 import { startBookingAutoCompletionJob } from './jobs/booking.job';
-import path from 'path';
 
 const app = express();
 const apiPrefix = `/api`;
@@ -20,31 +19,25 @@ const allowedOrigins = [
     env.FRONTEND_URL,
 ];
 
-if (env.NODE_ENV === "production") {
-    allowedOrigins.push('https://tranquilo-hurghada.combine');
-}
-
-app.use(express.static(path.join(__dirname, 'client/build')));
-
 app.use(cors({
     origin: allowedOrigins,
     credentials: true,
     // methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     // allowedHeaders: ['Content-Type', 'Authorization']
 }));
-app.use(
-    helmet({
-        crossOriginResourcePolicy: { policy: 'cross-origin' },
-        contentSecurityPolicy: {
-            directives: {
-                defaultSrc: ["'self'"],
-                styleSrc: ["'self'", "'unsafe-inline'"],
-                scriptSrc: ["'self'"],
-                imgSrc: ["'self'", 'data:', 'https:'],
-            },
-        },
-    })
-);
+// app.use(
+//     helmet({
+//         crossOriginResourcePolicy: { policy: 'cross-origin' },
+//         contentSecurityPolicy: {
+//             directives: {
+//                 defaultSrc: ["'self'"],
+//                 styleSrc: ["'self'", "'unsafe-inline'"],
+//                 scriptSrc: ["'self'"],
+//                 imgSrc: ["'self'", 'data:', 'https:'],
+//             },
+//         },
+//     })
+// );
 app.use(morgan('combined'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
