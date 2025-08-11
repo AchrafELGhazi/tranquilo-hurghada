@@ -120,7 +120,7 @@ const HeroSection = () => {
                         } transition-all duration-800 ease-out delay-300`}
                     >
                         <span className='inline-block px-2 py-1 sm:px-3 sm:py-1.5 backdrop-blur-md bg-orange-50/10 border border-orange-50/20 rounded-full text-yellow-400 font-medium text-xs sm:text-sm tracking-wider uppercase'>
-                            Welcome to Paradise
+                            Luxury Villa in Hurghada, Egypt
                         </span>
                     </div>
 
@@ -134,6 +134,9 @@ const HeroSection = () => {
                             Tranquilo
                             <span className='block text-yellow-400 font-bold text-3xl md:text-4xl lg:text-5xl mt-1 font-sans tracking-wide'>
                                 HURGHADA
+                            </span>
+                            <span className='block text-yellow-400 font-bold text-3xl md:text-4xl lg:text-5xl mt-1 font-sans tracking-wide'>
+                                Private Red Sea Escape
                             </span>
                         </h1>
                     </div>
@@ -159,8 +162,9 @@ const HeroSection = () => {
                         } transition-all duration-800 ease-out delay-900`}
                     >
                         <p className='font-light text-base md:text-lg text-orange-50/80 max-w-3xl mx-auto leading-relaxed'>
-                            Where ancient Egyptian mystique meets contemporary luxury along the crystal-clear Red Sea
-                            coast.
+                            Experience the perfect blend of Egyptian charm and modern luxury at our exclusive beachfront
+                            villa on the Red Sea. Enjoy a private pool, pristine beaches, world-class diving, and
+                            personalized hospitality in the heart of Hurghada.
                         </p>
                     </div>
 
@@ -172,7 +176,7 @@ const HeroSection = () => {
                     >
                         <div className='flex flex-col sm:flex-row gap-4 justify-center'>
                             <button className='group relative px-6 py-3 bg-gradient-to-r from-orange-600 to-orange-700 transition-all duration-500 rounded-full font-semibold text-orange-50 text-base shadow-xl hover:shadow-2xl transform hover:scale-105'>
-                                <span className='relative z-10'>Reserve Your Suite</span>
+                                <span className='relative z-10'>Book Your Luxury Villa Stay</span>
                                 <div className='absolute inset-0 bg-gradient-to-r from-yellow-400/20 to-transparent rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
                                 <span className='inline-block ml-2 transition-transform duration-300 group-hover:translate-x-1'>
                                     →
@@ -180,7 +184,7 @@ const HeroSection = () => {
                             </button>
 
                             <button className='group px-6 py-3 backdrop-blur-md bg-orange-50/10 border-2 border-orange-50/30 text-orange-50 hover:bg-orange-50/20 hover:border-orange-50/50 transition-all duration-500 rounded-full font-medium text-base transform hover:-translate-y-0.5'>
-                                View Services
+                                Explore Villa Amenities & Services
                                 <Calendar className='inline-block ml-2 w-4 h-4 transition-transform duration-300 group-hover:rotate-12' />
                             </button>
                         </div>

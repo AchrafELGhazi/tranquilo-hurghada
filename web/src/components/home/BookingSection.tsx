@@ -16,10 +16,10 @@ interface FormData {
 }
 
 const BookingSection: React.FC = () => {
-    const [checkIn, setCheckIn] = useState<string>('');
-    const [checkOut, setCheckOut] = useState<string>('');
-    const [guests, setGuests] = useState<string>('2');
-    const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
+    const [checkIn, setCheckIn] = useState('');
+    const [checkOut, setCheckOut] = useState('');
+    const [guests, setGuests] = useState('2');
+    const [showDatePicker, setShowDatePicker] = useState(false);
     const { lang } = useParams<{ lang: string }>();
 
     useEffect(() => {
@@ -36,7 +36,7 @@ const BookingSection: React.FC = () => {
         }
     }, []);
 
-    const saveFormDataToStorage = (newCheckIn: string, newCheckOut: string, newGuests: string): void => {
+    const saveFormDataToStorage = (newCheckIn: string, newCheckOut: string, newGuests: string) => {
         try {
             let existingData: Partial<FormData> = {};
             try {
@@ -47,33 +47,31 @@ const BookingSection: React.FC = () => {
             } catch {
                 existingData = {};
             }
-
             const formData: FormData = {
                 ...existingData,
                 checkIn: newCheckIn,
                 checkOut: newCheckOut,
                 totalGuests: parseInt(newGuests, 10),
             };
-
             localStorage.setItem(FORM_STORAGE_KEY, JSON.stringify(formData));
         } catch (error) {
             console.warn('Failed to save form data to localStorage:', error);
         }
     };
 
-    const handleDateSelect = (newCheckIn: string, newCheckOut: string): void => {
+    const handleDateSelect = (newCheckIn: string, newCheckOut: string) => {
         setCheckIn(newCheckIn);
         setCheckOut(newCheckOut);
         saveFormDataToStorage(newCheckIn, newCheckOut, guests);
     };
 
-    const handleGuestsChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
+    const handleGuestsChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const newGuests = e.target.value;
         setGuests(newGuests);
         saveFormDataToStorage(checkIn, checkOut, newGuests);
     };
 
-    const formatDisplayDate = (dateString: string): string => {
+    const formatDisplayDate = (dateString: string) => {
         if (!dateString) return '';
         return new Date(dateString).toLocaleDateString('en-US', {
             month: 'short',
@@ -81,7 +79,7 @@ const BookingSection: React.FC = () => {
         });
     };
 
-    const calculateNights = (): number => {
+    const calculateNights = () => {
         if (!checkIn || !checkOut) return 0;
         const startDate = new Date(checkIn);
         const endDate = new Date(checkOut);
@@ -91,41 +89,79 @@ const BookingSection: React.FC = () => {
 
     return (
         <>
-            <section className='relative py-20 px-6 bg-gradient-to-br from-orange-50 to-amber-50 overflow-hidden'>
-                {/* Background Elements */}
-                <div className='absolute top-10 right-10 w-32 h-32 bg-gradient-radial from-orange-200/30 to-transparent rounded-full blur-2xl'></div>
-                <div className='absolute bottom-20 left-10 w-40 h-40 bg-gradient-radial from-yellow-200/20 to-transparent rounded-full blur-3xl'></div>
+            {/* LodgingBusiness Schema for SEO */}
+            <script type='application/ld+json'>
+                {JSON.stringify({
+                    '@context': 'https://schema.org',
+                    '@type': 'LodgingBusiness',
+                    name: 'Tranquilo Hurghada Luxury Villa',
+                    description:
+                        'Luxury beachfront villa in Hurghada, Egypt, with private pool, premium Red Sea views, and concierge service.',
+                    image: 'https://www.tranquilo-hurghada.com/images/villa-main.jpg',
+                    address: {
+                        '@type': 'PostalAddress',
+                        addressLocality: 'Hurghada',
+                        addressRegion: 'Red Sea Governorate',
+                        addressCountry: 'EG',
+                    },
+                    priceRange: '€150 - €300 per night',
+                    telephone: '+20 123 456 7890',
+                    amenityFeature: [
+                        { '@type': 'LocationFeatureSpecification', name: 'Private pool' },
+                        { '@type': 'LocationFeatureSpecification', name: 'Free Wi-Fi' },
+                        { '@type': 'LocationFeatureSpecification', name: 'Beachfront' },
+                    ],
+                    url: 'https://www.tranquilo-hurghada.com',
+                })}
+            </script>
+
+            <section
+                className='relative py-20 px-6 bg-gradient-to-br from-orange-50 to-amber-50 overflow-hidden'
+                aria-labelledby='booking-heading'
+            >
+                <div
+                    className='absolute top-10 right-10 w-32 h-32 bg-gradient-radial from-orange-200/30 to-transparent rounded-full blur-2xl'
+                    aria-hidden='true'
+                ></div>
+                <div
+                    className='absolute bottom-20 left-10 w-40 h-40 bg-gradient-radial from-yellow-200/20 to-transparent rounded-full blur-3xl'
+                    aria-hidden='true'
+                ></div>
 
                 <div className='max-w-6xl mx-auto'>
-                    {/* Section Header */}
-                    <div className='text-center mb-16'>
-                        <div className='inline-block px-4 py-2 backdrop-blur-md bg-orange-100/50 border border-orange-200/50 rounded-full text-orange-700 font-medium text-sm tracking-wider uppercase mb-6'>
+                    <header className='text-center mb-16'>
+                        <span className='inline-block px-4 py-2 backdrop-blur-md bg-orange-100/50 border border-orange-200/50 rounded-full text-orange-700 font-medium text-sm tracking-wider uppercase mb-6'>
                             Reserve Your Stay
-                        </div>
-                        <h2 className='font-butler text-5xl md:text-6xl text-orange-900 mb-6 leading-tight'>
+                        </span>
+                        <h2
+                            id='booking-heading'
+                            className='font-butler text-5xl md:text-6xl text-orange-900 mb-6 leading-tight'
+                        >
                             Book Your
                             <span className='block text-amber-600 font-bold text-3xl md:text-4xl mt-2 font-sans tracking-wide'>
-                                PARADISE ESCAPE
+                                Luxury Beachfront Villa in Hurghada
                             </span>
                         </h2>
                         <p className='text-lg text-orange-700/80 max-w-3xl mx-auto leading-relaxed'>
-                            Secure your luxury villa experience with instant confirmation and premium Red Sea views
+                            Experience the perfect Red Sea getaway — secure your private villa with{' '}
+                            <strong>instant booking confirmation</strong>, panoramic sea views, and 5-star amenities.
                         </p>
-                    </div>
+                    </header>
 
-                    {/* Booking Widget */}
                     <div className='bg-white/80 backdrop-blur-lg border-2 border-orange-200/50 rounded-3xl p-8 shadow-2xl mb-12'>
                         <div className='grid grid-cols-1 md:grid-cols-4 gap-6 mb-6'>
-                            {/* Date Selection - Updated to use modal */}
+                            {/* Date Picker */}
                             <div className='md:col-span-2'>
-                                <div
-                                    className='bg-white/50 border-2 border-orange-200/60 rounded-xl overflow-hidden cursor-pointer hover:bg-white/70 transition-all duration-300 h-full'
+                                <button
+                                    type='button'
+                                    className='bg-white/50 border-2 border-orange-200/60 rounded-xl overflow-hidden w-full h-full hover:bg-white/70 transition-all duration-300'
                                     onClick={() => setShowDatePicker(true)}
+                                    aria-label='Select check-in and check-out dates'
                                 >
                                     <div className='grid grid-cols-2 h-full'>
                                         <div className='p-4 border-r border-orange-200/60 flex flex-col justify-center'>
                                             <label className='text-sm font-semibold text-orange-900 mb-2 flex items-center'>
-                                                <Calendar className='w-4 h-4 mr-2' />
+                                                <Calendar className='w-4 h-4 mr-2' aria-hidden='true' />
                                                 Check-in Date
                                             </label>
                                             <div className='text-orange-900 font-medium'>
@@ -142,26 +178,31 @@ const BookingSection: React.FC = () => {
                                         </div>
                                     </div>
                                     {checkIn && checkOut && (
-                                        <div className='px-4 pb-3 border-t border-orange-200/50 bg-orange-50/50'>
-                                            <div className='flex items-center justify-center space-x-2 mt-2'>
-                                                <span className='text-sm font-semibold text-orange-700'>
-                                                    {calculateNights()} {calculateNights() === 1 ? 'night' : 'nights'}
-                                                </span>
-                                            </div>
+                                        <div className='px-4 pb-3 border-t border-orange-200/50 bg-orange-50/50 text-center'>
+                                            <span className='text-sm font-semibold text-orange-700'>
+                                                {calculateNights()} {calculateNights() === 1 ? 'night' : 'nights'}
+                                            </span>
                                         </div>
                                     )}
-                                </div>
+                                </button>
                             </div>
 
                             {/* Guests */}
-                            <div className='space-y-2'>
-                                <label className='block text-sm font-semibold text-orange-900 mb-2'>Guests</label>
+                            <div>
+                                <label htmlFor='guests' className='block text-sm font-semibold text-orange-900 mb-2'>
+                                    Guests
+                                </label>
                                 <div className='relative'>
-                                    <Users className='absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-orange-600' />
+                                    <Users
+                                        className='absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-orange-600'
+                                        aria-hidden='true'
+                                    />
                                     <select
+                                        id='guests'
                                         value={guests}
                                         onChange={handleGuestsChange}
                                         className='w-full pl-10 pr-4 py-3 border-2 border-orange-200/60 rounded-xl bg-white/70 text-orange-900 focus:outline-none focus:border-orange-500 focus:bg-white transition-all duration-300 appearance-none'
+                                        aria-label='Select number of guests'
                                     >
                                         {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(num => (
                                             <option key={num} value={num}>
@@ -172,31 +213,35 @@ const BookingSection: React.FC = () => {
                                 </div>
                             </div>
 
-                            {/* Book Now Button */}
+                            {/* Book Now */}
                             <div className='flex items-end'>
-                                <button className='w-full group relative px-6 py-3 bg-gradient-to-r from-orange-600 to-orange-700 transition-all duration-500 rounded-xl font-semibold text-white shadow-xl hover:shadow-2xl transform hover:scale-105'>
-                                    <Link to={`/${lang}/booking`} className='block'>
-                                        <span className='relative z-10 flex items-center justify-center space-x-2'>
-                                            <span>Book Now</span>
-                                            <ArrowRight className='w-4 h-4 transition-transform duration-300 group-hover:translate-x-1' />
-                                        </span>
-                                        <div className='absolute inset-0 bg-gradient-to-r from-yellow-400/20 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
-                                    </Link>
-                                </button>
+                                <Link
+                                    to={`/${lang}/booking`}
+                                    className='w-full group relative px-6 py-3 bg-gradient-to-r from-orange-600 to-orange-700 rounded-xl font-semibold text-white shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-500 text-center'
+                                    aria-label='Book your luxury beachfront villa now'
+                                >
+                                    <span className='flex items-center justify-center space-x-2 relative z-10'>
+                                        <span>Book Now</span>
+                                        <ArrowRight
+                                            className='w-4 h-4 transition-transform duration-300 group-hover:translate-x-1'
+                                            aria-hidden='true'
+                                        />
+                                    </span>
+                                    <span
+                                        className='absolute inset-0 bg-gradient-to-r from-yellow-400/20 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300'
+                                        aria-hidden='true'
+                                    ></span>
+                                </Link>
                             </div>
                         </div>
 
-                        {/* Price Display */}
+                        {/* Price */}
                         <div className='flex items-center justify-between pt-6 border-t border-orange-200/50'>
-                            <div className='flex items-center space-x-4'>
-                                <div className='flex items-center space-x-1'>
-                                    <Star className='w-5 h-5 text-yellow-500 fill-current' />
-                                    <Star className='w-5 h-5 text-yellow-500 fill-current' />
-                                    <Star className='w-5 h-5 text-yellow-500 fill-current' />
-                                    <Star className='w-5 h-5 text-yellow-500 fill-current' />
-                                    <Star className='w-5 h-5 text-yellow-500 fill-current' />
-                                    <span className='text-sm text-orange-700 ml-2'>(4.9) 127 reviews</span>
-                                </div>
+                            <div className='flex items-center space-x-1'>
+                                {Array.from({ length: 5 }).map((_, i) => (
+                                    <Star key={i} className='w-5 h-5 text-yellow-500 fill-current' aria-hidden='true' />
+                                ))}
+                                <span className='text-sm text-orange-700 ml-2'>(4.9) 127 reviews</span>
                             </div>
                             <div className='text-right'>
                                 <div className='text-2xl font-bold text-orange-900'>
@@ -208,23 +253,26 @@ const BookingSection: React.FC = () => {
                     </div>
 
                     {/* Trust Indicators */}
-                    <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
-                        <div className='bg-white/60 backdrop-blur-md border border-orange-200/50 rounded-2xl p-6 text-center'>
-                            <Award className='w-8 h-8 text-orange-600 mx-auto mb-3' />
+                    <ul
+                        className='grid grid-cols-1 md:grid-cols-3 gap-6'
+                        aria-label='Key benefits of staying at Tranquilo Hurghada'
+                    >
+                        <li className='bg-white/60 backdrop-blur-md border border-orange-200/50 rounded-2xl p-6 text-center'>
+                            <Award className='w-8 h-8 text-orange-600 mx-auto mb-3' aria-hidden='true' />
                             <h3 className='font-semibold text-orange-900 mb-2'>Instant Confirmation</h3>
-                            <p className='text-sm text-orange-700'>Immediate booking confirmation</p>
-                        </div>
-                        <div className='bg-white/60 backdrop-blur-md border border-orange-200/50 rounded-2xl p-6 text-center'>
-                            <MapPin className='w-8 h-8 text-orange-600 mx-auto mb-3' />
-                            <h3 className='font-semibold text-orange-900 mb-2'>Prime Location</h3>
-                            <p className='text-sm text-orange-700'>Beachfront Red Sea access</p>
-                        </div>
-                        <div className='bg-white/60 backdrop-blur-md border border-orange-200/50 rounded-2xl p-6 text-center'>
-                            <Users className='w-8 h-8 text-orange-600 mx-auto mb-3' />
+                            <p className='text-sm text-orange-700'>Your villa is booked immediately — no waiting.</p>
+                        </li>
+                        <li className='bg-white/60 backdrop-blur-md border border-orange-200/50 rounded-2xl p-6 text-center'>
+                            <MapPin className='w-8 h-8 text-orange-600 mx-auto mb-3' aria-hidden='true' />
+                            <h3 className='font-semibold text-orange-900 mb-2'>Prime Red Sea Location</h3>
+                            <p className='text-sm text-orange-700'>Beachfront access with breathtaking views.</p>
+                        </li>
+                        <li className='bg-white/60 backdrop-blur-md border border-orange-200/50 rounded-2xl p-6 text-center'>
+                            <Users className='w-8 h-8 text-orange-600 mx-auto mb-3' aria-hidden='true' />
                             <h3 className='font-semibold text-orange-900 mb-2'>Concierge Service</h3>
-                            <p className='text-sm text-orange-700'>24/7 premium support</p>
-                        </div>
-                    </div>
+                            <p className='text-sm text-orange-700'>24/7 personalized assistance during your stay.</p>
+                        </li>
+                    </ul>
                 </div>
             </section>
 
