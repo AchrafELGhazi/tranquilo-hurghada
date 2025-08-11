@@ -1,47 +1,77 @@
-version: '3.8'
-
 services:
-  backend:
-    build: 
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: backend-dev
+  postgres:
+    image: postgres:15-alpine
+    container_name: tranquilo-postgres-dev
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: tranquilo-hughada
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - tranquilo-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.dev
+    container_name: tranquilo-server-dev
+    env_file:
+      - ./server/.env
+    environment:
+      NODE_ENV: development
     ports:
       - "5000:5000"
-    environment:
-      - NODE_ENV=development
-      - DATABASE_URL=${DATABASE_URL}
-      - JWT_SECRET=${JWT_SECRET}
     volumes:
-      - ./backend:/app
+      - ./server:/app
       - /app/node_modules
+      - /app/dist
+      - ./server/logs:/app/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
-      - app-network
-    restart: unless-stopped
-    command: npm run dev
+      - tranquilo-network
+    command: >
+      sh -c "
+        echo 'Waiting for database to be ready...' &&
+        npx prisma db push &&
+        echo 'Database schema updated' &&
+        npm run dev
+      "
 
-  frontend:
+  # Frontend web application
+  web:
     build:
-      context: ./frontend
+      context: ./web
       dockerfile: Dockerfile.dev
-    container_name: frontend-dev
+    container_name: tranquilo-web-dev
+    environment:
+      NODE_ENV: development
+      VITE_API_URL: http://localhost:5000/api
+      VITE_FRONTEND_URL: http://localhost:3000
     ports:
       - "3000:3000"
-    environment:
-      - VITE_API_URL=http://localhost:5000/api
     volumes:
-      - ./frontend:/app
+      - ./web:/app
       - /app/node_modules
     depends_on:
-      - backend
+      - server
     networks:
-      - app-network
-    restart: unless-stopped
-
-networks:
-  app-network:
-    driver: bridge
+      - tranquilo-network
+    stdin_open: true
+    tty: true
 
 volumes:
-  node_modules_backend:
-  node_modules_frontend:
+  postgres_data:
+
+networks:
+  tranquilo-network:
+    driver: bridge
