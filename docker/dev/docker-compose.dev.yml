@@ -1,0 +1,77 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: tranquilo-postgres-dev
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: tranquilo-hughada
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - tranquilo-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.dev
+    container_name: tranquilo-server-dev
+    env_file:
+      - ./server/.env
+    environment:
+      NODE_ENV: development
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+      - /app/dist
+      - ./server/logs:/app/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - tranquilo-network
+    command: >
+      sh -c "
+        echo 'Waiting for database to be ready...' &&
+        npx prisma db push &&
+        echo 'Database schema updated' &&
+        npm run dev
+      "
+
+  # Frontend web application
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile.dev
+    container_name: tranquilo-web-dev
+    environment:
+      NODE_ENV: development
+      VITE_API_URL: http://localhost:5000/api
+      VITE_FRONTEND_URL: http://localhost:3000
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./web:/app
+      - /app/node_modules
+    depends_on:
+      - server
+    networks:
+      - tranquilo-network
+    stdin_open: true
+    tty: true
+
+volumes:
+  postgres_data:
+
+networks:
+  tranquilo-network:
+    driver: bridge
