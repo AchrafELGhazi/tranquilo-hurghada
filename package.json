@@ -1,5 +1,39 @@
 {
-  "dependencies": {
-    "react-router-dom": "^7.7.1"
-  }
+    "name": "tranquilo-hurghada",
+    "version": "1.0.0",
+    "description": "Tranquilo Hurghada - Full Stack Application",
+    "private": true,
+    "workspaces": [
+        "server",
+        "web"
+    ],
+    "scripts": {
+        "dev": "make dev-start",
+        "dev:stop": "make dev-stop",
+        "dev:restart": "make dev-restart",
+        "dev:reset": "make dev-reset",
+        "dev:logs": "make dev-logs",
+        "dev:logs:server": "make dev-logs-server",
+        "dev:logs:web": "make dev-logs-web",
+        "dev:seed": "make dev-seed",
+        "dev:clean": "make dev-clean",
+        "build": "make dev-build",
+        "build:server": "make dev-build-server",
+        "build:web": "make dev-build-web",
+        "setup": "make setup",
+        "test": "make test",
+        "lint": "make lint",
+        "security": "make security",
+        "deploy": "make prod-deploy",
+        "help": "make help",
+        "postinstall": "chmod +x scripts/**/*.sh || true"
+    },
+    "devDependencies": {
+        "concurrently": "^8.2.2",
+        "cross-env": "^7.0.3"
+    },
+    "engines": {
+        "node": ">=20.0.0",
+        "npm": ">=10.0.0"
+    }
 }

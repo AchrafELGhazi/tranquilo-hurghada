@@ -1,224 +1,72 @@
+# Tranquilo Hurghada - Development Commands (Simplified)
+.PHONY: help dev-start dev-stop dev-reset dev-logs dev-build dev-seed
 
-CLIENT_DIR = web
-SERVER_DIR = server
-DB_NAME = tranquilo-hurghada
-DB_USER = postgres
-DB_HOST = localhost
-DB_PORT = 5432
-
-GREEN = \033[0;32m
-YELLOW = \033[1;33m
-RED = \033[0;31m
-NC = \033[0m
-
-.PHONY: help install dev build start test clean db-setup db-reset db-migrate db-seed docker-up docker-down lint format check-deps
-
-help:
-	@echo "$(GREEN)PERN Stack Development Commands$(NC)"
+# Default target
+help: ## Show this help message
+	@echo "🏖️  Tranquilo Hurghada Development Commands"
 	@echo ""
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  $(YELLOW)%-15s$(NC) %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-25s\033[0m %s\n", $$1, $$2}'
+	@echo ""
+	@echo "🚀 Quick start: make dev-start"
 
-install:
-	@echo "$(GREEN)Installing dependencies...$(NC)"
-	@echo "Installing server dependencies..."
-	cd $(SERVER_DIR) && npm install
-	@echo "Installing client dependencies..."
-	cd $(CLIENT_DIR) && npm install
-	@echo "$(GREEN)✓ All dependencies installed$(NC)"
+# === Development Environment ===
+dev-start: ## Start development environment
+	@./scripts/dev/start.sh
 
-install-client:
-	@echo "$(GREEN)Installing client dependencies...$(NC)"
-	cd $(CLIENT_DIR) && npm install
+dev-stop: ## Stop development environment
+	@./scripts/dev/stop.sh
 
-install-server:
-	@echo "$(GREEN)Installing server dependencies...$(NC)"
-	cd $(SERVER_DIR) && npm install
+dev-reset: ## Reset development environment with fresh database
+	@./scripts/dev/reset.sh
 
-dev:
-	@echo "$(GREEN)Starting development servers...$(NC)"
-	@trap 'kill 0' SIGINT; \
-	(cd $(SERVER_DIR) && npm run dev) & \
-	(cd $(CLIENT_DIR) && npm run dev) & \
-	wait
+dev-logs: ## View all development logs
+	@./scripts/dev/logs.sh
 
-dev-client:
-	@echo "$(GREEN)Starting client development server...$(NC)"
-	cd $(CLIENT_DIR) && npm run dev
+dev-logs-server: ## View server logs only
+	@./scripts/dev/logs-server.sh
 
-dev-server: 
-	@echo "$(GREEN)Starting server development server...$(NC)"
-	cd $(SERVER_DIR) && npm run dev
+dev-logs-web: ## View web logs only
+	@./scripts/dev/logs-web.sh
 
-# Build commands
-build: ## Build both client and server for production
-	@echo "$(GREEN)Building application...$(NC)"
-	@echo "Building client..."
-	cd $(CLIENT_DIR) && npm run build
-	@echo "Building server..."
-	cd $(SERVER_DIR) && npm run build
-	@echo "$(GREEN)✓ Build completed$(NC)"
+# === Database Operations ===
+dev-seed: ## Seed development database
+	@./scripts/dev/seed.sh
 
-build-client: ## Build client for production
-	@echo "$(GREEN)Building client...$(NC)"
-	cd $(CLIENT_DIR) && npm run build
+dev-db-studio: ## Open Prisma Studio
+	@./scripts/dev/db-studio.sh
 
-build-server: ## Build server for production
-	@echo "$(GREEN)Building server...$(NC)"
-	cd $(SERVER_DIR) && npm run build
+dev-db-shell: ## Access PostgreSQL shell
+	@./scripts/dev/db-shell.sh
 
-# Production commands
-start: ## Start production servers
-	@echo "$(GREEN)Starting production servers...$(NC)"
-	@trap 'kill 0' SIGINT; \
-	(cd $(SERVER_DIR) && npm start) & \
-	(cd $(CLIENT_DIR) && npm run preview) & \
-	wait
+# === Build Operations ===
+dev-build: ## Rebuild all services
+	@./scripts/dev/build.sh all
 
-start-server: ## Start production server only
-	@echo "$(GREEN)Starting production server...$(NC)"
-	cd $(SERVER_DIR) && npm start
+dev-build-server: ## Rebuild server only
+	@./scripts/dev/build.sh server
 
-# Testing commands
-test: ## Run tests for both client and server
-	@echo "$(GREEN)Running tests...$(NC)"
-	@echo "Running server tests..."
-	cd $(SERVER_DIR) && npm test
-	@echo "Running client tests..."
-	cd $(CLIENT_DIR) && npm test
+dev-build-web: ## Rebuild web only
+	@./scripts/dev/build.sh web
 
-test-client: ## Run client tests
-	@echo "$(GREEN)Running client tests...$(NC)"
-	cd $(CLIENT_DIR) && npm test
+# === Shell Access ===
+dev-shell-server: ## Access server container shell
+	@./scripts/dev/shell-server.sh
 
-test-server: ## Run server tests
-	@echo "$(GREEN)Running server tests...$(NC)"
-	cd $(SERVER_DIR) && npm test
+dev-shell-web: ## Access web container shell
+	@./scripts/dev/shell-web.sh
 
-test-watch: ## Run tests in watch mode
-	@echo "$(GREEN)Running tests in watch mode...$(NC)"
-	@trap 'kill 0' SIGINT; \
-	(cd $(SERVER_DIR) && npm run test:watch) & \
-	(cd $(CLIENT_DIR) && npm run test:watch) & \
-	wait
+# === Utilities ===
+dev-clean: ## Clean development environment
+	@./scripts/dev/clean.sh
 
-# Database commands
-db-setup: ## Setup PostgreSQL database
-	@echo "$(GREEN)Setting up database...$(NC)"
-	createdb $(DB_NAME) || echo "Database may already exist"
-	@echo "$(GREEN)✓ Database setup completed$(NC)"
-
-db-reset: ## Reset database (drop and recreate)
-	@echo "$(YELLOW)Resetting database...$(NC)"
-	dropdb --if-exists $(DB_NAME)
-	createdb $(DB_NAME)
-	@echo "$(GREEN)✓ Database reset completed$(NC)"
-
-db-migrate: ## Run database migrations
-	@echo "$(GREEN)Running database migrations...$(NC)"
-	cd $(SERVER_DIR) && npm run migrate
-	@echo "$(GREEN)✓ Migrations completed$(NC)"
-
-db-seed: ## Seed database with sample data
-	@echo "$(GREEN)Seeding database...$(NC)"
-	cd $(SERVER_DIR) && npm run seed
-	@echo "$(GREEN)✓ Database seeded$(NC)"
-
-db-status: ## Check database connection and status
-	@echo "$(GREEN)Checking database status...$(NC)"
-	psql -h $(DB_HOST) -p $(DB_PORT) -U $(DB_USER) -d $(DB_NAME) -c "SELECT version();" || echo "$(RED)Database connection failed$(NC)"
-
-# Docker commands
-docker-up: ## Start Docker containers
-	@echo "$(GREEN)Starting Docker containers...$(NC)"
-	docker-compose up -d
-	@echo "$(GREEN)✓ Docker containers started$(NC)"
-
-docker-down: ## Stop Docker containers
-	@echo "$(YELLOW)Stopping Docker containers...$(NC)"
-	docker-compose down
-	@echo "$(GREEN)✓ Docker containers stopped$(NC)"
-
-docker-build: ## Build Docker containers
-	@echo "$(GREEN)Building Docker containers...$(NC)"
-	docker-compose build
-	@echo "$(GREEN)✓ Docker containers built$(NC)"
-
-docker-logs: ## View Docker container logs
-	docker-compose logs -f
-
-# Code quality commands
-lint: ## Run linting for both client and server
-	@echo "$(GREEN)Running linters...$(NC)"
-	@echo "Linting server..."
-	cd $(SERVER_DIR) && npm run lint
-	@echo "Linting client..."
-	cd $(CLIENT_DIR) && npm run lint
-	@echo "$(GREEN)✓ Linting completed$(NC)"
-
-lint-fix: ## Fix linting issues automatically
-	@echo "$(GREEN)Fixing linting issues...$(NC)"
-	cd $(SERVER_DIR) && npm run lint:fix
-	cd $(CLIENT_DIR) && npm run lint:fix
-	@echo "$(GREEN)✓ Linting fixes applied$(NC)"
-
-format: ## Format code with Prettier
-	@echo "$(GREEN)Formatting code...$(NC)"
-	cd $(SERVER_DIR) && npm run format
-	cd $(CLIENT_DIR) && npm run format
-	@echo "$(GREEN)✓ Code formatted$(NC)"
-
-# Utility commands
-clean: ## Clean node_modules and build artifacts
-	@echo "$(YELLOW)Cleaning project...$(NC)"
-	rm -rf $(CLIENT_DIR)/node_modules
-	rm -rf $(SERVER_DIR)/node_modules
-	rm -rf $(CLIENT_DIR)/dist
-	rm -rf $(SERVER_DIR)/dist
-	rm -rf $(CLIENT_DIR)/.next
-	@echo "$(GREEN)✓ Project cleaned$(NC)"
-
-clean-cache: ## Clear npm cache
-	@echo "$(YELLOW)Clearing npm cache...$(NC)"
-	npm cache clean --force
-	@echo "$(GREEN)✓ Cache cleared$(NC)"
-
-check-deps: ## Check for outdated dependencies
-	@echo "$(GREEN)Checking dependencies...$(NC)"
-	@echo "Server dependencies:"
-	cd $(SERVER_DIR) && npm outdated
-	@echo "Client dependencies:"
-	cd $(CLIENT_DIR) && npm outdated
-
-update-deps: ## Update dependencies
-	@echo "$(GREEN)Updating dependencies...$(NC)"
-	cd $(SERVER_DIR) && npm update
-	cd $(CLIENT_DIR) && npm update
-	@echo "$(GREEN)✓ Dependencies updated$(NC)"
-
-# Health check
-health: ## Check application health
-	@echo "$(GREEN)Checking application health...$(NC)"
-	@curl -f http://localhost:5000/health || echo "$(RED)Server health check failed$(NC)"
-	@curl -f http://localhost:3000 || echo "$(RED)Client health check failed$(NC)"
-
-# Environment setup
 setup: ## Initial project setup
-	@echo "$(GREEN)Setting up PERN stack project...$(NC)"
-	@make install
-	@make db-setup
-	@make db-migrate
-	@make db-seed
-	@echo "$(GREEN)✓ Project setup completed$(NC)"
-	@echo "$(YELLOW)Run 'make dev' to start development servers$(NC)"
+	@./scripts/utils/setup.sh
 
-# Deployment
-deploy-staging: ## Deploy to staging environment
-	@echo "$(GREEN)Deploying to staging...$(NC)"
-	@make build
-	@echo "$(GREEN)✓ Staging deployment completed$(NC)"
+# === Production Commands ===
+prod-deploy: ## Deploy to production
+	@./scripts/prod/deploy.sh
 
-deploy-prod: ## Deploy to production environment
-	@echo "$(GREEN)Deploying to production...$(NC)"
-	@make build
-	@make test
-	@echo "$(GREEN)✓ Production deployment completed$(NC)"
+# === Quick aliases ===
+start: dev-start ## Alias for dev-start
+stop: dev-stop ## Alias for dev-stop
+logs: dev-logs ## Alias for dev-logs
