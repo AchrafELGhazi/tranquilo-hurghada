@@ -2,14 +2,14 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-COPY package*.json ./
-COPY prisma ./prisma
+COPY server/package*.json ./
+COPY server/prisma ./prisma
 
 RUN npm ci
 
 RUN npx prisma generate
 
-COPY . .
+COPY server/ .
 
 RUN npm run build
 

@@ -1,19 +1,32 @@
 services:
   server:
-    build: ./server
-    container_name: tranquilo_server
+    build:
+      context: ../..
+      dockerfile: docker/prod/server.Dockerfile
+    container_name: tranquilo_server_prod
     restart: unless-stopped
     env_file:
-      - ./server/.env
+      - ../../server/.env
     ports:
       - "5000:5000"
     environment:
-    - NODE_ENV=production
+      - NODE_ENV=production
+    networks:
+      - tranquilo-network
+
   web:
-    build: ./web
-    container_name: tranquilo_web
+    build:
+      context: ../..
+      dockerfile: docker/prod/web.Dockerfile
+    container_name: tranquilo_web_prod
     restart: unless-stopped
     ports:
       - "8080:80"
     depends_on:
       - server
+    networks:
+      - tranquilo-network
+
+networks:
+  tranquilo-network:
+    driver: bridge

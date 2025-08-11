@@ -26,7 +26,11 @@
         "security": "make security",
         "deploy": "make prod-deploy",
         "help": "make help",
-        "postinstall": "chmod +x scripts/**/*.sh || true"
+        "postinstall": "chmod +x scripts/**/*.sh || true",
+        "docker:prod": "docker-compose -f docker/prod/docker-compose.yml",
+        "docker:prod:up": "docker-compose -f docker/prod/docker-compose.yml up --build",
+        "docker:prod:down": "docker-compose -f docker/prod/docker-compose.yml down",
+        "docker:prod:logs": "docker-compose -f docker/prod/docker-compose.yml logs -f"
     },
     "devDependencies": {
         "concurrently": "^8.2.2",
