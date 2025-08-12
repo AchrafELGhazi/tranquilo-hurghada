@@ -8,12 +8,16 @@ import {
     X,
     AlertCircle,
     Eye,
-    MapPin,
     Star,
     RefreshCw,
     Filter,
     ChevronLeft,
     ChevronRight,
+    Baby,
+    Phone,
+    Mail,
+    User,
+    Home,
 } from 'lucide-react';
 import bookingApi, { type BookingFilters } from '@/api/bookingApi';
 import { useAuth } from '@/contexts/AuthContext';
@@ -43,7 +47,6 @@ const MyBookings: React.FC = () => {
             setLoading(true);
             setError('');
             const response = await bookingApi.getMyBookings(filters);
-            console.log('Bookings response:', response);
             setBookings(response.data);
             setCurrentPage(response.pagination.currentPage);
             setTotalPages(response.pagination.totalPages);
@@ -68,7 +71,6 @@ const MyBookings: React.FC = () => {
             setCancelling(selectedBooking.id);
             await bookingApi.cancelBooking(selectedBooking.id, cancellationReason);
 
-            // Update local state
             setBookings(prev =>
                 prev.map(booking =>
                     booking.id === selectedBooking.id
@@ -116,6 +118,14 @@ const MyBookings: React.FC = () => {
 
     const handlePageChange = (page: number) => {
         setFilters(prev => ({ ...prev, page }));
+    };
+
+    const formatDate = (dateString: string) => {
+        return new Date(dateString).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+        });
     };
 
     if (!user) {
@@ -213,7 +223,10 @@ const MyBookings: React.FC = () => {
                                                 Villa
                                             </th>
                                             <th className='px-6 py-4 text-left text-xs font-bold text-[#C75D2C] uppercase tracking-wider'>
-                                                Dates
+                                                Check-in
+                                            </th>
+                                            <th className='px-6 py-4 text-left text-xs font-bold text-[#C75D2C] uppercase tracking-wider'>
+                                                Check-out
                                             </th>
                                             <th className='px-6 py-4 text-left text-xs font-bold text-[#C75D2C] uppercase tracking-wider'>
                                                 Guests
@@ -238,11 +251,11 @@ const MyBookings: React.FC = () => {
                                                 <td className='px-6 py-4'>
                                                     <div className='flex items-center space-x-3'>
                                                         <div className='w-12 h-12 bg-gradient-to-br from-[#F8B259]/30 to-[#D96F32]/30 rounded-lg flex items-center justify-center'>
-                                                            <MapPin className='w-5 h-5 text-[#D96F32]' />
+                                                            <Home className='w-5 h-5 text-[#D96F32]' />
                                                         </div>
                                                         <div>
                                                             <p className='font-semibold text-[#C75D2C]'>
-                                                                {booking.villa.title}
+                                                                {booking.villa?.title || 'Villa'}
                                                             </p>
                                                             <p className='text-xs text-[#C75D2C]/60'>
                                                                 #{booking.id.slice(-8)}
@@ -251,49 +264,59 @@ const MyBookings: React.FC = () => {
                                                     </div>
                                                 </td>
                                                 <td className='px-6 py-4'>
-                                                    <div className='text-sm'>
-                                                        <p className='text-[#C75D2C] font-medium'>
-                                                            {new Date(booking.checkIn).toLocaleDateString()}
-                                                        </p>
-                                                        <p className='text-[#C75D2C]/60'>
-                                                            to {new Date(booking.checkOut).toLocaleDateString()}
-                                                        </p>
-                                                        <p className='text-xs text-[#C75D2C]/60'>
-                                                            {bookingApi.getStayDuration(
-                                                                booking.checkIn,
-                                                                booking.checkOut
-                                                            )}{' '}
-                                                            nights
-                                                        </p>
-                                                    </div>
+                                                    <p className='text-[#C75D2C] font-medium'>
+                                                        {formatDate(booking.checkIn)}
+                                                    </p>
+                                                    <p className='text-xs text-[#C75D2C]/60'>
+                                                        {new Date(booking.checkIn).toLocaleDateString('en-US', {
+                                                            weekday: 'short',
+                                                        })}
+                                                    </p>
                                                 </td>
                                                 <td className='px-6 py-4'>
-                                                    <div className='flex items-center space-x-1 text-[#C75D2C]'>
-                                                        <Users className='w-4 h-4' />
-                                                        <span className='font-medium'>{booking.totalGuests}</span>
-                                                    </div>
+                                                    <p className='text-[#C75D2C] font-medium'>
+                                                        {formatDate(booking.checkOut)}
+                                                    </p>
+                                                    <p className='text-xs text-[#C75D2C]/60'>
+                                                        {new Date(booking.checkOut).toLocaleDateString('en-US', {
+                                                            weekday: 'short',
+                                                        })}
+                                                    </p>
                                                 </td>
                                                 <td className='px-6 py-4'>
-                                                    <div className='text-sm'>
-                                                        <p className='font-bold text-[#C75D2C]'>
-                                                            {bookingApi.formatPrice(booking.totalPrice, 'EUR')}
-                                                        </p>
-                                                        <div className='flex items-center space-x-1 text-xs text-[#C75D2C]/60'>
-                                                            <CreditCard className='w-3 h-3' />
-                                                            <span>
-                                                                {booking.paymentMethod === 'BANK_TRANSFER'
-                                                                    ? 'Bank Transfer'
-                                                                    : 'On Arrival'}
+                                                    <div className='flex items-center space-x-3'>
+                                                        <div className='flex items-center space-x-1'>
+                                                            <Users className='w-4 h-4 text-[#D96F32]' />
+                                                            <span className='font-medium text-[#C75D2C]'>
+                                                                {booking.totalAdults}
                                                             </span>
                                                         </div>
+                                                        {booking.totalChildren > 0 && (
+                                                            <div className='flex items-center space-x-1'>
+                                                                <Baby className='w-4 h-4 text-[#D96F32]' />
+                                                                <span className='font-medium text-[#C75D2C]'>
+                                                                    {booking.totalChildren}
+                                                                </span>
+                                                            </div>
+                                                        )}
                                                     </div>
+                                                </td>
+                                                <td className='px-6 py-4'>
+                                                    <p className='font-bold text-[#C75D2C]'>
+                                                        {bookingApi.formatPrice(booking.totalPrice, 'EUR')}
+                                                    </p>
+                                                    <p className='text-xs text-[#C75D2C]/60'>
+                                                        {booking.paymentMethod === 'BANK_TRANSFER'
+                                                            ? 'Bank Transfer'
+                                                            : 'On Arrival'}
+                                                    </p>
                                                 </td>
                                                 <td className='px-6 py-4'>{getStatusBadge(booking.status)}</td>
                                                 <td className='px-6 py-4'>
                                                     <div className='flex items-center space-x-2'>
                                                         <button
                                                             onClick={() => setSelectedBooking(booking)}
-                                                            className='p-2 bg-[#D96F32]/20 text-[#D96F32] rounded-lg hover:bg-[#D96F32]/30 transition-colors duration-200'
+                                                            className='p-2 bg-[#D96F32]/20 text-[#D96F32] rounded-lg hover:bg-[#D96F32]/30 transition-colors'
                                                             title='View Details'
                                                         >
                                                             <Eye className='w-4 h-4' />
@@ -305,7 +328,7 @@ const MyBookings: React.FC = () => {
                                                                     setShowCancelModal(true);
                                                                 }}
                                                                 disabled={cancelling === booking.id}
-                                                                className='p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors duration-200 disabled:opacity-50'
+                                                                className='p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors disabled:opacity-50'
                                                                 title='Cancel Booking'
                                                             >
                                                                 <X className='w-4 h-4' />
@@ -328,7 +351,9 @@ const MyBookings: React.FC = () => {
                                     >
                                         <div className='flex justify-between items-start'>
                                             <div>
-                                                <h3 className='font-semibold text-[#C75D2C]'>{booking.villa.title}</h3>
+                                                <h3 className='font-semibold text-[#C75D2C]'>
+                                                    {booking.villa?.title || 'Villa'}
+                                                </h3>
                                                 <p className='text-xs text-[#C75D2C]/60'>#{booking.id.slice(-8)}</p>
                                             </div>
                                             {getStatusBadge(booking.status)}
@@ -338,22 +363,32 @@ const MyBookings: React.FC = () => {
                                             <div>
                                                 <p className='text-[#C75D2C]/60'>Check-in</p>
                                                 <p className='font-medium text-[#C75D2C]'>
-                                                    {new Date(booking.checkIn).toLocaleDateString()}
+                                                    {formatDate(booking.checkIn)}
                                                 </p>
                                             </div>
                                             <div>
                                                 <p className='text-[#C75D2C]/60'>Check-out</p>
                                                 <p className='font-medium text-[#C75D2C]'>
-                                                    {new Date(booking.checkOut).toLocaleDateString()}
+                                                    {formatDate(booking.checkOut)}
                                                 </p>
                                             </div>
                                             <div>
                                                 <p className='text-[#C75D2C]/60'>Guests</p>
-                                                <div className='flex items-center space-x-1'>
-                                                    <Users className='w-4 h-4 text-[#D96F32]' />
-                                                    <span className='font-medium text-[#C75D2C]'>
-                                                        {booking.totalGuests}
-                                                    </span>
+                                                <div className='flex items-center space-x-2'>
+                                                    <div className='flex items-center space-x-1'>
+                                                        <Users className='w-4 h-4 text-[#D96F32]' />
+                                                        <span className='font-medium text-[#C75D2C]'>
+                                                            {booking.totalAdults}
+                                                        </span>
+                                                    </div>
+                                                    {booking.totalChildren > 0 && (
+                                                        <div className='flex items-center space-x-1'>
+                                                            <Baby className='w-4 h-4 text-[#D96F32]' />
+                                                            <span className='font-medium text-[#C75D2C]'>
+                                                                {booking.totalChildren}
+                                                            </span>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                             <div>
@@ -365,18 +400,15 @@ const MyBookings: React.FC = () => {
                                         </div>
 
                                         <div className='flex justify-between items-center pt-2 border-t border-[#F8B259]/30'>
-                                            <div className='flex items-center space-x-1 text-xs text-[#C75D2C]/60'>
-                                                <CreditCard className='w-3 h-3' />
-                                                <span>
-                                                    {booking.paymentMethod === 'BANK_TRANSFER'
-                                                        ? 'Bank Transfer'
-                                                        : 'On Arrival'}
-                                                </span>
-                                            </div>
+                                            <p className='text-xs text-[#C75D2C]/60'>
+                                                {booking.paymentMethod === 'BANK_TRANSFER'
+                                                    ? 'Bank Transfer'
+                                                    : 'Payment on Arrival'}
+                                            </p>
                                             <div className='flex items-center space-x-2'>
                                                 <button
                                                     onClick={() => setSelectedBooking(booking)}
-                                                    className='p-2 bg-[#D96F32]/20 text-[#D96F32] rounded-lg hover:bg-[#D96F32]/30 transition-colors duration-200'
+                                                    className='p-2 bg-[#D96F32]/20 text-[#D96F32] rounded-lg hover:bg-[#D96F32]/30 transition-colors'
                                                 >
                                                     <Eye className='w-4 h-4' />
                                                 </button>
@@ -387,7 +419,7 @@ const MyBookings: React.FC = () => {
                                                             setShowCancelModal(true);
                                                         }}
                                                         disabled={cancelling === booking.id}
-                                                        className='p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors duration-200 disabled:opacity-50'
+                                                        className='p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors disabled:opacity-50'
                                                     >
                                                         <X className='w-4 h-4' />
                                                     </button>
@@ -409,14 +441,14 @@ const MyBookings: React.FC = () => {
                                             <button
                                                 onClick={() => handlePageChange(currentPage - 1)}
                                                 disabled={currentPage === 1}
-                                                className='p-2 rounded-lg bg-white/50 text-[#C75D2C] hover:bg-white/70 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed'
+                                                className='p-2 rounded-lg bg-white/50 text-[#C75D2C] hover:bg-white/70 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                                             >
                                                 <ChevronLeft className='w-4 h-4' />
                                             </button>
                                             <button
                                                 onClick={() => handlePageChange(currentPage + 1)}
                                                 disabled={currentPage === totalPages}
-                                                className='p-2 rounded-lg bg-white/50 text-[#C75D2C] hover:bg-white/70 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed'
+                                                className='p-2 rounded-lg bg-white/50 text-[#C75D2C] hover:bg-white/70 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                                             >
                                                 <ChevronRight className='w-4 h-4' />
                                             </button>
@@ -432,8 +464,9 @@ const MyBookings: React.FC = () => {
             {/* Booking Details Modal */}
             {selectedBooking && !showCancelModal && (
                 <div className='fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4'>
-                    <div className='bg-white/95 backdrop-blur-md border-2 border-[#F8B259]/70 rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto'>
-                        <div className='flex items-center justify-between mb-6'>
+                    <div className='bg-white/95 backdrop-blur-md border-2 border-[#F8B259]/70 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto'>
+                        {/* Modal Header */}
+                        <div className='flex items-center justify-between p-6 border-b border-[#F8B259]/30'>
                             <h3 className='text-xl font-bold text-[#C75D2C] font-butler'>Booking Details</h3>
                             <button
                                 onClick={() => setSelectedBooking(null)}
@@ -443,86 +476,199 @@ const MyBookings: React.FC = () => {
                             </button>
                         </div>
 
-                        <div className='space-y-4'>
-                            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                                <div className='bg-white/30 border border-[#F8B259]/50 rounded-xl p-4'>
-                                    <h4 className='font-semibold text-[#C75D2C] mb-2'>Villa Information</h4>
-                                    <p className='font-medium text-[#C75D2C]'>{selectedBooking.villa.title}</p>
-                                    <p className='text-sm text-[#C75D2C]/60'>Booking ID: #{selectedBooking.id}</p>
-                                </div>
-                                <div className='bg-white/30 border border-[#F8B259]/50 rounded-xl p-4'>
-                                    <h4 className='font-semibold text-[#C75D2C] mb-2'>Status</h4>
-                                    {getStatusBadge(selectedBooking.status)}
+                        {/* Modal Content */}
+                        <div className='p-6 space-y-6'>
+                            {/* Booking Overview */}
+                            <div className='bg-gradient-to-r from-[#F8B259]/10 to-[#D96F32]/10 rounded-xl p-4'>
+                                <div className='flex justify-between items-start'>
+                                    <div>
+                                        <h4 className='text-lg font-bold text-[#C75D2C]'>
+                                            {selectedBooking.villa?.title || 'Villa Booking'}
+                                        </h4>
+                                        <p className='text-sm text-[#C75D2C]/60'>#{selectedBooking.id}</p>
+                                    </div>
+                                    <div className='text-right'>
+                                        {getStatusBadge(selectedBooking.status)}
+                                        <p className='text-sm text-[#C75D2C]/60 mt-1'>
+                                            Booked: {formatDate(selectedBooking.createdAt)}
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div className='bg-white/30 border border-[#F8B259]/50 rounded-xl p-4'>
-                                <h4 className='font-semibold text-[#C75D2C] mb-3'>Stay Details</h4>
-                                <div className='grid grid-cols-2 md:grid-cols-4 gap-4 text-sm'>
+                            {/* Stay Details */}
+                            <div>
+                                <h5 className='font-semibold text-[#C75D2C] mb-3 flex items-center'>
+                                    <Calendar className='w-4 h-4 mr-2' />
+                                    Stay Details
+                                </h5>
+                                <div className='grid grid-cols-2 gap-4'>
                                     <div>
-                                        <p className='text-[#C75D2C]/60'>Check-in</p>
+                                        <label className='text-sm text-[#C75D2C]/60'>Check-in</label>
                                         <p className='font-medium text-[#C75D2C]'>
-                                            {new Date(selectedBooking.checkIn).toLocaleDateString()}
+                                            {formatDate(selectedBooking.checkIn)}
                                         </p>
                                     </div>
                                     <div>
-                                        <p className='text-[#C75D2C]/60'>Check-out</p>
+                                        <label className='text-sm text-[#C75D2C]/60'>Check-out</label>
                                         <p className='font-medium text-[#C75D2C]'>
-                                            {new Date(selectedBooking.checkOut).toLocaleDateString()}
+                                            {formatDate(selectedBooking.checkOut)}
                                         </p>
                                     </div>
                                     <div>
-                                        <p className='text-[#C75D2C]/60'>Guests</p>
-                                        <p className='font-medium text-[#C75D2C]'>{selectedBooking.totalGuests}</p>
-                                    </div>
-                                    <div>
-                                        <p className='text-[#C75D2C]/60'>Nights</p>
+                                        <label className='text-sm text-[#C75D2C]/60'>Duration</label>
                                         <p className='font-medium text-[#C75D2C]'>
                                             {bookingApi.getStayDuration(
                                                 selectedBooking.checkIn,
                                                 selectedBooking.checkOut
-                                            )}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className='bg-white/30 border border-[#F8B259]/50 rounded-xl p-4'>
-                                <h4 className='font-semibold text-[#C75D2C] mb-3'>Payment Information</h4>
-                                <div className='grid grid-cols-1 md:grid-cols-2 gap-4 text-sm'>
-                                    <div>
-                                        <p className='text-[#C75D2C]/60'>Total Amount</p>
-                                        <p className='font-bold text-[#C75D2C] text-lg'>
-                                            {bookingApi.formatPrice(selectedBooking.totalPrice, 'EUR')}
+                                            )}{' '}
+                                            nights
                                         </p>
                                     </div>
                                     <div>
-                                        <p className='text-[#C75D2C]/60'>Payment Method</p>
+                                        <label className='text-sm text-[#C75D2C]/60'>Guests</label>
                                         <p className='font-medium text-[#C75D2C]'>
-                                            {selectedBooking.paymentMethod === 'BANK_TRANSFER'
-                                                ? 'Bank Transfer'
-                                                : 'Payment on Arrival'}
+                                            {selectedBooking.totalAdults} adults
+                                            {selectedBooking.totalChildren > 0 &&
+                                                `, ${selectedBooking.totalChildren} children`}
                                         </p>
                                     </div>
                                 </div>
                             </div>
 
-                            {selectedBooking.notes && (
-                                <div className='bg-white/30 border border-[#F8B259]/50 rounded-xl p-4'>
-                                    <h4 className='font-semibold text-[#C75D2C] mb-2'>Special Requests</h4>
-                                    <p className='text-[#C75D2C]/80'>{selectedBooking.notes}</p>
+                            {/* Guest Information */}
+                            {selectedBooking.guest && (
+                                <div>
+                                    <h5 className='font-semibold text-[#C75D2C] mb-3 flex items-center'>
+                                        <User className='w-4 h-4 mr-2' />
+                                        Guest Information
+                                    </h5>
+                                    <div className='space-y-2'>
+                                        <div className='flex items-center space-x-2'>
+                                            <User className='w-4 h-4 text-[#D96F32]' />
+                                            <span className='font-medium text-[#C75D2C]'>
+                                                {selectedBooking.guest.fullName}
+                                            </span>
+                                        </div>
+                                        <div className='flex items-center space-x-2'>
+                                            <Mail className='w-4 h-4 text-[#D96F32]' />
+                                            <span className='font-medium text-[#C75D2C]'>
+                                                {selectedBooking.guest.email}
+                                            </span>
+                                        </div>
+                                        {selectedBooking.guest.phone && (
+                                            <div className='flex items-center space-x-2'>
+                                                <Phone className='w-4 h-4 text-[#D96F32]' />
+                                                <span className='font-medium text-[#C75D2C]'>
+                                                    {selectedBooking.guest.phone}
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             )}
 
-                            {(selectedBooking.rejectionReason || selectedBooking.cancellationReason) && (
-                                <div className='bg-red-50/80 border border-red-200/60 rounded-xl p-4'>
-                                    <h4 className='font-semibold text-red-800 mb-2'>
-                                        {selectedBooking.rejectionReason ? 'Rejection Reason' : 'Cancellation Reason'}
-                                    </h4>
-                                    <p className='text-red-700'>
-                                        {selectedBooking.rejectionReason || selectedBooking.cancellationReason}
-                                    </p>
+                            {/* Payment Information */}
+                            <div>
+                                <h5 className='font-semibold text-[#C75D2C] mb-3 flex items-center'>
+                                    <CreditCard className='w-4 h-4 mr-2' />
+                                    Payment Information
+                                </h5>
+                                <div className='bg-white/30 rounded-lg p-4 space-y-3'>
+                                    <div className='flex justify-between'>
+                                        <span className='text-[#C75D2C]/60'>Total Amount</span>
+                                        <span className='font-bold text-[#C75D2C] text-lg'>
+                                            {bookingApi.formatPrice(selectedBooking.totalPrice, 'EUR')}
+                                        </span>
+                                    </div>
+                                    <div className='flex justify-between'>
+                                        <span className='text-[#C75D2C]/60'>Payment Method</span>
+                                        <span className='font-medium text-[#C75D2C]'>
+                                            {selectedBooking.paymentMethod === 'BANK_TRANSFER'
+                                                ? 'Bank Transfer'
+                                                : 'Payment on Arrival'}
+                                        </span>
+                                    </div>
+                                    <div className='flex justify-between'>
+                                        <span className='text-[#C75D2C]/60'>Payment Status</span>
+                                        <span
+                                            className={`font-medium ${
+                                                selectedBooking.isPaid ? 'text-green-600' : 'text-amber-600'
+                                            }`}
+                                        >
+                                            {selectedBooking.isPaid ? 'Paid' : 'Pending'}
+                                        </span>
+                                    </div>
                                 </div>
+                            </div>
+
+                            {/* Additional Services */}
+                            {selectedBooking.bookingServices && selectedBooking.bookingServices.length > 0 && (
+                                <div>
+                                    <h5 className='font-semibold text-[#C75D2C] mb-3'>Additional Services</h5>
+                                    <div className='space-y-2'>
+                                        {selectedBooking.bookingServices.map(service => (
+                                            <div
+                                                key={service.id}
+                                                className='bg-white/30 rounded-lg p-3 flex justify-between items-center'
+                                            >
+                                                <div>
+                                                    <p className='font-medium text-[#C75D2C]'>
+                                                        {service.service?.title || 'Service'}
+                                                    </p>
+                                                    <p className='font-sm text-xs text-[#C75D2C]'>
+                                                        {service.service?.description || 'Service'}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Special Notes */}
+                            {selectedBooking.notes && (
+                                <div>
+                                    <h5 className='font-semibold text-[#C75D2C] mb-3'>Special Requests</h5>
+                                    <div className='bg-white/30 rounded-lg p-4'>
+                                        <p className='text-[#C75D2C]'>{selectedBooking.notes}</p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Cancellation/Rejection Reason */}
+                            {(selectedBooking.cancellationReason || selectedBooking.rejectionReason) && (
+                                <div>
+                                    <h5 className='font-semibold text-red-700 mb-3'>
+                                        {selectedBooking.cancellationReason
+                                            ? 'Cancellation Reason'
+                                            : 'Rejection Reason'}
+                                    </h5>
+                                    <div className='bg-red-50 border border-red-200 rounded-lg p-4'>
+                                        <p className='text-red-700'>
+                                            {selectedBooking.cancellationReason || selectedBooking.rejectionReason}
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Modal Actions */}
+                        <div className='flex justify-between items-center p-6 border-t border-[#F8B259]/30'>
+                            <button
+                                onClick={() => setSelectedBooking(null)}
+                                className='px-4 py-2 text-[#C75D2C] hover:bg-[#F8B259]/20 rounded-lg transition-colors'
+                            >
+                                Close
+                            </button>
+                            {bookingApi.canCancelBooking(selectedBooking, user.id, user.role) && (
+                                <button
+                                    onClick={() => setShowCancelModal(true)}
+                                    className='px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center space-x-2'
+                                >
+                                    <X className='w-4 h-4' />
+                                    <span>Cancel Booking</span>
+                                </button>
                             )}
                         </div>
                     </div>
@@ -549,7 +695,7 @@ const MyBookings: React.FC = () => {
                         <div className='space-y-4'>
                             <p className='text-[#C75D2C]'>
                                 Are you sure you want to cancel your booking for{' '}
-                                <strong>{selectedBooking.villa.title}</strong>?
+                                <strong>{selectedBooking.villa?.title || 'this villa'}</strong>?
                             </p>
 
                             <div>
@@ -571,14 +717,14 @@ const MyBookings: React.FC = () => {
                                         setShowCancelModal(false);
                                         setCancellationReason('');
                                     }}
-                                    className='flex-1 py-2 px-4 border-2 border-[#F8B259]/50 text-[#C75D2C] rounded-xl hover:bg-white/50 transition-colors duration-300'
+                                    className='flex-1 py-2 px-4 border-2 border-[#F8B259]/50 text-[#C75D2C] rounded-xl hover:bg-white/50 transition-colors'
                                 >
                                     Keep Booking
                                 </button>
                                 <button
                                     onClick={handleCancelBooking}
                                     disabled={cancelling === selectedBooking.id}
-                                    className='flex-1 py-2 px-4 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors duration-300 disabled:opacity-50 flex items-center justify-center space-x-2'
+                                    className='flex-1 py-2 px-4 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center space-x-2'
                                 >
                                     {cancelling === selectedBooking.id ? (
                                         <>

@@ -204,7 +204,7 @@ export const createBooking = async (params: CreateBookingParams): Promise<any> =
 };
 
 export const getBookings = async (filters: BookingFilters): Promise<PaginatedBookingsResponse> => {
-    const {
+    let {
         status,
         villaId,
         guestId,
@@ -217,6 +217,9 @@ export const getBookings = async (filters: BookingFilters): Promise<PaginatedBoo
         sortOrder = 'desc'
     } = filters;
 
+    page = Number(page);
+    limit = Number(limit);
+
     const skip = (page - 1) * limit;
     const where: Prisma.BookingWhereInput = {};
 
@@ -227,7 +230,6 @@ export const getBookings = async (filters: BookingFilters): Promise<PaginatedBoo
         where.villa = { ownerId: ownerId };
     }
 
-    // Date range filtering
     if (startDate || endDate) {
         where.OR = [
             {
@@ -313,6 +315,7 @@ export const getBookings = async (filters: BookingFilters): Promise<PaginatedBoo
         }
     };
 };
+
 
 export const getBookingById = async (bookingId: string, userId: string, userRole: string): Promise<any> => {
     const booking = await prisma.booking.findUnique({
@@ -742,15 +745,12 @@ export const updateBookingServices = async (
                 throw new Error('Can only update services for pending bookings');
             }
 
-            // Delete existing booking services
             await tx.bookingService.deleteMany({
                 where: { bookingId }
             });
 
-            // Process new services
             const { serviceBookings } = await calculateServicesTotal(selectedServices);
 
-            // Create new booking services
             if (serviceBookings.length > 0) {
                 await tx.bookingService.createMany({
                     data: serviceBookings.map(sb => ({
