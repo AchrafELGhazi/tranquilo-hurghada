@@ -712,7 +712,7 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
                             <div className='bg-white/30 border-2 border-[#F8B259]/50 rounded-xl p-4'>
                                 <label className='block text-xs font-bold text-[#C75D2C] mb-2 uppercase tracking-wider'>
                                     <FileText className='w-4 h-4 inline mr-2' />
-                                    Special Requests
+                                    Notes
                                 </label>
                                 <textarea
                                     name='notes'
@@ -720,7 +720,7 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
                                     onChange={handleInputChange}
                                     rows={3}
                                     maxLength={500}
-                                    placeholder='Any special requests or requirements...'
+                                    placeholder='Any notes or speacial needs...'
                                     className='w-full text-sm text-[#C75D2C] bg-transparent focus:outline-none placeholder-[#C75D2C]/50 resize-none font-medium'
                                 />
                                 <p className='text-xs text-[#C75D2C]/60 mt-2'>{formData.notes.length}/500 characters</p>

@@ -16,7 +16,6 @@ const Booking: React.FC = () => {
             try {
                 setLoading(true);
 
-                // Load user data
                 try {
                     const currentUser = await authApi.getCurrentUser();
                     setUser(currentUser);
@@ -25,7 +24,6 @@ const Booking: React.FC = () => {
                     setUser(null);
                 }
 
-                // Load villa data - get first available villa
                 try {
                     const villasResponse = await villaApi.getAllVillas({
                         limit: 1,
@@ -108,7 +106,6 @@ const Booking: React.FC = () => {
                             </button>
                             <button
                                 onClick={() => {
-                                    // Navigate to contact or home page
                                     const currentPath = window.location.pathname;
                                     const langMatch = currentPath.match(/^\/([a-z]{2})\//);
                                     const lang = langMatch ? langMatch[1] : 'en';
@@ -141,13 +138,7 @@ const Booking: React.FC = () => {
                             <div className='flex items-center space-x-3'>
                                 {/* Villa Status Indicator */}
                                 {villa.status === 'AVAILABLE' && villa.isActive ? (
-                                    <div className='flex items-center space-x-2 px-4 py-2 bg-green-50 border border-green-200 rounded-xl'>
-                                        <div className='w-3 h-3 bg-green-500 rounded-full animate-pulse'></div>
-                                        <div className='text-green-800'>
-                                            <div className='font-semibold text-sm'>✓ Available Now</div>
-                                            <div className='text-xs'>Ready for immediate booking</div>
-                                        </div>
-                                    </div>
+                                    ''
                                 ) : villa.status === 'UNAVAILABLE' ? (
                                     <div className='flex items-center space-x-2 px-4 py-2 bg-red-50 border border-red-200 rounded-xl'>
                                         <div className='w-3 h-3 bg-red-500 rounded-full'></div>

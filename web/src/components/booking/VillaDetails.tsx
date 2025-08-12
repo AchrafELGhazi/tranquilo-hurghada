@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import Map from './Map';
 import type { Villa } from '@/utils/types';
+import { getAmenityDisplayName, getAmenityIcon } from '@/utils/amenitiesUtils';
 
 interface VillaDetailsProps {
     villa: Villa;
@@ -42,16 +43,6 @@ const VillaDetails: React.FC<VillaDetailsProps> = ({ villa }) => {
         setCurrentImageIndex(prev => (prev - 1 + villa.images.length) % villa.images.length);
     };
 
-    const getAmenityIcon = (amenity: string) => {
-        const amenityLower = amenity.toLowerCase();
-        if (amenityLower.includes('wifi')) return <Wifi className='w-5 h-5 text-[#D96F32]' />;
-        if (amenityLower.includes('parking')) return <Car className='w-5 h-5 text-[#D96F32]' />;
-        if (amenityLower.includes('kitchen')) return <Utensils className='w-5 h-5 text-[#D96F32]' />;
-        if (amenityLower.includes('air conditioning')) return <Snowflake className='w-5 h-5 text-[#D96F32]' />;
-        if (amenityLower.includes('pool')) return <Waves className='w-5 h-5 text-[#D96F32]' />;
-        if (amenityLower.includes('garden')) return <Trees className='w-5 h-5 text-[#D96F32]' />;
-        return <div className='w-5 h-5 bg-[#F8B259] rounded-full' />;
-    };
 
     const getStatusIcon = (status: string) => {
         switch (status) {
@@ -134,7 +125,6 @@ const VillaDetails: React.FC<VillaDetailsProps> = ({ villa }) => {
                             {getStatusIcon(villa.status)}
                             <span className='text-sm font-medium capitalize'>{villa.status.toLowerCase()}</span>
                         </div>
-                       
                     </div>
                 </div>
             </div>
@@ -231,22 +221,6 @@ const VillaDetails: React.FC<VillaDetailsProps> = ({ villa }) => {
                                 <div className='text-sm text-[#C75D2C]/70'>Rating</div>
                             </div>
                         </div>
-
-                        {/* Additional Villa Stats */}
-                        <div className='mt-6 grid grid-cols-2 md:grid-cols-3 gap-4 p-4 bg-gradient-to-r from-[#F8B259]/10 to-[#D96F32]/10 rounded-xl border border-[#F8B259]/30'>
-                            <div className='text-center'>
-                                <div className='text-2xl font-bold text-[#D96F32]'>{villa.pricePerNight}</div>
-                                <div className='text-sm text-[#C75D2C]/70'>EUR per night</div>
-                            </div>
-                            <div className='text-center'>
-                                <div className='text-2xl font-bold text-[#D96F32]'>{villa.services?.length || 0}</div>
-                                <div className='text-sm text-[#C75D2C]/70'>Services</div>
-                            </div>
-                            <div className='text-center'>
-                                <div className='text-2xl font-bold text-[#D96F32]'>{villa.bookings?.length || 0}</div>
-                                <div className='text-sm text-[#C75D2C]/70'>Bookings</div>
-                            </div>
-                        </div>
                     </div>
 
                     {/* Description */}
@@ -315,7 +289,9 @@ const VillaDetails: React.FC<VillaDetailsProps> = ({ villa }) => {
                                         className='flex items-center space-x-3 p-3 bg-white/30 rounded-xl border border-[#F8B259]/50 hover:bg-white/50 transition-all duration-300'
                                     >
                                         {getAmenityIcon(amenity)}
-                                        <span className='text-[#C75D2C] font-medium'>{amenity}</span>
+                                        <span className='text-[#C75D2C] font-medium'>
+                                            {getAmenityDisplayName(amenity) }
+                                        </span>
                                     </div>
                                 ))}
                             </div>
@@ -357,7 +333,6 @@ const VillaDetails: React.FC<VillaDetailsProps> = ({ villa }) => {
                                                     </p>
                                                 )}
                                             </div>
-                                        
                                         </div>
 
                                         {service.image && (
