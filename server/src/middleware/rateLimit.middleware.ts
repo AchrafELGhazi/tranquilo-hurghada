@@ -2,8 +2,8 @@ import { Request, Response } from 'express';
 import { Options } from 'express-rate-limit';
 import { env } from '../config/env';
 
-const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
-const RETRY_AFTER = 15 * 60; // 15 minutes in seconds
+const WINDOW_MS = 15 * 60 * 1000;
+const RETRY_AFTER = 15 * 60;
 
 // Base rate limit - applies to all routes
 export const baseRateLimit: Partial<Options> = {
@@ -21,7 +21,7 @@ export const baseRateLimit: Partial<Options> = {
     skip: (req: Request) => req.path === '/health'
 };
 
-// Strict rate limit for sensitive endpoints (auth, admin, etc.)
+// Strict rate limit for sensitive endpoints
 export const strictRateLimit: Partial<Options> = {
     ...baseRateLimit,
     max: env.isProduction ? 5 : 20,
