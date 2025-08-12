@@ -72,7 +72,7 @@ export const getVillas = async (filters: VillaFilters): Promise<PaginatedVillasR
         minBedrooms,
         minBathrooms,
         amenities,
-        status = VillaStatus.AVAILABLE,
+        status,
         ownerId,
         isActive = true,
         checkIn,
@@ -83,19 +83,16 @@ export const getVillas = async (filters: VillaFilters): Promise<PaginatedVillasR
         sortOrder = 'desc'
     } = filters;
 
-    // Convert to numbers to ensure Prisma gets the right types
     const pageNum = typeof page === 'string' ? parseInt(page) : page;
     const limitNum = typeof limit === 'string' ? parseInt(limit) : limit;
 
     const skip = (pageNum - 1) * limitNum;
 
-    // Build where clause
     const where: Prisma.VillaWhereInput = {
         isActive,
         status
     };
 
-    // Location filters
     if (city) {
         where.city = {
             contains: city,
@@ -110,14 +107,12 @@ export const getVillas = async (filters: VillaFilters): Promise<PaginatedVillasR
         };
     }
 
-    // Price filters
     if (minPrice || maxPrice) {
         where.pricePerNight = {};
         if (minPrice) where.pricePerNight.gte = typeof minPrice === 'string' ? parseFloat(minPrice) : minPrice;
         if (maxPrice) where.pricePerNight.lte = typeof maxPrice === 'string' ? parseFloat(maxPrice) : maxPrice;
     }
 
-    // Capacity filters
     if (maxGuests) {
         where.maxGuests = { gte: typeof maxGuests === 'string' ? parseInt(maxGuests) : maxGuests };
     }
@@ -130,14 +125,12 @@ export const getVillas = async (filters: VillaFilters): Promise<PaginatedVillasR
         where.bathrooms = { gte: typeof minBathrooms === 'string' ? parseInt(minBathrooms) : minBathrooms };
     }
 
-    // Amenities filter
     if (amenities && amenities.length > 0) {
         where.amenities = {
             hasEvery: amenities
         };
     }
 
-    // Owner filter
     if (ownerId) {
         where.ownerId = ownerId;
     }
