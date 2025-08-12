@@ -15,7 +15,6 @@ const envSchema = z.object({
     LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('debug'),
     LOG_FILE_PATH: z.string().default('./logs'),
     FRONTEND_URL: z.string().url(),
-    PROD_URL: z.string().url(),
     SALT_ROUNDS: z.string().regex(/^\d+$/).transform(Number).default(10),
     ADMIN_EMAIL: z.string().email(),
     ADMIN_PASSWORD: z.string().min(8),

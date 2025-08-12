@@ -1,0 +1,519 @@
+{
+    "info": {
+        "name": "Tranquilo Hurghada - Bookings",
+        "description": "Booking management endpoints for Tranquilo Hurghada API",
+        "version": "2.0.0",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "token",
+                "value": "{{auth_token}}",
+                "type": "string"
+            }
+        ]
+    },
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:5000/api",
+            "type": "string"
+        },
+        {
+            "key": "auth_token",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "booking_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "villa_id",
+            "value": "",
+            "type": "string"
+        }
+    ],
+    "item": [
+        {
+            "name": "Bookings",
+            "item": [
+                {
+                    "name": "Create Booking (Guest)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "if (pm.response.status === 201) {",
+                                    "    const response = pm.response.json();",
+                                    "    if (response.data && response.data.id) {",
+                                    "        pm.collectionVariables.set('booking_id', response.data.id);",
+                                    "        console.log('Booking ID saved:', response.data.id);",
+                                    "    }",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{auth_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"villaId\": \"{{villa_id}}\",\n    \"checkIn\": \"2024-12-01\",\n    \"checkOut\": \"2024-12-07\",\n    \"totalAdults\": 2,\n    \"totalChildren\": 1,\n    \"paymentMethod\": \"BANK_TRANSFER\",\n    \"phone\": \"+1234567890\",\n    \"dateOfBirth\": \"1990-01-15\",\n    \"notes\": \"Special request: Late check-in expected\",\n    \"selectedServices\": [\n        {\n            \"serviceId\": \"villa-accommodation\",\n            \"quantity\": 1\n        },\n        {\n            \"serviceId\": \"gourmet-delivery\",\n            \"quantity\": 1,\n            \"numberOfGuests\": 3,\n            \"scheduledDate\": \"2024-12-02\",\n            \"scheduledTime\": \"19:00\",\n            \"specialRequests\": \"Vegetarian options please\"\n        },\n        {\n            \"serviceId\": \"diving\",\n            \"quantity\": 2,\n            \"numberOfGuests\": 2,\n            \"scheduledDate\": \"2024-12-03\",\n            \"scheduledTime\": \"09:00\"\n        }\n    ]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/bookings",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "bookings"
+                            ]
+                        },
+                        "description": "Create a new booking with required services (guests only)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get All Bookings",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{auth_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/bookings?page=1&limit=10&sortBy=createdAt&sortOrder=desc",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "bookings"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "Page number"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10",
+                                    "description": "Results per page (max: 100)"
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "PENDING",
+                                    "description": "Filter by status: PENDING, CONFIRMED, CANCELLED, REJECTED, COMPLETED",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "villaId",
+                                    "value": "{{villa_id}}",
+                                    "description": "Filter by villa ID",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "guestId",
+                                    "value": "user-id",
+                                    "description": "Filter by guest ID (admin only)",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "ownerId",
+                                    "value": "owner-id",
+                                    "description": "Filter by villa owner ID",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "startDate",
+                                    "value": "2024-12-01",
+                                    "description": "Filter by date range start (YYYY-MM-DD)",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "endDate",
+                                    "value": "2024-12-31",
+                                    "description": "Filter by date range end (YYYY-MM-DD)",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "sortBy",
+                                    "value": "createdAt",
+                                    "description": "Sort by: createdAt, checkIn, checkOut, totalPrice"
+                                },
+                                {
+                                    "key": "sortOrder",
+                                    "value": "desc",
+                                    "description": "Sort order: asc, desc"
+                                }
+                            ]
+                        },
+                        "description": "Get all bookings with role-based filtering"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get My Bookings (Guest)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{auth_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/bookings/my?page=1&limit=10&status=PENDING",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "bookings",
+                                "my"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10"
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "PENDING",
+                                    "description": "Filter by status",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "sortBy",
+                                    "value": "createdAt",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "sortOrder",
+                                    "value": "desc",
+                                    "disabled": true
+                                }
+                            ]
+                        },
+                        "description": "Get current user's bookings"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Booking Details",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{auth_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/bookings/{{booking_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "bookings",
+                                "{{booking_id}}"
+                            ]
+                        },
+                        "description": "Get specific booking details with services"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Villa Booked Dates",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{auth_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/bookings/villa/{{villa_id}}/booked-dates?year=2025&month=6",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "bookings",
+                                "villa",
+                                "{{villa_id}}",
+                                "booked-dates"
+                            ],
+                            "query": [
+                                {
+                                    "key": "year",
+                                    "value": "2025",
+                                    "description": "Year (2020-2030) - optional"
+                                },
+                                {
+                                    "key": "month",
+                                    "value": "6",
+                                    "description": "Month (1-12) - optional, requires year"
+                                }
+                            ]
+                        },
+                        "description": "Get villa booked dates for availability checking"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Villa Services for Booking",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{auth_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/bookings/villa/{{villa_id}}/services",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "bookings",
+                                "villa",
+                                "{{villa_id}}",
+                                "services"
+                            ]
+                        },
+                        "description": "Get available services for villa booking"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Booking Services",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{auth_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"selectedServices\": [\n        {\n            \"serviceId\": \"villa-accommodation\",\n            \"quantity\": 1\n        },\n        {\n            \"serviceId\": \"gourmet-delivery\",\n            \"quantity\": 2,\n            \"numberOfGuests\": 3,\n            \"scheduledDate\": \"2024-12-02\",\n            \"scheduledTime\": \"19:30\",\n            \"specialRequests\": \"Updated: Vegetarian and gluten-free options\"\n        },\n        {\n            \"serviceId\": \"wellness-relaxation\",\n            \"quantity\": 1,\n            \"numberOfGuests\": 2,\n            \"scheduledDate\": \"2024-12-04\",\n            \"scheduledTime\": \"14:00\",\n            \"specialRequests\": \"Couples massage preferred\"\n        }\n    ]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/bookings/{{booking_id}}/services",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "bookings",
+                                "{{booking_id}}",
+                                "services"
+                            ]
+                        },
+                        "description": "Update services for pending bookings only"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Confirm Booking (Host/Admin)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{auth_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/bookings/{{booking_id}}/confirm",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "bookings",
+                                "{{booking_id}}",
+                                "confirm"
+                            ]
+                        },
+                        "description": "Confirm a pending booking (villa owner or admin)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Reject Booking (Host/Admin)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{auth_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"rejectionReason\": \"Villa is under maintenance during requested dates\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/bookings/{{booking_id}}/reject",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "bookings",
+                                "{{booking_id}}",
+                                "reject"
+                            ]
+                        },
+                        "description": "Reject a pending booking with optional reason"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Cancel Booking",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{auth_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"cancellationReason\": \"Change in travel plans due to work commitments\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/bookings/{{booking_id}}/cancel",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "bookings",
+                                "{{booking_id}}",
+                                "cancel"
+                            ]
+                        },
+                        "description": "Cancel a booking (guest, host, or admin can cancel)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Toggle Payment Status (Host/Admin)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{auth_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/bookings/{{booking_id}}/toggle-payment",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "bookings",
+                                "{{booking_id}}",
+                                "toggle-payment"
+                            ]
+                        },
+                        "description": "Toggle payment status between paid/unpaid (villa owner or admin)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Complete Booking (Admin)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{auth_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/bookings/{{booking_id}}/complete",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "bookings",
+                                "{{booking_id}}",
+                                "complete"
+                            ]
+                        },
+                        "description": "Mark booking as completed after check-out (admin only)"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Booking management endpoints with new schema structure"
+        }
+    ],
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "console.log('Making request to:', pm.request.url.toString());"
+                ]
+            }
+        },
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "console.log('Response status:', pm.response.status);",
+                    "console.log('Response time:', pm.response.responseTime + 'ms');",
+                    "",
+                    "if (pm.response.status >= 200 && pm.response.status < 300) {",
+                    "    console.log('✅ Request successful');",
+                    "} else {",
+                    "    console.log('❌ Request failed');",
+                    "    if (pm.response.json && pm.response.json().message) {",
+                    "        console.log('Error message:', pm.response.json().message);",
+                    "    }",
+                    "}"
+                ]
+            }
+        }
+    ]
+}

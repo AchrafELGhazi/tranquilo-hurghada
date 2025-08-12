@@ -3,21 +3,45 @@ import authRouter from './auth.route';
 import villaRouter from './villa.route';
 import bookingRouter from './booking.route';
 import userRouter from './user.route';
+import { env } from '../config/env';
+import generateRootResponse from '../utils/generateRootResponse';
 
 const apiRouter = Router();
 
+// Root route
+apiRouter.get('/', (req, res) => {
+    res.status(200).json(generateRootResponse());
+});
 
+// Route handlers
 apiRouter.use('/auth', authRouter);
 apiRouter.use('/profile', userRouter);
 apiRouter.use('/villas', villaRouter);
 apiRouter.use('/bookings', bookingRouter);
 
+// Health check endpoint
+apiRouter.get('/health', (_req, res) => {
+    res.status(200).json({
+        status: 'OK',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        environment: env.NODE_ENV,
+        version: env.API_VERSION || '1.0.0',
+        memory: {
+            used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024) + ' MB',
+            total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024) + ' MB'
+        }
+    });
+});
 
+// Development documentation endpoint
 if (process.env.NODE_ENV === 'development') {
     apiRouter.get('/docs', (req, res) => {
         res.json({
             success: true,
-            message: 'API Documentation',
+            message: 'Tranquilo Hurghada API Documentation',
+            version: env.API_VERSION || '1.0.0',
+            baseUrl: `${req.protocol}://${req.get('host')}/api`,
             endpoints: {
                 auth: {
                     'POST /api/auth/register': 'Register a new user',
@@ -26,19 +50,36 @@ if (process.env.NODE_ENV === 'development') {
                     'POST /api/auth/logout': 'Logout user',
                     'GET /api/auth/me': 'Get current user info'
                 },
+                users: {
+                    'GET /api/profile': 'Get current user profile',
+                    'PUT /api/profile': 'Update user profile',
+                    'PUT /api/profile/change-password': 'Change user password',
+                    'GET /api/profile/complete': 'Check if profile is complete',
+                    'PUT /api/profile/deactivate': 'Deactivate user account'
+                },
                 villas: {
                     'GET /api/villas': 'Get all villas with filters and pagination',
                     'GET /api/villas/:id': 'Get villa by ID',
-                    'GET /api/villas/my': 'Get my villas (hosts/admins only)'
+                    'GET /api/villas/:id/availability': 'Get villa availability calendar',
+                    'GET /api/villas/:id/services': 'Get villa services',
+                    'GET /api/villas/my': 'Get my villas (hosts/admins only)',
+                    'POST /api/villas': 'Create new villa (hosts/admins only)',
+                    'PUT /api/villas/:id': 'Update villa (owners/admins only)',
+                    'DELETE /api/villas/:id': 'Delete villa (admins only)',
+                    'GET /api/villas/:id/statistics': 'Get villa statistics (owners/admins only)'
                 },
                 bookings: {
                     'POST /api/bookings': 'Create new booking request',
                     'GET /api/bookings': 'Get all bookings (filtered by role)',
                     'GET /api/bookings/my': 'Get my bookings',
                     'GET /api/bookings/:id': 'Get booking details',
+                    'GET /api/bookings/villa/:villaId/booked-dates': 'Get villa booked dates',
+                    'GET /api/bookings/villa/:villaId/services': 'Get villa services for booking',
+                    'PUT /api/bookings/:id/services': 'Update booking services',
                     'PUT /api/bookings/:id/confirm': 'Confirm booking (hosts/admins)',
                     'PUT /api/bookings/:id/reject': 'Reject booking (hosts/admins)',
                     'PUT /api/bookings/:id/cancel': 'Cancel booking',
+                    'PUT /api/bookings/:id/toggle-payment': 'Toggle payment status (hosts/admins)',
                     'PUT /api/bookings/:id/complete': 'Complete booking (admins only)'
                 }
             },
@@ -71,10 +112,14 @@ if (process.env.NODE_ENV === 'development') {
                     sortBy: 'Sort field (createdAt, checkIn, checkOut, totalPrice)',
                     sortOrder: 'Sort order (asc, desc)'
                 }
+            },
+            authentication: {
+                type: 'Bearer Token',
+                header: 'Authorization: Bearer <your-jwt-token>',
+                note: 'Most endpoints require authentication. Get your token from /api/auth/login'
             }
         });
     });
 }
-
 
 export default apiRouter;

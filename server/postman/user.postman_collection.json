@@ -1,0 +1,276 @@
+{
+    "info": {
+        "name": "Tranquilo Hurghada - User Management",
+        "description": "User management endpoints for Tranquilo Hurghada API",
+        "version": "2.0.0",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "token",
+                "value": "{{auth_token}}",
+                "type": "string"
+            }
+        ]
+    },
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:5000/api",
+            "type": "string"
+        },
+        {
+            "key": "auth_token",
+            "value": "",
+            "type": "string"
+        }
+    ],
+    "item": [
+        {
+            "name": "User Management",
+            "item": [
+                {
+                    "name": "Get Profile",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{auth_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/users/profile",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "users",
+                                "profile"
+                            ]
+                        },
+                        "description": "Get current user profile"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Profile",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{auth_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"fullName\": \"John Updated Doe\",\n    \"phone\": \"+1234567890\",\n    \"dateOfBirth\": \"1990-01-01\",\n    \"email\": \"newemail@example.com\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/users/profile",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "users",
+                                "profile"
+                            ]
+                        },
+                        "description": "Update user profile information"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Change Password",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{auth_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"currentPassword\": \"oldPassword123\",\n    \"newPassword\": \"newPassword123\",\n    \"confirmPassword\": \"newPassword123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/users/change-password",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "users",
+                                "change-password"
+                            ]
+                        },
+                        "description": "Change user password"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Check Profile Complete",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{auth_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/users/profile/complete",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "users",
+                                "profile",
+                                "complete"
+                            ]
+                        },
+                        "description": "Check if user profile is complete"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get All Users (Admin)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{auth_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/users?page=1&limit=10&sortBy=createdAt&sortOrder=desc",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "users"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "Page number"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10",
+                                    "description": "Results per page"
+                                },
+                                {
+                                    "key": "search",
+                                    "value": "john",
+                                    "description": "Search in name or email",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "role",
+                                    "value": "GUEST",
+                                    "description": "Filter by role: GUEST, HOST, ADMIN",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "isActive",
+                                    "value": "true",
+                                    "description": "Filter by active status",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "sortBy",
+                                    "value": "createdAt",
+                                    "description": "Sort by: fullName, email, createdAt, updatedAt"
+                                },
+                                {
+                                    "key": "sortOrder",
+                                    "value": "desc",
+                                    "description": "Sort order: asc, desc"
+                                }
+                            ]
+                        },
+                        "description": "Get all users with filters (admin only)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Deactivate Account",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{auth_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"password\": \"currentPassword123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/users/deactivate",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "users",
+                                "deactivate"
+                            ]
+                        },
+                        "description": "Deactivate user account (requires password confirmation)"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "User management endpoints"
+        }
+    ],
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "console.log('Making request to:', pm.request.url.toString());"
+                ]
+            }
+        },
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "console.log('Response status:', pm.response.status);",
+                    "console.log('Response time:', pm.response.responseTime + 'ms');",
+                    "",
+                    "if (pm.response.status >= 200 && pm.response.status < 300) {",
+                    "    console.log('✅ Request successful');",
+                    "} else {",
+                    "    console.log('❌ Request failed');",
+                    "    if (pm.response.json && pm.response.json().message) {",
+                    "        console.log('Error message:', pm.response.json().message);",
+                    "    }",
+                    "}"
+                ]
+            }
+        }
+    ]
+}

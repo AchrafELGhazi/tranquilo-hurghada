@@ -1,7 +1,7 @@
 {
     "info": {
-        "name": "Tranquilo Hurghada API",
-        "description": "Complete API collection for Tranquilo Hurghada with Villas and Bookings",
+        "name": "Tranquilo Hurghada API - Complete Server Collection",
+        "description": "Complete API collection for Tranquilo Hurghada with Authentication, User Management, Villas, and Bookings",
         "version": "2.0.0",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
@@ -56,7 +56,8 @@
                             ]
                         },
                         "description": "Test if the API is running"
-                    }
+                    },
+                    "response": []
                 },
                 {
                     "name": "Health Check",
@@ -73,7 +74,8 @@
                             ]
                         },
                         "description": "Check API health status"
-                    }
+                    },
+                    "response": []
                 }
             ],
             "description": "Basic health check endpoints"
@@ -87,6 +89,7 @@
                         {
                             "listen": "test",
                             "script": {
+                                "type": "text/javascript",
                                 "exec": [
                                     "if (pm.response.status === 201) {",
                                     "    const response = pm.response.json();",
@@ -122,7 +125,8 @@
                             ]
                         },
                         "description": "Register a new user"
-                    }
+                    },
+                    "response": []
                 },
                 {
                     "name": "Login User",
@@ -130,6 +134,7 @@
                         {
                             "listen": "test",
                             "script": {
+                                "type": "text/javascript",
                                 "exec": [
                                     "if (pm.response.status === 200) {",
                                     "    const response = pm.response.json();",
@@ -165,7 +170,8 @@
                             ]
                         },
                         "description": "Login existing user"
-                    }
+                    },
+                    "response": []
                 },
                 {
                     "name": "Current User",
@@ -188,7 +194,8 @@
                             ]
                         },
                         "description": "Get current authenticated user"
-                    }
+                    },
+                    "response": []
                 },
                 {
                     "name": "Logout",
@@ -211,10 +218,225 @@
                             ]
                         },
                         "description": "Logout user"
-                    }
+                    },
+                    "response": []
                 }
             ],
             "description": "Authentication related endpoints"
+        },
+        {
+            "name": "User Management",
+            "item": [
+                {
+                    "name": "Get Profile",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{auth_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/users/profile",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "users",
+                                "profile"
+                            ]
+                        },
+                        "description": "Get current user profile"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Profile",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{auth_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"fullName\": \"John Updated Doe\",\n    \"phone\": \"+1234567890\",\n    \"dateOfBirth\": \"1990-01-01\",\n    \"email\": \"newemail@example.com\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/users/profile",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "users",
+                                "profile"
+                            ]
+                        },
+                        "description": "Update user profile information"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Change Password",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{auth_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"currentPassword\": \"oldPassword123\",\n    \"newPassword\": \"newPassword123\",\n    \"confirmPassword\": \"newPassword123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/users/change-password",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "users",
+                                "change-password"
+                            ]
+                        },
+                        "description": "Change user password"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Check Profile Complete",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{auth_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/users/profile/complete",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "users",
+                                "profile",
+                                "complete"
+                            ]
+                        },
+                        "description": "Check if user profile is complete"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get All Users (Admin)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{auth_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/users?page=1&limit=10&sortBy=createdAt&sortOrder=desc",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "users"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "Page number"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10",
+                                    "description": "Results per page"
+                                },
+                                {
+                                    "key": "search",
+                                    "value": "john",
+                                    "description": "Search in name or email",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "role",
+                                    "value": "GUEST",
+                                    "description": "Filter by role: GUEST, HOST, ADMIN",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "isActive",
+                                    "value": "true",
+                                    "description": "Filter by active status",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "sortBy",
+                                    "value": "createdAt",
+                                    "description": "Sort by: fullName, email, createdAt, updatedAt"
+                                },
+                                {
+                                    "key": "sortOrder",
+                                    "value": "desc",
+                                    "description": "Sort order: asc, desc"
+                                }
+                            ]
+                        },
+                        "description": "Get all users with filters (admin only)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Deactivate Account",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{auth_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"password\": \"currentPassword123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/users/deactivate",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "users",
+                                "deactivate"
+                            ]
+                        },
+                        "description": "Deactivate user account (requires password confirmation)"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "User management endpoints"
         },
         {
             "name": "Villas",
@@ -225,6 +447,7 @@
                         {
                             "listen": "test",
                             "script": {
+                                "type": "text/javascript",
                                 "exec": [
                                     "if (pm.response.status === 200) {",
                                     "    const response = pm.response.json();",
@@ -332,7 +555,8 @@
                             ]
                         },
                         "description": "Get all available villas with filters and services"
-                    }
+                    },
+                    "response": []
                 },
                 {
                     "name": "Get Villa Details",
@@ -350,7 +574,8 @@
                             ]
                         },
                         "description": "Get specific villa details with services and availability"
-                    }
+                    },
+                    "response": []
                 },
                 {
                     "name": "Get Villa Availability",
@@ -381,7 +606,8 @@
                             ]
                         },
                         "description": "Get villa availability calendar"
-                    }
+                    },
+                    "response": []
                 },
                 {
                     "name": "Get Villa Services",
@@ -400,7 +626,8 @@
                             ]
                         },
                         "description": "Get all services available for a villa"
-                    }
+                    },
+                    "response": []
                 },
                 {
                     "name": "Get My Villas (Host)",
@@ -447,7 +674,8 @@
                             ]
                         },
                         "description": "Get current user's villas (hosts/admins only)"
-                    }
+                    },
+                    "response": []
                 },
                 {
                     "name": "Create Villa (Host)",
@@ -477,7 +705,8 @@
                             ]
                         },
                         "description": "Create a new villa (hosts/admins only)"
-                    }
+                    },
+                    "response": []
                 },
                 {
                     "name": "Update Villa (Host/Admin)",
@@ -508,7 +737,8 @@
                             ]
                         },
                         "description": "Update villa details (villa owner/admin only)"
-                    }
+                    },
+                    "response": []
                 },
                 {
                     "name": "Get Villa Statistics (Owner/Admin)",
@@ -532,7 +762,8 @@
                             ]
                         },
                         "description": "Get villa statistics and analytics (villa owner/admin only)"
-                    }
+                    },
+                    "response": []
                 },
                 {
                     "name": "Delete Villa (Admin)",
@@ -555,7 +786,8 @@
                             ]
                         },
                         "description": "Delete villa (soft delete - admins only)"
-                    }
+                    },
+                    "response": []
                 }
             ],
             "description": "Villa management endpoints"
@@ -569,6 +801,7 @@
                         {
                             "listen": "test",
                             "script": {
+                                "type": "text/javascript",
                                 "exec": [
                                     "if (pm.response.status === 201) {",
                                     "    const response = pm.response.json();",
@@ -607,7 +840,8 @@
                             ]
                         },
                         "description": "Create a new booking with required services (guests only)"
-                    }
+                    },
+                    "response": []
                 },
                 {
                     "name": "Get All Bookings",
@@ -687,7 +921,8 @@
                             ]
                         },
                         "description": "Get all bookings with role-based filtering"
-                    }
+                    },
+                    "response": []
                 },
                 {
                     "name": "Get My Bookings (Guest)",
@@ -736,7 +971,8 @@
                             ]
                         },
                         "description": "Get current user's bookings"
-                    }
+                    },
+                    "response": []
                 },
                 {
                     "name": "Get Booking Details",
@@ -759,7 +995,8 @@
                             ]
                         },
                         "description": "Get specific booking details with services"
-                    }
+                    },
+                    "response": []
                 },
                 {
                     "name": "Get Villa Booked Dates",
@@ -796,7 +1033,8 @@
                             ]
                         },
                         "description": "Get villa booked dates for availability checking"
-                    }
+                    },
+                    "response": []
                 },
                 {
                     "name": "Get Villa Services for Booking",
@@ -821,7 +1059,8 @@
                             ]
                         },
                         "description": "Get available services for villa booking"
-                    }
+                    },
+                    "response": []
                 },
                 {
                     "name": "Update Booking Services",
@@ -853,7 +1092,8 @@
                             ]
                         },
                         "description": "Update services for pending bookings only"
-                    }
+                    },
+                    "response": []
                 },
                 {
                     "name": "Confirm Booking (Host/Admin)",
@@ -877,7 +1117,8 @@
                             ]
                         },
                         "description": "Confirm a pending booking (villa owner or admin)"
-                    }
+                    },
+                    "response": []
                 },
                 {
                     "name": "Reject Booking (Host/Admin)",
@@ -909,7 +1150,8 @@
                             ]
                         },
                         "description": "Reject a pending booking with optional reason"
-                    }
+                    },
+                    "response": []
                 },
                 {
                     "name": "Cancel Booking",
@@ -941,7 +1183,8 @@
                             ]
                         },
                         "description": "Cancel a booking (guest, host, or admin can cancel)"
-                    }
+                    },
+                    "response": []
                 },
                 {
                     "name": "Toggle Payment Status (Host/Admin)",
@@ -965,7 +1208,8 @@
                             ]
                         },
                         "description": "Toggle payment status between paid/unpaid (villa owner or admin)"
-                    }
+                    },
+                    "response": []
                 },
                 {
                     "name": "Complete Booking (Admin)",
@@ -989,218 +1233,11 @@
                             ]
                         },
                         "description": "Mark booking as completed after check-out (admin only)"
-                    }
+                    },
+                    "response": []
                 }
             ],
             "description": "Booking management endpoints with new schema structure"
-        },
-        {
-            "name": "User Management",
-            "item": [
-                {
-                    "name": "Get Profile",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{auth_token}}"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{base_url}}/users/profile",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "users",
-                                "profile"
-                            ]
-                        },
-                        "description": "Get current user profile"
-                    }
-                },
-                {
-                    "name": "Update Profile",
-                    "request": {
-                        "method": "PUT",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{auth_token}}"
-                            },
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"fullName\": \"John Updated Doe\",\n    \"phone\": \"+1234567890\",\n    \"dateOfBirth\": \"1990-01-01\",\n    \"email\": \"newemail@example.com\"\n}"
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/users/profile",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "users",
-                                "profile"
-                            ]
-                        },
-                        "description": "Update user profile information"
-                    }
-                },
-                {
-                    "name": "Change Password",
-                    "request": {
-                        "method": "PUT",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{auth_token}}"
-                            },
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"currentPassword\": \"oldPassword123\",\n    \"newPassword\": \"newPassword123\",\n    \"confirmPassword\": \"newPassword123\"\n}"
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/users/change-password",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "users",
-                                "change-password"
-                            ]
-                        },
-                        "description": "Change user password"
-                    }
-                },
-                {
-                    "name": "Check Profile Complete",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{auth_token}}"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{base_url}}/users/profile/complete",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "users",
-                                "profile",
-                                "complete"
-                            ]
-                        },
-                        "description": "Check if user profile is complete"
-                    }
-                },
-                {
-                    "name": "Get All Users (Admin)",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{auth_token}}"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{base_url}}/users?page=1&limit=10&sortBy=createdAt&sortOrder=desc",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "users"
-                            ],
-                            "query": [
-                                {
-                                    "key": "page",
-                                    "value": "1",
-                                    "description": "Page number"
-                                },
-                                {
-                                    "key": "limit",
-                                    "value": "10",
-                                    "description": "Results per page"
-                                },
-                                {
-                                    "key": "search",
-                                    "value": "john",
-                                    "description": "Search in name or email",
-                                    "disabled": true
-                                },
-                                {
-                                    "key": "role",
-                                    "value": "GUEST",
-                                    "description": "Filter by role: GUEST, HOST, ADMIN",
-                                    "disabled": true
-                                },
-                                {
-                                    "key": "isActive",
-                                    "value": "true",
-                                    "description": "Filter by active status",
-                                    "disabled": true
-                                },
-                                {
-                                    "key": "sortBy",
-                                    "value": "createdAt",
-                                    "description": "Sort by: fullName, email, createdAt, updatedAt"
-                                },
-                                {
-                                    "key": "sortOrder",
-                                    "value": "desc",
-                                    "description": "Sort order: asc, desc"
-                                }
-                            ]
-                        },
-                        "description": "Get all users with filters (admin only)"
-                    }
-                },
-                {
-                    "name": "Deactivate Account",
-                    "request": {
-                        "method": "PUT",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{auth_token}}"
-                            },
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"password\": \"currentPassword123\"\n}"
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/users/deactivate",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "users",
-                                "deactivate"
-                            ]
-                        },
-                        "description": "Deactivate user account (requires password confirmation)"
-                    }
-                }
-            ],
-            "description": "User management endpoints"
         },
         {
             "name": "Test Scenarios",
@@ -1232,7 +1269,8 @@
                                         "login"
                                     ]
                                 }
-                            }
+                            },
+                            "response": []
                         },
                         {
                             "name": "2. Get Available Villas",
@@ -1262,7 +1300,8 @@
                                         }
                                     ]
                                 }
-                            }
+                            },
+                            "response": []
                         },
                         {
                             "name": "3. Get Villa Services",
@@ -1280,7 +1319,8 @@
                                         "services"
                                     ]
                                 }
-                            }
+                            },
+                            "response": []
                         },
                         {
                             "name": "4. Create Booking with Services",
@@ -1309,7 +1349,8 @@
                                         "bookings"
                                     ]
                                 }
-                            }
+                            },
+                            "response": []
                         }
                     ],
                     "description": "Complete booking flow from guest perspective"
@@ -1341,7 +1382,8 @@
                                         "login"
                                     ]
                                 }
-                            }
+                            },
+                            "response": []
                         },
                         {
                             "name": "2. Get My Villas",
@@ -1363,7 +1405,8 @@
                                         "my"
                                     ]
                                 }
-                            }
+                            },
+                            "response": []
                         },
                         {
                             "name": "3. Get Villa Bookings",
@@ -1390,7 +1433,8 @@
                                         }
                                     ]
                                 }
-                            }
+                            },
+                            "response": []
                         },
                         {
                             "name": "4. Confirm Booking",
@@ -1413,7 +1457,8 @@
                                         "confirm"
                                     ]
                                 }
-                            }
+                            },
+                            "response": []
                         }
                     ],
                     "description": "Host booking management flow"
@@ -1428,7 +1473,6 @@
             "script": {
                 "type": "text/javascript",
                 "exec": [
-                    "// Pre-request script runs before each request",
                     "console.log('Making request to:', pm.request.url.toString());"
                 ]
             }
@@ -1438,21 +1482,18 @@
             "script": {
                 "type": "text/javascript",
                 "exec": [
-                    "// Global test script runs after each request",
                     "console.log('Response status:', pm.response.status);",
                     "console.log('Response time:', pm.response.responseTime + 'ms');",
                     "",
-                    "// Check for successful responses",
                     "if (pm.response.status >= 200 && pm.response.status < 300) {",
-                    "    console.log('✅ Request successful');",
+                    "console.log('✅ Request successful');",
                     "} else {",
-                    "    console.log('❌ Request failed');",
-                    "    if (pm.response.json && pm.response.json().message) {",
-                    "        console.log('Error message:', pm.response.json().message);",
-                    "    }",
+                    "console.log('❌ Request failed');",
+                    "if (pm.response.json && pm.response.json().message) {",
+                    "console.log('Error message:', pm.response.json().message);",
+                    "}",
                     "}"
                 ]
             }
         }
-    ]
-}
+    ]}

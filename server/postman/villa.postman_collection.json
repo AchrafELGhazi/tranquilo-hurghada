@@ -1,0 +1,421 @@
+{
+    "info": {
+        "name": "Tranquilo Hurghada - Villas",
+        "description": "Villa management endpoints for Tranquilo Hurghada API",
+        "version": "2.0.0",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "token",
+                "value": "{{auth_token}}",
+                "type": "string"
+            }
+        ]
+    },
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:5000/api",
+            "type": "string"
+        },
+        {
+            "key": "auth_token",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "villa_id",
+            "value": "",
+            "type": "string"
+        }
+    ],
+    "item": [
+        {
+            "name": "Villas",
+            "item": [
+                {
+                    "name": "Get All Villas",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "if (pm.response.status === 200) {",
+                                    "    const response = pm.response.json();",
+                                    "    if (response.data && response.data.length > 0) {",
+                                    "        pm.collectionVariables.set('villa_id', response.data[0].id);",
+                                    "        console.log('Villa ID saved:', response.data[0].id);",
+                                    "    }",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/villas?page=1&limit=12&sortBy=createdAt&sortOrder=desc",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "villas"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "Page number (default: 1)"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "12",
+                                    "description": "Results per page (default: 10, max: 100)"
+                                },
+                                {
+                                    "key": "city",
+                                    "value": "Hurghada",
+                                    "description": "Filter by city",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "country",
+                                    "value": "Egypt",
+                                    "description": "Filter by country",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "minPrice",
+                                    "value": "100",
+                                    "description": "Minimum price per night",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "maxPrice",
+                                    "value": "500",
+                                    "description": "Maximum price per night",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "maxGuests",
+                                    "value": "4",
+                                    "description": "Minimum guest capacity",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "minBedrooms",
+                                    "value": "2",
+                                    "description": "Minimum bedrooms",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "minBathrooms",
+                                    "value": "1",
+                                    "description": "Minimum bathrooms",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "amenities",
+                                    "value": "wifi,pool,parking",
+                                    "description": "Comma-separated amenities",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "checkIn",
+                                    "value": "2024-12-01",
+                                    "description": "Check availability from date (YYYY-MM-DD)",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "checkOut",
+                                    "value": "2024-12-07",
+                                    "description": "Check availability to date (YYYY-MM-DD)",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "sortBy",
+                                    "value": "createdAt",
+                                    "description": "Sort by: title, pricePerNight, maxGuests, bedrooms, createdAt"
+                                },
+                                {
+                                    "key": "sortOrder",
+                                    "value": "desc",
+                                    "description": "Sort order: asc, desc"
+                                }
+                            ]
+                        },
+                        "description": "Get all available villas with filters and services"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Villa Details",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/villas/{{villa_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "villas",
+                                "{{villa_id}}"
+                            ]
+                        },
+                        "description": "Get specific villa details with services and availability"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Villa Availability",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/villas/{{villa_id}}/availability?year=2025&month=6",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "villas",
+                                "{{villa_id}}",
+                                "availability"
+                            ],
+                            "query": [
+                                {
+                                    "key": "year",
+                                    "value": "2025",
+                                    "description": "Year (2020-2030)"
+                                },
+                                {
+                                    "key": "month",
+                                    "value": "6",
+                                    "description": "Month (1-12) - optional, requires year"
+                                }
+                            ]
+                        },
+                        "description": "Get villa availability calendar"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Villa Services",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/villas/{{villa_id}}/services",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "villas",
+                                "{{villa_id}}",
+                                "services"
+                            ]
+                        },
+                        "description": "Get all services available for a villa"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get My Villas (Host)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{auth_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/villas/my?page=1&limit=10&sortBy=title&sortOrder=asc",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "villas",
+                                "my"
+                            ],
+                            "query": [
+                                {
+                                    "key": "status",
+                                    "value": "AVAILABLE",
+                                    "description": "Filter by status: AVAILABLE, UNAVAILABLE, MAINTENANCE",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10"
+                                },
+                                {
+                                    "key": "sortBy",
+                                    "value": "title"
+                                },
+                                {
+                                    "key": "sortOrder",
+                                    "value": "asc"
+                                }
+                            ]
+                        },
+                        "description": "Get current user's villas (hosts/admins only)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Villa (Host)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{auth_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"title\": \"Luxury Beachfront Villa\",\n    \"description\": \"Beautiful villa with stunning ocean views and private pool\",\n    \"address\": \"123 Beach Road, North Coast\",\n    \"city\": \"Hurghada\",\n    \"country\": \"Egypt\",\n    \"pricePerNight\": 250.00,\n    \"maxGuests\": 8,\n    \"bedrooms\": 4,\n    \"bathrooms\": 3,\n    \"amenities\": [\"wifi\", \"pool\", \"parking\", \"tv\", \"bbq\", \"beach_access\"],\n    \"images\": [\n        \"https://images.unsplash.com/photo-1564013799919-ab600027ffc6\",\n        \"https://images.unsplash.com/photo-1551882547-ff40c63fe5fa\"\n    ]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/villas",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "villas"
+                            ]
+                        },
+                        "description": "Create a new villa (hosts/admins only)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Villa (Host/Admin)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{auth_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"title\": \"Updated Luxury Beachfront Villa\",\n    \"description\": \"Updated description with new amenities\",\n    \"pricePerNight\": 275.00,\n    \"amenities\": [\"wifi\", \"pool\", \"parking\", \"tv\", \"bbq\", \"beach_access\", \"gym\"],\n    \"status\": \"AVAILABLE\",\n    \"isActive\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/villas/{{villa_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "villas",
+                                "{{villa_id}}"
+                            ]
+                        },
+                        "description": "Update villa details (villa owner/admin only)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Villa Statistics (Owner/Admin)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{auth_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/villas/{{villa_id}}/statistics",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "villas",
+                                "{{villa_id}}",
+                                "statistics"
+                            ]
+                        },
+                        "description": "Get villa statistics and analytics (villa owner/admin only)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Villa (Admin)",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{auth_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/villas/{{villa_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "villas",
+                                "{{villa_id}}"
+                            ]
+                        },
+                        "description": "Delete villa (soft delete - admins only)"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Villa management endpoints"
+        }
+    ],
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "console.log('Making request to:', pm.request.url.toString());"
+                ]
+            }
+        },
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "console.log('Response status:', pm.response.status);",
+                    "console.log('Response time:', pm.response.responseTime + 'ms');",
+                    "",
+                    "if (pm.response.status >= 200 && pm.response.status < 300) {",
+                    "    console.log('✅ Request successful');",
+                    "} else {",
+                    "    console.log('❌ Request failed');",
+                    "    if (pm.response.json && pm.response.json().message) {",
+                    "        console.log('Error message:', pm.response.json().message);",
+                    "    }",
+                    "}"
+                ]
+            }
+        }
+    ]
+}
