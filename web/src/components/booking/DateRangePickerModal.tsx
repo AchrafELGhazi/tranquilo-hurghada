@@ -265,7 +265,7 @@ const DateRangePickerModal: React.FC<DateRangePickerModalProps> = ({
                         </div>
                         <button
                             onClick={onClose}
-                            className='p-2  cursor-pointer hover:bg-[#F8B259]/20 rounded-xl transition-colors group'
+                            className='p-2 cursor-pointer hover:bg-[#F8B259]/20 rounded-xl transition-colors group'
                         >
                             <X className='w-5 h-5 text-[#C75D2C] group-hover:rotate-90 transition-transform duration-200' />
                         </button>
