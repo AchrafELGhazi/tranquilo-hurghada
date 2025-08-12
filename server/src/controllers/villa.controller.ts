@@ -11,118 +11,11 @@ import {
     deleteVilla as deleteVillaService,
     getVillaStatistics
 } from '../services/villa.service';
-import { parseQueryDates } from '../utils/booking.utils';
 import prisma from '../config/database';
 
 export const getAllVillas = async (req: Request, res: Response): Promise<void> => {
     try {
-        const {
-            city,
-            country,
-            minPrice,
-            maxPrice,
-            maxGuests,
-            minBedrooms,
-            minBathrooms,
-            amenities,
-            status,
-            ownerId,
-            checkIn,
-            checkOut,
-            page = '1',
-            limit = '12',
-            sortBy = 'createdAt',
-            sortOrder = 'desc'
-        } = req.query;
-
-        // Parse and validate parameters
-        const parsedPage = Math.max(1, parseInt(page as string) || 1);
-        const parsedLimit = Math.min(50, Math.max(1, parseInt(limit as string) || 12));
-
-        const filters: any = {
-            page: parsedPage,
-            limit: parsedLimit,
-            sortBy: ['title', 'pricePerNight', 'maxGuests', 'bedrooms', 'createdAt'].includes(sortBy as string)
-                ? sortBy as string
-                : 'createdAt',
-            sortOrder: ['asc', 'desc'].includes(sortOrder as string) ? sortOrder as string : 'desc'
-        };
-
-        // Location filters
-        if (city) filters.city = city as string;
-        if (country) filters.country = country as string;
-
-        // Price filters
-        if (minPrice) {
-            const price = parseFloat(minPrice as string);
-            if (!isNaN(price) && price >= 0) filters.minPrice = price;
-        }
-
-        if (maxPrice) {
-            const price = parseFloat(maxPrice as string);
-            if (!isNaN(price) && price >= 0) filters.maxPrice = price;
-        }
-
-        // Capacity filters
-        if (maxGuests) {
-            const guests = parseInt(maxGuests as string);
-            if (!isNaN(guests) && guests > 0) filters.maxGuests = guests;
-        }
-
-        if (minBedrooms) {
-            const bedrooms = parseInt(minBedrooms as string);
-            if (!isNaN(bedrooms) && bedrooms >= 0) filters.minBedrooms = bedrooms;
-        }
-
-        if (minBathrooms) {
-            const bathrooms = parseInt(minBathrooms as string);
-            if (!isNaN(bathrooms) && bathrooms >= 0) filters.minBathrooms = bathrooms;
-        }
-
-        // Amenities filter
-        if (amenities) {
-            const amenitiesList = typeof amenities === 'string'
-                ? amenities.split(',').map(a => a.trim()).filter(a => a.length > 0)
-                : [];
-            if (amenitiesList.length > 0) filters.amenities = amenitiesList;
-        }
-
-        // Status filter (only for authenticated requests with proper permissions)
-        if (status && Object.values(VillaStatus).includes(status as VillaStatus)) {
-            filters.status = status as VillaStatus;
-        } else {
-            // Default to only available villas for public requests
-            filters.status = VillaStatus.AVAILABLE;
-        }
-
-        // Owner filter
-        if (ownerId) filters.ownerId = ownerId as string;
-
-        // Date availability filters
-        if (checkIn) {
-            filters.checkIn = parseQueryDates(checkIn as string);
-            if (!filters.checkIn) {
-                ApiResponse.badRequest(res, 'Invalid checkIn date format');
-                return;
-            }
-        }
-
-        if (checkOut) {
-            filters.checkOut = parseQueryDates(checkOut as string);
-            if (!filters.checkOut) {
-                ApiResponse.badRequest(res, 'Invalid checkOut date format');
-                return;
-            }
-        }
-
-        // Validate date range if both provided
-        if (filters.checkIn && filters.checkOut && filters.checkIn >= filters.checkOut) {
-            ApiResponse.badRequest(res, 'Check-out date must be after check-in date');
-            return;
-        }
-
-        const result = await getVillas(filters);
-
+        const result = await getVillas(req.query as any);
         ApiResponse.successWithPagination(
             res,
             result.villas,
@@ -139,40 +32,11 @@ export const getAllVillas = async (req: Request, res: Response): Promise<void> =
 export const getVillaDetails = async (req: Request, res: Response): Promise<void> => {
     try {
         const { villaId } = req.params;
-
-        if (!villaId) {
-            ApiResponse.badRequest(res, 'Villa ID is required');
-            return;
-        }
-
         const villa = await getVillaById(villaId);
 
         if (!villa) {
             ApiResponse.notFound(res, 'Villa not found');
             return;
-        }
-
-        // Hide sensitive information for inactive villas from non-owners
-        if (!villa.isActive || villa.status !== VillaStatus.AVAILABLE) {
-            // Check if requesting user is the owner or admin (if authenticated)
-            const authHeader = req.headers['authorization'];
-            let canViewInactiveVilla = false;
-
-            if (authHeader) {
-                try {
-                    // You might want to verify the token here to check user permissions
-                    // For now, we'll allow viewing if there's an auth header
-                    // In a real implementation, decode the JWT and check permissions
-                    canViewInactiveVilla = true;
-                } catch (error) {
-                    canViewInactiveVilla = false;
-                }
-            }
-
-            if (!canViewInactiveVilla) {
-                ApiResponse.notFound(res, 'Villa not found or not available');
-                return;
-            }
         }
 
         ApiResponse.success(res, villa, 'Villa details retrieved successfully');
@@ -187,36 +51,15 @@ export const getMyVillas = async (req: AuthenticatedRequest, res: Response): Pro
     try {
         const user = req.user!;
 
-        // Only hosts and admins can have villas
         if (user.role === 'GUEST') {
             ApiResponse.forbidden(res, 'Guests cannot own villas');
             return;
         }
 
-        const {
-            status,
-            page = '1',
-            limit = '10',
-            sortBy = 'createdAt',
-            sortOrder = 'desc'
-        } = req.query;
-
-        const filters: any = {
-            ownerId: user.id,
-            page: Math.max(1, parseInt(page as string) || 1),
-            limit: Math.min(50, Math.max(1, parseInt(limit as string) || 10)),
-            sortBy: ['title', 'pricePerNight', 'maxGuests', 'bedrooms', 'createdAt'].includes(sortBy as string)
-                ? sortBy as string
-                : 'createdAt',
-            sortOrder: ['asc', 'desc'].includes(sortOrder as string) ? sortOrder as string : 'desc'
+        const filters = {
+            ...req.query as any,
+            ownerId: user.id
         };
-
-        // Don't filter by isActive for owners - they should see all their villas
-        delete filters.isActive;
-
-        if (status && Object.values(VillaStatus).includes(status as VillaStatus)) {
-            filters.status = status as VillaStatus;
-        }
 
         const result = await getVillas(filters);
 
@@ -237,71 +80,13 @@ export const createVillaRequest = async (req: AuthenticatedRequest, res: Respons
     try {
         const user = req.user!;
 
-        // Only hosts and admins can create villas
         if (user.role === 'GUEST') {
             ApiResponse.forbidden(res, 'Guests cannot create villas');
             return;
         }
 
-        const {
-            title,
-            description,
-            address,
-            city,
-            country,
-            pricePerNight,
-            maxGuests,
-            bedrooms,
-            bathrooms,
-            amenities,
-            images
-        } = req.body;
-
-        // Validate required fields
-        if (!title || !address || !city || !country || !pricePerNight || !maxGuests || !bedrooms || !bathrooms) {
-            ApiResponse.badRequest(res, 'Missing required fields: title, address, city, country, pricePerNight, maxGuests, bedrooms, bathrooms');
-            return;
-        }
-
-        // Validate numeric values
-        if (pricePerNight <= 0 || maxGuests <= 0 || bedrooms <= 0 || bathrooms <= 0) {
-            ApiResponse.badRequest(res, 'Numeric values must be greater than 0');
-            return;
-        }
-
-        if (maxGuests > 50) {
-            ApiResponse.badRequest(res, 'Maximum guests cannot exceed 50');
-            return;
-        }
-
-        if (bedrooms > 20 || bathrooms > 20) {
-            ApiResponse.badRequest(res, 'Bedrooms and bathrooms cannot exceed 20');
-            return;
-        }
-
-        // Validate arrays
-        if (amenities && !Array.isArray(amenities)) {
-            ApiResponse.badRequest(res, 'Amenities must be an array');
-            return;
-        }
-
-        if (images && !Array.isArray(images)) {
-            ApiResponse.badRequest(res, 'Images must be an array');
-            return;
-        }
-
         const villa = await createVilla({
-            title,
-            description,
-            address,
-            city,
-            country,
-            pricePerNight: parseFloat(pricePerNight),
-            maxGuests: parseInt(maxGuests),
-            bedrooms: parseInt(bedrooms),
-            bathrooms: parseInt(bathrooms),
-            amenities: amenities || [],
-            images: images || [],
+            ...req.body,
             ownerId: user.id
         });
 
@@ -318,101 +103,18 @@ export const updateVilla = async (req: AuthenticatedRequest, res: Response): Pro
         const { villaId } = req.params;
         const user = req.user!;
 
-        if (!villaId) {
-            ApiResponse.badRequest(res, 'Villa ID is required');
-            return;
-        }
-
-        // Check if villa exists
         const existingVilla = await getVillaById(villaId);
         if (!existingVilla) {
             ApiResponse.notFound(res, 'Villa not found');
             return;
         }
 
-        // Check permissions (only villa owner or admin can update)
         if (existingVilla.ownerId !== user.id && user.role !== 'ADMIN') {
             ApiResponse.forbidden(res, 'You are not authorized to update this villa');
             return;
         }
 
-        const {
-            title,
-            description,
-            address,
-            city,
-            country,
-            pricePerNight,
-            maxGuests,
-            bedrooms,
-            bathrooms,
-            amenities,
-            images,
-            status,
-            isActive
-        } = req.body;
-
-        // Validate numeric values if provided
-        if (pricePerNight !== undefined && pricePerNight <= 0) {
-            ApiResponse.badRequest(res, 'Price per night must be greater than 0');
-            return;
-        }
-
-        if (maxGuests !== undefined && (maxGuests <= 0 || maxGuests > 50)) {
-            ApiResponse.badRequest(res, 'Max guests must be between 1 and 50');
-            return;
-        }
-
-        if (bedrooms !== undefined && (bedrooms <= 0 || bedrooms > 20)) {
-            ApiResponse.badRequest(res, 'Bedrooms must be between 1 and 20');
-            return;
-        }
-
-        if (bathrooms !== undefined && (bathrooms <= 0 || bathrooms > 20)) {
-            ApiResponse.badRequest(res, 'Bathrooms must be between 1 and 20');
-            return;
-        }
-
-        // Validate arrays if provided
-        if (amenities !== undefined && !Array.isArray(amenities)) {
-            ApiResponse.badRequest(res, 'Amenities must be an array');
-            return;
-        }
-
-        if (images !== undefined && !Array.isArray(images)) {
-            ApiResponse.badRequest(res, 'Images must be an array');
-            return;
-        }
-
-        // Validate status if provided
-        if (status !== undefined && !Object.values(VillaStatus).includes(status)) {
-            ApiResponse.badRequest(res, `Status must be one of: ${Object.values(VillaStatus).join(', ')}`);
-            return;
-        }
-
-        // Validate isActive if provided
-        if (isActive !== undefined && typeof isActive !== 'boolean') {
-            ApiResponse.badRequest(res, 'isActive must be a boolean');
-            return;
-        }
-
-        const updateParams: any = {};
-        if (title !== undefined) updateParams.title = title;
-        if (description !== undefined) updateParams.description = description;
-        if (address !== undefined) updateParams.address = address;
-        if (city !== undefined) updateParams.city = city;
-        if (country !== undefined) updateParams.country = country;
-        if (pricePerNight !== undefined) updateParams.pricePerNight = parseFloat(pricePerNight);
-        if (maxGuests !== undefined) updateParams.maxGuests = parseInt(maxGuests);
-        if (bedrooms !== undefined) updateParams.bedrooms = parseInt(bedrooms);
-        if (bathrooms !== undefined) updateParams.bathrooms = parseInt(bathrooms);
-        if (amenities !== undefined) updateParams.amenities = amenities;
-        if (images !== undefined) updateParams.images = images;
-        if (status !== undefined) updateParams.status = status;
-        if (isActive !== undefined) updateParams.isActive = isActive;
-
-        const updatedVilla = await updateVillaService(villaId, updateParams);
-
+        const updatedVilla = await updateVillaService(villaId, req.body);
         ApiResponse.success(res, updatedVilla, 'Villa updated successfully');
     } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to update villa';
@@ -426,18 +128,11 @@ export const deleteVilla = async (req: AuthenticatedRequest, res: Response): Pro
         const { villaId } = req.params;
         const user = req.user!;
 
-        if (!villaId) {
-            ApiResponse.badRequest(res, 'Villa ID is required');
-            return;
-        }
-
-        // Only admins can delete villas
         if (user.role !== 'ADMIN') {
             ApiResponse.forbidden(res, 'Only administrators can delete villas');
             return;
         }
 
-        // Check if villa exists
         const existingVilla = await getVillaById(villaId);
         if (!existingVilla) {
             ApiResponse.notFound(res, 'Villa not found');
@@ -445,7 +140,6 @@ export const deleteVilla = async (req: AuthenticatedRequest, res: Response): Pro
         }
 
         const deletedVilla = await deleteVillaService(villaId);
-
         ApiResponse.success(res, deletedVilla, 'Villa deleted successfully');
     } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to delete villa';
@@ -464,26 +158,18 @@ export const getVillaStatisticsEndpoint = async (req: AuthenticatedRequest, res:
         const { villaId } = req.params;
         const user = req.user!;
 
-        if (!villaId) {
-            ApiResponse.badRequest(res, 'Villa ID is required');
-            return;
-        }
-
-        // Check if villa exists and user has permission
         const villa = await getVillaById(villaId);
         if (!villa) {
             ApiResponse.notFound(res, 'Villa not found');
             return;
         }
 
-        // Only villa owner or admin can view statistics
         if (villa.ownerId !== user.id && user.role !== 'ADMIN') {
             ApiResponse.forbidden(res, 'You are not authorized to view this villa\'s statistics');
             return;
         }
 
         const statistics = await getVillaStatistics(villaId);
-
         ApiResponse.success(res, statistics, 'Villa statistics retrieved successfully');
     } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to get villa statistics';
@@ -497,39 +183,21 @@ export const getVillaAvailability = async (req: Request, res: Response): Promise
         const { villaId } = req.params;
         const { year, month } = req.query;
 
-        if (!villaId) {
-            ApiResponse.badRequest(res, 'Villa ID is required');
-            return;
-        }
-
-        // Build date range filter
+        // Build date range
         let startDate: Date;
         let endDate: Date;
 
         if (year) {
-            const yearNum = parseInt(year as string);
-            if (isNaN(yearNum) || yearNum < 2020 || yearNum > 2030) {
-                ApiResponse.badRequest(res, 'Invalid year. Must be between 2020 and 2030');
-                return;
-            }
-
+            const yearNum = Number(year);
             if (month) {
-                const monthNum = parseInt(month as string);
-                if (isNaN(monthNum) || monthNum < 1 || monthNum > 12) {
-                    ApiResponse.badRequest(res, 'Invalid month. Must be between 1 and 12');
-                    return;
-                }
-
-                // Get specific month
+                const monthNum = Number(month);
                 startDate = new Date(yearNum, monthNum - 1, 1);
-                endDate = new Date(yearNum, monthNum, 0); // Last day of the month
+                endDate = new Date(yearNum, monthNum, 0);
             } else {
-                // Get entire year
                 startDate = new Date(yearNum, 0, 1);
                 endDate = new Date(yearNum, 11, 31);
             }
         } else {
-            // Default: get next 12 months from today
             startDate = new Date();
             endDate = new Date();
             endDate.setFullYear(endDate.getFullYear() + 1);
@@ -544,22 +212,10 @@ export const getVillaAvailability = async (req: Request, res: Response): Promise
                 status: true,
                 bookings: {
                     where: {
-                        status: {
-                            in: ['PENDING', 'CONFIRMED']
-                        },
+                        status: { in: ['PENDING', 'CONFIRMED'] },
                         OR: [
-                            {
-                                checkIn: {
-                                    gte: startDate,
-                                    lte: endDate
-                                }
-                            },
-                            {
-                                checkOut: {
-                                    gte: startDate,
-                                    lte: endDate
-                                }
-                            },
+                            { checkIn: { gte: startDate, lte: endDate } },
+                            { checkOut: { gte: startDate, lte: endDate } },
                             {
                                 AND: [
                                     { checkIn: { lte: startDate } },
@@ -584,7 +240,6 @@ export const getVillaAvailability = async (req: Request, res: Response): Promise
 
         // Generate unavailable dates
         const unavailableDates: string[] = [];
-
         villa.bookings.forEach(booking => {
             const currentDate = new Date(booking.checkIn);
             const endBookingDate = new Date(booking.checkOut);
@@ -622,11 +277,6 @@ export const getVillaAvailability = async (req: Request, res: Response): Promise
 export const getVillaServicesEndpoint = async (req: Request, res: Response): Promise<void> => {
     try {
         const { villaId } = req.params;
-
-        if (!villaId) {
-            ApiResponse.badRequest(res, 'Villa ID is required');
-            return;
-        }
 
         const villa = await prisma.villa.findUnique({
             where: { id: villaId },

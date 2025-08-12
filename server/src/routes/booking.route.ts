@@ -1,67 +1,142 @@
 import { Router } from 'express';
 import {
-    createBookingRequest,
-    getAllBookings,
-    getBookingDetails,
-    confirmBookingRequest,
-    rejectBookingRequest,
-    cancelBookingRequest,
-    completeBookingRequest,
-    getMyBookings,
-    getVillaBookedDates,
-    toggleBookingPaidStatus,
-    getVillaServicesEndpoint,
-    updateBookingServicesEndpoint
+    createBookingRequest, getAllBookings, getBookingDetails, confirmBookingRequest, rejectBookingRequest, cancelBookingRequest, completeBookingRequest, getMyBookings, getVillaBookedDates, toggleBookingPaidStatus, getVillaServicesEndpoint, updateBookingServicesEndpoint
 } from '../controllers/booking.controller';
 import { authenticate, requireGuest, requireHost, requireAdmin } from '../middleware/auth.middleware';
+import { validateRequest } from '../middleware/validateRequest.middleware';
 import {
-    validateBookingRequest,
-    validatePaginationParams,
-    validateDateParams,
-    validateBookingAction,
-    validateBookingFilters,
-    validateVillaBookedDatesParams,
-    validateBookingServicesUpdate
-} from '../middleware/validation.middleware';
+    createBookingSchema, updateBookingServicesSchema, bookingActionSchema, bookingParamsSchema, villaAvailabilityParamsSchema, bookingQuerySchema
+} from '../schemas/booking.schema';
+import { villaParamsSchema } from '../schemas/villa.schema';
 
 const bookingRouter = Router();
 
+// All routes require authentication
 bookingRouter.use(authenticate);
 
-// Create a new booking request (with optional services selection)
-bookingRouter.post('/', requireGuest, validateBookingRequest, createBookingRequest);
+/**
+ * @route   POST /api/bookings
+ * @desc    Create a new booking request with services
+ * @access  Private (Guests)
+ */
+bookingRouter.post('/',
+    requireGuest,
+    validateRequest(createBookingSchema),
+    createBookingRequest
+);
 
-// Get all bookings (with role-based filtering) - includes services data
-bookingRouter.get('/', validatePaginationParams, validateDateParams, validateBookingFilters, getAllBookings);
+/**
+ * @route   GET /api/bookings
+ * @desc    Get all bookings with role-based filtering
+ * @access  Private (Role-based)
+ */
+bookingRouter.get('/',
+    validateRequest(bookingQuerySchema),
+    getAllBookings
+);
 
-// Get current user's bookings - includes services data
-bookingRouter.get('/my', validatePaginationParams, validateBookingFilters, getMyBookings);
+/**
+ * @route   GET /api/bookings/my
+ * @desc    Get current user's bookings
+ * @access  Private (All roles)
+ */
+bookingRouter.get('/my',
+    validateRequest(bookingQuerySchema),
+    getMyBookings
+);
 
-// Get villa booked dates
-bookingRouter.get('/villa/:villaId/booked-dates', validateVillaBookedDatesParams, getVillaBookedDates);
+/**
+ * @route   GET /api/bookings/villa/:villaId/booked-dates
+ * @desc    Get villa booked dates
+ * @access  Private (All roles)
+ * @query   ?year=2025&month=6
+ */
+bookingRouter.get('/villa/:villaId/booked-dates',
+    validateRequest(villaAvailabilityParamsSchema),
+    getVillaBookedDates
+);
 
-// Get available services for a villa
-bookingRouter.get('/villa/:villaId/services', getVillaServicesEndpoint);
+/**
+ * @route   GET /api/bookings/villa/:villaId/services
+ * @desc    Get available services for a villa
+ * @access  Private (All roles)
+ */
+bookingRouter.get('/villa/:villaId/services',
+    validateRequest(villaParamsSchema),
+    getVillaServicesEndpoint
+);
 
-// Get specific booking details - includes services data
-bookingRouter.get('/:bookingId', getBookingDetails);
+/**
+ * @route   GET /api/bookings/:bookingId
+ * @desc    Get specific booking details
+ * @access  Private (Booking participants)
+ */
+bookingRouter.get('/:bookingId',
+    validateRequest(bookingParamsSchema),
+    getBookingDetails
+);
 
-// Update booking services (for pending bookings only)
-bookingRouter.put('/:bookingId/services', validateBookingServicesUpdate, updateBookingServicesEndpoint);
+/**
+ * @route   PUT /api/bookings/:bookingId/services
+ * @desc    Update booking services (for pending bookings only)
+ * @access  Private (Booking participants)
+ */
+bookingRouter.put('/:bookingId/services',
+    validateRequest(updateBookingServicesSchema),
+    updateBookingServicesEndpoint
+);
 
-// Confirm a booking (hosts and admins only)
-bookingRouter.put('/:bookingId/confirm', requireHost, confirmBookingRequest);
+/**
+ * @route   PUT /api/bookings/:bookingId/confirm
+ * @desc    Confirm a booking
+ * @access  Private (Hosts, Admins)
+ */
+bookingRouter.put('/:bookingId/confirm',
+    requireHost,
+    validateRequest(bookingParamsSchema),
+    confirmBookingRequest
+);
 
-// Reject a booking (hosts and admins only)
-bookingRouter.put('/:bookingId/reject', validateBookingAction, requireHost, rejectBookingRequest);
+/**
+ * @route   PUT /api/bookings/:bookingId/reject
+ * @desc    Reject a booking
+ * @access  Private (Hosts, Admins)
+ */
+bookingRouter.put('/:bookingId/reject',
+    requireHost,
+    validateRequest(bookingActionSchema),
+    rejectBookingRequest
+);
 
-// Cancel a booking (guests, hosts, and admins)
-bookingRouter.put('/:bookingId/cancel', validateBookingAction, cancelBookingRequest);
+/**
+ * @route   PUT /api/bookings/:bookingId/cancel
+ * @desc    Cancel a booking
+ * @access  Private (Guests, Hosts, Admins)
+ */
+bookingRouter.put('/:bookingId/cancel',
+    validateRequest(bookingActionSchema),
+    cancelBookingRequest
+);
 
-// Toggle payment status (hosts and admins only)
-bookingRouter.put('/:bookingId/toggle-payment', toggleBookingPaidStatus);
+/**
+ * @route   PUT /api/bookings/:bookingId/toggle-payment
+ * @desc    Toggle payment status
+ * @access  Private (Hosts, Admins)
+ */
+bookingRouter.put('/:bookingId/toggle-payment',
+    validateRequest(bookingParamsSchema),
+    toggleBookingPaidStatus
+);
 
-// Complete a booking (admins only)
-bookingRouter.put('/:bookingId/complete', requireAdmin, completeBookingRequest);
+/**
+ * @route   PUT /api/bookings/:bookingId/complete
+ * @desc    Complete a booking
+ * @access  Private (Admins only)
+ */
+bookingRouter.put('/:bookingId/complete',
+    requireAdmin,
+    validateRequest(bookingParamsSchema),
+    completeBookingRequest
+);
 
 export default bookingRouter;

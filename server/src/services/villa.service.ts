@@ -298,7 +298,8 @@ export const getVillaById = async (villaId: string): Promise<any> => {
                     checkIn: true,
                     checkOut: true,
                     status: true,
-                    totalGuests: true,
+                    totalAdults: true,
+                    totalChildren: true,
                     guest: {
                         select: {
                             id: true,
@@ -503,8 +504,6 @@ export const getVillaStatistics = async (villaId: string): Promise<any> => {
                     select: {
                         status: true,
                         totalPrice: true,
-                        servicesTotal: true,
-                        grandTotal: true,
                         checkIn: true,
                         checkOut: true
                     }
@@ -524,7 +523,7 @@ export const getVillaStatistics = async (villaId: string): Promise<any> => {
 
         const totalRevenue = stats.bookings
             .filter(b => b.status === 'COMPLETED')
-            .reduce((sum, booking) => sum + parseFloat(booking.grandTotal.toString()), 0);
+            .reduce((sum, booking) => sum + parseFloat(booking.totalPrice.toString()), 0);
 
         const averageBookingValue = completedBookings > 0 ? totalRevenue / completedBookings : 0;
 

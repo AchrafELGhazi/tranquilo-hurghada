@@ -12,9 +12,13 @@ export const generateTokens = (user: User): {
     const payload: TokenPayload = {
         id: user.id,
         email: user.email,
+        phone: user.phone,
+        dateOfBirth: user.dateOfBirth ? user.dateOfBirth.toISOString() : null,
         fullName: user.fullName,
         role: user.role,
         isActive: user.isActive,
+        createdAt: user.createdAt.toISOString(),
+        updatedAt: user.updatedAt.toISOString(),
     };
 
     const accessToken = jwt.sign(payload, env.JWT_SECRET, { expiresIn: '7d' });
