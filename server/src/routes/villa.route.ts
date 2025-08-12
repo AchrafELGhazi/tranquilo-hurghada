@@ -1,24 +1,8 @@
 import { Router } from 'express';
-import {
-    getAllVillas,
-    getVillaDetails,
-    getMyVillas,
-    createVillaRequest,
-    updateVilla,
-    deleteVilla,
-    getVillaStatisticsEndpoint,
-    getVillaAvailability,
-    getVillaServicesEndpoint
-} from '../controllers/villa.controller';
+import { getAllVillas, getVillaDetails, getMyVillas, createVillaRequest, updateVilla, deleteVilla, getVillaStatisticsEndpoint, getVillaAvailability, getVillaServicesEndpoint } from '../controllers/villa.controller';
 import { authenticate, requireHost, requireAdmin } from '../middleware/auth.middleware';
 import { validateRequest } from '../middleware/validateRequest.middleware';
-import {
-    createVillaSchema,
-    updateVillaSchema,
-    villaQuerySchema,
-    villaParamsSchema,
-    villaAvailabilitySchema
-} from '../schemas/villa.schema';
+import { createVillaSchema, updateVillaSchema, villaQuerySchema, villaParamsSchema, villaAvailabilitySchema } from '../schemas/villa.schema';
 
 const villaRouter = Router();
 

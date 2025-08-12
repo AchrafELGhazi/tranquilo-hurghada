@@ -18,10 +18,11 @@ interface CreateBookingParams {
     guestId: string;
     checkIn: Date;
     checkOut: Date;
-    totalGuests: number;
+    totalAdults: number;
+    totalChildren: number;
     paymentMethod: PaymentMethod;
     notes?: string;
-    selectedServices?: ServiceSelection[];
+    selectedServices: ServiceSelection[];
 }
 
 interface BookingFilters {
@@ -33,7 +34,7 @@ interface BookingFilters {
     endDate?: Date;
     page?: number;
     limit?: number;
-    sortBy?: 'createdAt' | 'checkIn' | 'checkOut' | 'totalPrice' | 'grandTotal';
+    sortBy?: 'createdAt' | 'checkIn' | 'checkOut' | 'totalPrice';
     sortOrder?: 'asc' | 'desc';
 }
 
@@ -47,16 +48,14 @@ interface PaginatedBookingsResponse {
     };
 }
 
-const calculateServicesTotal = async (selectedServices: ServiceSelection[]): Promise<{ servicesTotal: Decimal; serviceBookings: any[] }> => {
+const calculateServicesTotal = async (selectedServices: ServiceSelection[]): Promise<{ serviceBookings: any[] }> => {
     if (!selectedServices || selectedServices.length === 0) {
-        return { servicesTotal: new Decimal(0), serviceBookings: [] };
+        return { serviceBookings: [] };
     }
 
-    let servicesTotal = new Decimal(0);
     const serviceBookings = [];
 
     for (const serviceSelection of selectedServices) {
-        // Get service details
         const service = await prisma.service.findUnique({
             where: { id: serviceSelection.serviceId },
             select: { id: true, price: true, title: true, isActive: true }
@@ -74,8 +73,6 @@ const calculateServicesTotal = async (selectedServices: ServiceSelection[]): Pro
         const unitPrice = service.price;
         const totalPrice = new Decimal(unitPrice).mul(quantity);
 
-        servicesTotal = servicesTotal.add(totalPrice);
-
         serviceBookings.push({
             serviceId: service.id,
             quantity,
@@ -88,11 +85,11 @@ const calculateServicesTotal = async (selectedServices: ServiceSelection[]): Pro
         });
     }
 
-    return { servicesTotal, serviceBookings };
+    return { serviceBookings };
 };
 
 export const createBooking = async (params: CreateBookingParams): Promise<any> => {
-    const { villaId, guestId, checkIn, checkOut, totalGuests, paymentMethod, notes, selectedServices } = params;
+    const { villaId, guestId, checkIn, checkOut, totalAdults, totalChildren, paymentMethod, notes, selectedServices } = params;
 
     // Validate dates
     const dateValidation = validateBookingDates(checkIn, checkOut);
@@ -100,16 +97,12 @@ export const createBooking = async (params: CreateBookingParams): Promise<any> =
         throw new Error(dateValidation.error);
     }
 
-    // Get villa details with services
+    // Get villa details
     const villa = await prisma.villa.findUnique({
         where: { id: villaId },
         include: {
             owner: {
                 select: { id: true, fullName: true, email: true, role: true }
-            },
-            services: {
-                where: { isActive: true },
-                select: { id: true, title: true, price: true, category: true }
             }
         }
     });
@@ -122,6 +115,7 @@ export const createBooking = async (params: CreateBookingParams): Promise<any> =
         throw new Error('Villa is not available for booking');
     }
 
+    const totalGuests = totalAdults + totalChildren;
     if (totalGuests > villa.maxGuests) {
         throw new Error(`Maximum ${villa.maxGuests} guests allowed`);
     }
@@ -132,35 +126,30 @@ export const createBooking = async (params: CreateBookingParams): Promise<any> =
         throw new Error('Villa is not available for the selected dates');
     }
 
-    // Calculate villa total price
-    const villaTotal = calculateTotalPrice(villa.pricePerNight, checkIn, checkOut);
+    // Calculate villa total price (only based on nights, no services)
+    const totalPrice = calculateTotalPrice(villa.pricePerNight, checkIn, checkOut);
 
-    // Calculate services total
-    const { servicesTotal, serviceBookings } = await calculateServicesTotal(selectedServices || []);
-
-    // Calculate grand total
-    const grandTotal = new Decimal(villaTotal).add(servicesTotal);
+    // Process services
+    const { serviceBookings } = await calculateServicesTotal(selectedServices);
 
     // Create booking with services in a transaction
     const booking = await prisma.$transaction(async (tx) => {
-        // Create the booking
         const newBooking = await tx.booking.create({
             data: {
                 villaId,
                 guestId,
                 checkIn,
                 checkOut,
-                totalGuests,
-                totalPrice: villaTotal,
-                servicesTotal,
-                grandTotal,
+                totalAdults,
+                totalChildren,
+                totalPrice,
                 paymentMethod,
                 notes,
                 status: BookingStatus.PENDING
             }
         });
 
-        // Create booking services if any
+        // Create booking services
         if (serviceBookings.length > 0) {
             await tx.bookingService.createMany({
                 data: serviceBookings.map(sb => ({
@@ -170,7 +159,6 @@ export const createBooking = async (params: CreateBookingParams): Promise<any> =
             });
         }
 
-        // Return booking with all relations
         return await tx.booking.findUnique({
             where: { id: newBooking.id },
             include: {
@@ -206,12 +194,11 @@ export const createBooking = async (params: CreateBookingParams): Promise<any> =
     // Send notification emails
     try {
         await sendBookingNotificationEmails({
-            booking: booking as any, // Type assertion for email service compatibility
+            booking: booking as any,
             type: 'NEW_BOOKING'
         });
     } catch (error) {
         console.error('Failed to send booking notification emails:', error);
-        // Don't throw error as booking was successful
     }
 
     return booking;
@@ -232,37 +219,30 @@ export const getBookings = async (filters: BookingFilters): Promise<PaginatedBoo
     } = filters;
 
     const skip = (page - 1) * limit;
-
-    // Build where clause
     const where: Prisma.BookingWhereInput = {};
 
     if (status) where.status = status;
     if (villaId) where.villaId = villaId;
     if (guestId) where.guestId = guestId;
     if (ownerId) {
-        where.villa = {
-            ownerId: ownerId
-        };
+        where.villa = { ownerId: ownerId };
     }
 
     // Date range filtering
     if (startDate || endDate) {
         where.OR = [
-            // Check-in date within range
             {
                 checkIn: {
                     ...(startDate && { gte: startDate }),
                     ...(endDate && { lte: endDate })
                 }
             },
-            // Check-out date within range
             {
                 checkOut: {
                     ...(startDate && { gte: startDate }),
                     ...(endDate && { lte: endDate })
                 }
             },
-            // Booking spans the entire range
             {
                 AND: [
                     ...(startDate ? [{ checkIn: { lte: startDate } }] : []),
@@ -272,10 +252,8 @@ export const getBookings = async (filters: BookingFilters): Promise<PaginatedBoo
         ];
     }
 
-    // Get total count
     const total = await prisma.booking.count({ where });
 
-    // Get bookings with services
     const bookings = await prisma.booking.findMany({
         where,
         include: {
@@ -426,18 +404,6 @@ export const confirmBooking = async (bookingId: string, confirmedById: string): 
             },
             guest: {
                 select: { id: true, fullName: true, email: true }
-            },
-            bookingServices: {
-                include: {
-                    service: {
-                        select: {
-                            id: true,
-                            title: true,
-                            category: true,
-                            price: true
-                        }
-                    }
-                }
             }
         }
     });
@@ -446,12 +412,15 @@ export const confirmBooking = async (bookingId: string, confirmedById: string): 
         throw new Error('Booking not found');
     }
 
-    // Check if booking dates are still available
+    if (booking.status !== BookingStatus.PENDING) {
+        throw new Error(`Cannot confirm booking with status: ${booking.status}`);
+    }
+
     const isStillAvailable = await checkVillaAvailability(
         booking.villaId,
         booking.checkIn,
         booking.checkOut,
-        bookingId // Exclude current booking from availability check
+        bookingId
     );
 
     if (!isStillAvailable) {
@@ -498,10 +467,9 @@ export const confirmBooking = async (bookingId: string, confirmedById: string): 
         }
     });
 
-    // Send confirmation emails
     try {
         await sendBookingNotificationEmails({
-            booking: updatedBooking as any, // Type assertion for email service compatibility
+            booking: updatedBooking as any,
             type: 'BOOKING_CONFIRMED'
         });
     } catch (error) {
@@ -517,41 +485,15 @@ export const rejectBooking = async (
     rejectionReason?: string
 ): Promise<any> => {
     const booking = await prisma.booking.findUnique({
-        where: { id: bookingId },
-        include: {
-            villa: {
-                select: {
-                    id: true,
-                    title: true,
-                    address: true,
-                    city: true,
-                    country: true,
-                    ownerId: true,
-                    owner: {
-                        select: { id: true, fullName: true, email: true, role: true }
-                    }
-                }
-            },
-            guest: {
-                select: { id: true, fullName: true, email: true }
-            },
-            bookingServices: {
-                include: {
-                    service: {
-                        select: {
-                            id: true,
-                            title: true,
-                            category: true,
-                            price: true
-                        }
-                    }
-                }
-            }
-        }
+        where: { id: bookingId }
     });
 
     if (!booking) {
         throw new Error('Booking not found');
+    }
+
+    if (booking.status !== BookingStatus.PENDING) {
+        throw new Error(`Cannot reject booking with status: ${booking.status}`);
     }
 
     const updatedBooking = await prisma.booking.update({
@@ -577,26 +519,13 @@ export const rejectBooking = async (
             },
             guest: {
                 select: { id: true, fullName: true, email: true }
-            },
-            bookingServices: {
-                include: {
-                    service: {
-                        select: {
-                            id: true,
-                            title: true,
-                            category: true,
-                            price: true
-                        }
-                    }
-                }
             }
         }
     });
 
-    // Send rejection emails
     try {
         await sendBookingNotificationEmails({
-            booking: updatedBooking as any, // Type assertion for email service compatibility
+            booking: updatedBooking as any,
             type: 'BOOKING_REJECTED'
         });
     } catch (error) {
@@ -612,37 +541,7 @@ export const cancelBooking = async (
     cancellationReason?: string
 ): Promise<any> => {
     const booking = await prisma.booking.findUnique({
-        where: { id: bookingId },
-        include: {
-            villa: {
-                select: {
-                    id: true,
-                    title: true,
-                    address: true,
-                    city: true,
-                    country: true,
-                    ownerId: true,
-                    owner: {
-                        select: { id: true, fullName: true, email: true, role: true }
-                    }
-                }
-            },
-            guest: {
-                select: { id: true, fullName: true, email: true }
-            },
-            bookingServices: {
-                include: {
-                    service: {
-                        select: {
-                            id: true,
-                            title: true,
-                            category: true,
-                            price: true
-                        }
-                    }
-                }
-            }
-        }
+        where: { id: bookingId }
     });
 
     if (!booking) {
@@ -654,7 +553,6 @@ export const cancelBooking = async (
         throw new Error(`Cannot cancel booking with status: ${booking.status}`);
     }
 
-    // Check if booking can still be cancelled (e.g., not past check-in date)
     const now = new Date();
     if (booking.checkIn <= now) {
         throw new Error('Cannot cancel booking after check-in date');
@@ -684,26 +582,13 @@ export const cancelBooking = async (
             },
             guest: {
                 select: { id: true, fullName: true, email: true }
-            },
-            bookingServices: {
-                include: {
-                    service: {
-                        select: {
-                            id: true,
-                            title: true,
-                            category: true,
-                            price: true
-                        }
-                    }
-                }
             }
         }
     });
 
-    // Send cancellation emails
     try {
         await sendBookingNotificationEmails({
-            booking: updatedBooking as any, // Type assertion for email service compatibility
+            booking: updatedBooking as any,
             type: 'BOOKING_CANCELLED'
         });
     } catch (error) {
@@ -715,25 +600,7 @@ export const cancelBooking = async (
 
 export const completeBooking = async (bookingId: string): Promise<any> => {
     const booking = await prisma.booking.findUnique({
-        where: { id: bookingId },
-        include: {
-            villa: true,
-            guest: {
-                select: { id: true, fullName: true, email: true }
-            },
-            bookingServices: {
-                include: {
-                    service: {
-                        select: {
-                            id: true,
-                            title: true,
-                            category: true,
-                            price: true
-                        }
-                    }
-                }
-            }
-        }
+        where: { id: bookingId }
     });
 
     if (!booking) {
@@ -778,30 +645,13 @@ export const getVillaBookedDatesFromDB = async (
     endDate: Date
 ): Promise<string[]> => {
     try {
-        // Get all bookings that overlap with the requested date range
-        // Only include PENDING and CONFIRMED bookings (not cancelled/rejected)
         const bookings = await prisma.booking.findMany({
             where: {
                 villaId,
-                status: {
-                    in: [BookingStatus.PENDING, BookingStatus.CONFIRMED]
-                },
+                status: { in: [BookingStatus.PENDING, BookingStatus.CONFIRMED] },
                 OR: [
-                    // Booking starts within the range
-                    {
-                        checkIn: {
-                            gte: startDate,
-                            lte: endDate
-                        }
-                    },
-                    // Booking ends within the range
-                    {
-                        checkOut: {
-                            gte: startDate,
-                            lte: endDate
-                        }
-                    },
-                    // Booking spans the entire range
+                    { checkIn: { gte: startDate, lte: endDate } },
+                    { checkOut: { gte: startDate, lte: endDate } },
                     {
                         AND: [
                             { checkIn: { lte: startDate } },
@@ -815,19 +665,15 @@ export const getVillaBookedDatesFromDB = async (
                 checkOut: true,
                 status: true
             },
-            orderBy: {
-                checkIn: 'asc'
-            }
+            orderBy: { checkIn: 'asc' }
         });
 
-        // Generate all booked dates
         const bookedDatesSet = new Set<string>();
 
         bookings.forEach(booking => {
             const currentDate = new Date(booking.checkIn);
             const endBookingDate = new Date(booking.checkOut);
 
-            // Add each day from check-in to check-out (excluding check-out day)
             while (currentDate < endBookingDate) {
                 const dateString = currentDate.toISOString().split('T')[0];
                 bookedDatesSet.add(dateString);
@@ -835,16 +681,13 @@ export const getVillaBookedDatesFromDB = async (
             }
         });
 
-        // Convert set to sorted array
         return Array.from(bookedDatesSet).sort();
-
     } catch (error) {
         console.error('Error getting villa booked dates:', error);
         throw new Error('Failed to retrieve villa booked dates');
     }
 };
 
-// New function to get available services for a villa
 export const getVillaServices = async (villaId: string): Promise<any[]> => {
     try {
         const services = await prisma.service.findMany({
@@ -881,19 +724,15 @@ export const getVillaServices = async (villaId: string): Promise<any[]> => {
     }
 };
 
-// New function to update booking services
 export const updateBookingServices = async (
     bookingId: string,
     selectedServices: ServiceSelection[]
 ): Promise<any> => {
     try {
         return await prisma.$transaction(async (tx) => {
-            // Get current booking
             const booking = await tx.booking.findUnique({
                 where: { id: bookingId },
-                include: {
-                    bookingServices: true
-                }
+                include: { bookingServices: true }
             });
 
             if (!booking) {
@@ -909,8 +748,8 @@ export const updateBookingServices = async (
                 where: { bookingId }
             });
 
-            // Calculate new services total
-            const { servicesTotal, serviceBookings } = await calculateServicesTotal(selectedServices);
+            // Process new services
+            const { serviceBookings } = await calculateServicesTotal(selectedServices);
 
             // Create new booking services
             if (serviceBookings.length > 0) {
@@ -922,15 +761,8 @@ export const updateBookingServices = async (
                 });
             }
 
-            // Update booking totals
-            const grandTotal = new Decimal(booking.totalPrice).add(servicesTotal);
-
-            const updatedBooking = await tx.booking.update({
+            return await tx.booking.findUnique({
                 where: { id: bookingId },
-                data: {
-                    servicesTotal,
-                    grandTotal
-                },
                 include: {
                     villa: {
                         select: {
@@ -963,8 +795,6 @@ export const updateBookingServices = async (
                     }
                 }
             });
-
-            return updatedBooking;
         });
     } catch (error) {
         console.error('Error updating booking services:', error);
