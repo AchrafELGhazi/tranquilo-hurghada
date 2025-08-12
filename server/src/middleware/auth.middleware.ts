@@ -42,7 +42,16 @@ export const authenticate = async (
         }
 
         req.user = user;
-        logger.info(`User authenticated: ${req.user}`);
+
+        // Option 1: Log specific user details
+        // logger.info(`User authenticated: ${user.fullName} (${user.email}) - Role: ${user.role}`);
+
+        // Option 2: Log full user object as JSON
+        logger.info(`User authenticated:`, JSON.stringify(user));
+
+        // Option 3: Use logger's object logging if supported
+        // logger.info('User authenticated:', user);
+
         next();
     } catch (error) {
         logger.error('Authentication error:', error);
