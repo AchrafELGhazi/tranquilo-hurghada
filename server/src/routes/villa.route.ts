@@ -11,13 +11,14 @@ import {
     getVillaServicesEndpoint
 } from '../controllers/villa.controller';
 import { authenticate, requireHost, requireAdmin } from '../middleware/auth.middleware';
+import { validateRequest } from '../middleware/validateRequest.middleware';
 import {
-    validatePaginationParams,
-    validateDateParams,
-    validateVillaUpdate,
-    validateVillaCreate,
-    validateVillaBookedDatesParams
-} from '../middleware/validation.middleware';
+    createVillaSchema,
+    updateVillaSchema,
+    villaQuerySchema,
+    villaParamsSchema,
+    villaAvailabilitySchema
+} from '../schemas/villa.schema';
 
 const villaRouter = Router();
 
@@ -27,7 +28,10 @@ const villaRouter = Router();
  * @access  Public
  * @query   ?city=Hurghada&country=Egypt&minPrice=100&maxPrice=500&maxGuests=4&minBedrooms=2&minBathrooms=1&amenities=wifi,pool&checkIn=2024-12-01&checkOut=2024-12-07&page=1&limit=12&sortBy=pricePerNight&sortOrder=asc
  */
-villaRouter.get('/', validatePaginationParams, validateDateParams, getAllVillas);
+villaRouter.get('/',
+    validateRequest(villaQuerySchema),
+    getAllVillas
+);
 
 /**
  * @route   GET /api/villas/my
@@ -35,21 +39,34 @@ villaRouter.get('/', validatePaginationParams, validateDateParams, getAllVillas)
  * @access  Private (Hosts, Admins)
  * @query   ?status=AVAILABLE&page=1&limit=10&sortBy=title&sortOrder=asc
  */
-villaRouter.get('/my', authenticate, requireHost, validatePaginationParams, getMyVillas);
+villaRouter.get('/my',
+    authenticate,
+    requireHost,
+    validateRequest(villaQuerySchema),
+    getMyVillas
+);
 
 /**
  * @route   POST /api/villas
  * @desc    Create a new villa
  * @access  Private (Hosts, Admins)
  */
-villaRouter.post('/', authenticate, requireHost, validateVillaCreate, createVillaRequest);
+villaRouter.post('/',
+    authenticate,
+    requireHost,
+    validateRequest(createVillaSchema),
+    createVillaRequest
+);
 
 /**
  * @route   GET /api/villas/:villaId
  * @desc    Get specific villa details with services and availability
  * @access  Public
  */
-villaRouter.get('/:villaId', getVillaDetails);
+villaRouter.get('/:villaId',
+    validateRequest(villaParamsSchema),
+    getVillaDetails
+);
 
 /**
  * @route   GET /api/villas/:villaId/availability
@@ -57,34 +74,53 @@ villaRouter.get('/:villaId', getVillaDetails);
  * @access  Public
  * @query   ?year=2025&month=6
  */
-villaRouter.get('/:villaId/availability', getVillaAvailability);
+villaRouter.get('/:villaId/availability',
+    validateRequest(villaAvailabilitySchema),
+    getVillaAvailability
+);
 
 /**
  * @route   GET /api/villas/:villaId/services
  * @desc    Get all services available for a villa
  * @access  Public
  */
-villaRouter.get('/:villaId/services', getVillaServicesEndpoint);
+villaRouter.get('/:villaId/services',
+    validateRequest(villaParamsSchema),
+    getVillaServicesEndpoint
+);
 
 /**
  * @route   GET /api/villas/:villaId/statistics
  * @desc    Get villa statistics and analytics
  * @access  Private (Villa Owner, Admins)
  */
-villaRouter.get('/:villaId/statistics', authenticate, getVillaStatisticsEndpoint);
+villaRouter.get('/:villaId/statistics',
+    authenticate,
+    validateRequest(villaParamsSchema),
+    getVillaStatisticsEndpoint
+);
 
 /**
  * @route   PUT /api/villas/:villaId
  * @desc    Update villa details
  * @access  Private (Villa Owner, Admins)
  */
-villaRouter.put('/:villaId', authenticate, validateVillaUpdate, updateVilla);
+villaRouter.put('/:villaId',
+    authenticate,
+    validateRequest(updateVillaSchema),
+    updateVilla
+);
 
 /**
  * @route   DELETE /api/villas/:villaId
  * @desc    Delete villa (soft delete - set isActive to false)
  * @access  Private (Admins only)
  */
-villaRouter.delete('/:villaId', authenticate, requireAdmin, deleteVilla);
+villaRouter.delete('/:villaId',
+    authenticate,
+    requireAdmin,
+    validateRequest(villaParamsSchema),
+    deleteVilla
+);
 
 export default villaRouter;
