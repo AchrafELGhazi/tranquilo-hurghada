@@ -1,0 +1,91 @@
+name: Server CI/CD
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  test-server:
+    name: Test Server Application
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NODE_ENV: test
+      CI: true
+      
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'yarn'
+          cache-dependency-path: 'server/yarn.lock'
+          
+      - name: Install dependencies
+        run: |
+          cd server
+          yarn install --frozen-lockfile
+          
+      - name: Setup test database
+        run: |
+          cd server
+          echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/test_db" > .env
+          echo "JWT_SECRET=test-secret-key" >> .env
+          echo "NODE_ENV=test" >> .env
+          
+      - name: Generate Prisma client
+        run: |
+          cd server
+          npx prisma generate
+          
+      - name: Run database migrations
+        run: |
+          cd server
+          npx prisma db push --accept-data-loss
+          
+      - name: Build TypeScript
+        run: |
+          cd server
+          yarn build
+          
+      - name: Clean up
+        run: |
+          cd server
+          yarn clean
+          
+      - name: Rebuild for verification
+        run: |
+          cd server
+          yarn build
+          
+      - name: Check build output
+        run: |
+          cd server
+          ls -la dist/
+          echo "Server build completed successfully"
+          
+      - name: Test server start (dry run)
+        run: |
+          cd server
+          timeout 10s yarn start || test $? = 124
+          echo "Server can start successfully"

@@ -10,8 +10,8 @@ import { notFoundHandler } from './middleware/notFoundHandler';
 import { env } from './config/env';
 import apiRouter from './routes/api';
 import { startBookingAutoCompletionJob } from './jobs/booking.job';
-import './types/express';
 import { baseRateLimit } from './middleware/rateLimit.middleware';
+import logger from './config/logger';
 
 const app = express();
 const apiPrefix = '/api';
@@ -27,7 +27,7 @@ const allowedOrigins = isProduction
 
 app.use((req: Request, res: Response, next: NextFunction) => {
     const requestId = uuidv4();
-    req.id = requestId;
+    res.locals.requestId = requestId;
     res.setHeader('X-Request-ID', requestId);
     next();
 });
@@ -109,10 +109,7 @@ const morganFormat = isProduction
 
 app.use(morgan(morganFormat));
 
-app.use(express.json({
-    limit: '5mb',
-    verify: (req: Request, res, buf: Buffer) => req.rawBody = buf
-}));
+app.use(express.json({ limit: '5mb' }));
 
 app.use(express.urlencoded({
     extended: true,
@@ -121,9 +118,8 @@ app.use(express.urlencoded({
 
 try {
     startBookingAutoCompletionJob();
-    console.log('✅ Booking auto-completion job started successfully');
 } catch (error) {
-    console.error('❌ Failed to start booking auto-completion job:', error);
+    logger.error('Failed to start booking auto-completion job:', error);
     if (isProduction) {
         process.exit(1);
     }
