@@ -123,10 +123,9 @@ model Booking {
     id                 String        @id @default(cuid())
     checkIn            DateTime
     checkOut           DateTime
-    totalGuests        Int
+    totalAdults        Int
+    totalChildren      Int           @default(0)
     totalPrice         Decimal       @db.Decimal(10, 2)
-    servicesTotal      Decimal       @db.Decimal(10, 2) @default(0)
-    grandTotal         Decimal       @db.Decimal(10, 2)
     status             BookingStatus @default(PENDING)
     paymentMethod      PaymentMethod
     isPaid             Boolean       @default(false)

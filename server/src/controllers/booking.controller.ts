@@ -34,16 +34,12 @@ export const createBookingRequest = async (req: AuthenticatedRequest, res: Respo
         } = req.body;
         const guestId = req.user!.id;
 
-        // The validation middleware should have already handled most validation
-        // Only do minimal additional validation here
-
         // Update user profile with phone and date of birth if not already set
         try {
             const dobDate = new Date(dateOfBirth);
             await updateUserProfile(guestId, { phone, dateOfBirth: dobDate });
         } catch (profileError) {
             logger.error('Failed to update user profile:', profileError);
-            // Continue with booking even if profile update fails
         }
 
         const booking = await createBooking({
