@@ -2,7 +2,7 @@ import { BookingStatus, PaymentMethod, Prisma } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
 import prisma from '../config/database';
 import { validateBookingDates, checkVillaAvailability, calculateTotalPrice } from '../utils/booking.utils';
-import { sendBookingNotificationEmails } from '../utils/emailService';
+// import { sendBookingNotificationEmails } from '../utils/emailService';
 import toDate from '../utils/toDate';
 
 interface ServiceSelection {
@@ -469,14 +469,14 @@ export const confirmBooking = async (bookingId: string, confirmedById: string): 
         }
     });
 
-    try {
-        await sendBookingNotificationEmails({
-            booking: updatedBooking as any,
-            type: 'BOOKING_CONFIRMED'
-        });
-    } catch (error) {
-        console.error('Failed to send booking confirmation emails:', error);
-    }
+    // try {
+    //     await sendBookingNotificationEmails({
+    //         booking: updatedBooking as any,
+    //         type: 'BOOKING_CONFIRMED'
+    //     });
+    // } catch (error) {
+    //     console.error('Failed to send booking confirmation emails:', error);
+    // }
 
     return updatedBooking;
 };
@@ -525,14 +525,14 @@ export const rejectBooking = async (
         }
     });
 
-    try {
-        await sendBookingNotificationEmails({
-            booking: updatedBooking as any,
-            type: 'BOOKING_REJECTED'
-        });
-    } catch (error) {
-        console.error('Failed to send booking rejection emails:', error);
-    }
+    // try {
+    //     await sendBookingNotificationEmails({
+    //         booking: updatedBooking as any,
+    //         type: 'BOOKING_REJECTED'
+    //     });
+    // } catch (error) {
+    //     console.error('Failed to send booking rejection emails:', error);
+    // }
 
     return updatedBooking;
 };
@@ -588,14 +588,14 @@ export const cancelBooking = async (
         }
     });
 
-    try {
-        await sendBookingNotificationEmails({
-            booking: updatedBooking as any,
-            type: 'BOOKING_CANCELLED'
-        });
-    } catch (error) {
-        console.error('Failed to send booking cancellation emails:', error);
-    }
+    // try {
+    //     await sendBookingNotificationEmails({
+    //         booking: updatedBooking as any,
+    //         type: 'BOOKING_CANCELLED'
+    //     });
+    // } catch (error) {
+    //     console.error('Failed to send booking cancellation emails:', error);
+    // }
 
     return updatedBooking;
 };
