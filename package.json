@@ -3,10 +3,6 @@
     "version": "1.0.0",
     "description": "Tranquilo Hurghada - Full Stack Application",
     "private": true,
-    // "workspaces": [
-    //     "server",
-    //     "web"
-    // ],
     "scripts": {
         "dev": "make dev-start",
         "dev:stop": "make dev-stop",
