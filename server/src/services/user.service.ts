@@ -57,22 +57,33 @@ export const updateUserProfile = async (
             dataToUpdate.phone = updateData.phone;
         }
 
-        if (updateData.dateOfBirth && (!existingUser.dateOfBirth || updateData.dateOfBirth.getTime() !== existingUser.dateOfBirth.getTime())) {
-            // Validate age (must be at least 18)
-            const today = new Date();
-            const age = today.getFullYear() - updateData.dateOfBirth.getFullYear();
-            const monthDiff = today.getMonth() - updateData.dateOfBirth.getMonth();
-            const finalAge = monthDiff < 0 || (monthDiff === 0 && today.getDate() < updateData.dateOfBirth.getDate()) ? age - 1 : age;
+        if (updateData.dateOfBirth) {
+            // Convert string to Date if needed
+            const dateOfBirth = typeof updateData.dateOfBirth === 'string'
+                ? new Date(updateData.dateOfBirth)
+                : updateData.dateOfBirth;
 
-            if (finalAge < 18) {
-                throw new Error('User must be at least 18 years old');
+            // Check if it's different from existing date
+            const isDifferent = !existingUser.dateOfBirth ||
+                dateOfBirth.getTime() !== existingUser.dateOfBirth.getTime();
+
+            if (isDifferent) {
+                // Validate age (must be at least 18)
+                const today = new Date();
+                const age = today.getFullYear() - dateOfBirth.getFullYear();
+                const monthDiff = today.getMonth() - dateOfBirth.getMonth();
+                const finalAge = monthDiff < 0 || (monthDiff === 0 && today.getDate() < dateOfBirth.getDate()) ? age - 1 : age;
+
+                if (finalAge < 18) {
+                    throw new Error('User must be at least 18 years old');
+                }
+
+                if (finalAge > 120) {
+                    throw new Error('Invalid date of birth');
+                }
+
+                dataToUpdate.dateOfBirth = dateOfBirth;
             }
-
-            if (finalAge > 120) {
-                throw new Error('Invalid date of birth');
-            }
-
-            dataToUpdate.dateOfBirth = updateData.dateOfBirth;
         }
 
         if (updateData.fullName && updateData.fullName !== existingUser.fullName) {
@@ -135,7 +146,6 @@ export const updateUserProfile = async (
         throw error;
     }
 };
-
 export const getUserProfile = async (userId: string): Promise<any> => {
     try {
         const user = await prisma.user.findUnique({

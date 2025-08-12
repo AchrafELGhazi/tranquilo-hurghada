@@ -52,8 +52,8 @@ export const createBookingSchema = z.object({
             message: `Payment method must be one of: ${Object.values(PaymentMethod).join(', ')}`
         }),
         phone: z.string()
-            .min(1, 'Phone number is required')
-            .regex(/^[\+]?[1-9][\d]{8,14}$/, 'Phone number format is invalid'),
+            .min(1, 'Phone number is required'),
+            // .regex(/^[\+]?[1-9][\d]{8,14}$/, 'Phone number format is invalid'),
         dateOfBirth: z.string()
             .regex(/^\d{4}-\d{2}-\d{2}$/, 'Date of birth must be in YYYY-MM-DD format')
             .transform(val => new Date(val)),
@@ -61,8 +61,6 @@ export const createBookingSchema = z.object({
             .max(1000, 'Notes cannot exceed 1000 characters')
             .trim()
             .optional(),
-        selectedServices: z.array(selectedServiceSchema)
-            .min(1, 'At least one service must be selected')
     }).refine(data => {
         // Check-out must be after check-in
         return data.checkOut > data.checkIn;

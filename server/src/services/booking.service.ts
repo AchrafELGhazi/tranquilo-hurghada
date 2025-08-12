@@ -3,6 +3,7 @@ import { Decimal } from '@prisma/client/runtime/library';
 import prisma from '../config/database';
 import { validateBookingDates, checkVillaAvailability, calculateTotalPrice } from '../utils/booking.utils';
 import { sendBookingNotificationEmails } from '../utils/emailService';
+import toDate from '../utils/toDate';
 
 interface ServiceSelection {
     serviceId: string;
@@ -89,15 +90,16 @@ const calculateServicesTotal = async (selectedServices: ServiceSelection[]): Pro
 };
 
 export const createBooking = async (params: CreateBookingParams): Promise<any> => {
-    const { villaId, guestId, checkIn, checkOut, totalAdults, totalChildren, paymentMethod, notes, selectedServices } = params;
+    const { villaId, guestId, checkIn: rawCheckIn, checkOut: rawCheckOut, totalAdults, totalChildren, paymentMethod, notes, selectedServices } = params;
 
-    // Validate dates
+    const checkIn = toDate(rawCheckIn);
+    const checkOut = toDate(rawCheckOut);
+
     const dateValidation = validateBookingDates(checkIn, checkOut);
     if (!dateValidation.isValid) {
         throw new Error(dateValidation.error);
     }
 
-    // Get villa details
     const villa = await prisma.villa.findUnique({
         where: { id: villaId },
         include: {
@@ -120,13 +122,11 @@ export const createBooking = async (params: CreateBookingParams): Promise<any> =
         throw new Error(`Maximum ${villa.maxGuests} guests allowed`);
     }
 
-    // Check availability
     const isAvailable = await checkVillaAvailability(villaId, checkIn, checkOut);
     if (!isAvailable) {
         throw new Error('Villa is not available for the selected dates');
     }
 
-    // Calculate villa total price (only based on nights, no services)
     const totalPrice = calculateTotalPrice(villa.pricePerNight, checkIn, checkOut);
 
     // Process services
@@ -191,15 +191,14 @@ export const createBooking = async (params: CreateBookingParams): Promise<any> =
         });
     });
 
-    // Send notification emails
-    try {
-        await sendBookingNotificationEmails({
-            booking: booking as any,
-            type: 'NEW_BOOKING'
-        });
-    } catch (error) {
-        console.error('Failed to send booking notification emails:', error);
-    }
+    // try {
+    //     await sendBookingNotificationEmails({
+    //         booking: booking as any,
+    //         type: 'NEW_BOOKING'
+    //     });
+    // } catch (error) {
+    //     console.error('Failed to send booking notification emails:', error);
+    // }
 
     return booking;
 };

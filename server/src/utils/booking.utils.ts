@@ -1,16 +1,23 @@
 import { Decimal } from '@prisma/client/runtime/library';
 import prisma from '../config/database';
+import toDate from './toDate';
 
 export interface DateValidationResult {
     isValid: boolean;
     error?: string;
 }
 
-export const validateBookingDates = (checkIn: Date, checkOut: Date): DateValidationResult => {
+
+
+export const validateBookingDates = (checkIn: Date | string, checkOut: Date | string): DateValidationResult => {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const checkInDate = new Date(checkIn.getFullYear(), checkIn.getMonth(), checkIn.getDate());
-    const checkOutDate = new Date(checkOut.getFullYear(), checkOut.getMonth(), checkOut.getDate());
+
+    const checkInDate = toDate(checkIn);
+    const checkOutDate = toDate(checkOut);
+
+    const checkInDateOnly = new Date(checkInDate.getFullYear(), checkInDate.getMonth(), checkInDate.getDate());
+    const checkOutDateOnly = new Date(checkOutDate.getFullYear(), checkOutDate.getMonth(), checkOutDate.getDate());
 
     // Check if dates are valid
     if (isNaN(checkInDate.getTime()) || isNaN(checkOutDate.getTime())) {
@@ -18,24 +25,24 @@ export const validateBookingDates = (checkIn: Date, checkOut: Date): DateValidat
     }
 
     // Check if check-in is in the past
-    if (checkInDate < today) {
+    if (checkInDateOnly < today) {
         return { isValid: false, error: 'Check-in date cannot be in the past' };
     }
 
     // Check if check-out is after check-in
-    if (checkOutDate <= checkInDate) {
+    if (checkOutDateOnly <= checkInDateOnly) {
         return { isValid: false, error: 'Check-out date must be after check-in date' };
     }
 
     // Check if booking is too far in advance (max 2 years)
     const maxAdvanceDate = new Date();
     maxAdvanceDate.setFullYear(maxAdvanceDate.getFullYear() + 2);
-    if (checkInDate > maxAdvanceDate) {
+    if (checkInDateOnly > maxAdvanceDate) {
         return { isValid: false, error: 'Booking cannot be made more than 2 years in advance' };
     }
 
     // Check minimum stay (at least 1 night)
-    const diffTime = checkOutDate.getTime() - checkInDate.getTime();
+    const diffTime = checkOutDateOnly.getTime() - checkInDateOnly.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     if (diffDays < 1) {
         return { isValid: false, error: 'Minimum stay is 1 night' };
@@ -51,13 +58,16 @@ export const validateBookingDates = (checkIn: Date, checkOut: Date): DateValidat
 
 export const checkVillaAvailability = async (
     villaId: string,
-    checkIn: Date,
-    checkOut: Date,
+    checkIn: Date | string,
+    checkOut: Date | string,
     excludeBookingId?: string
 ): Promise<boolean> => {
     try {
-        const checkInUTC = new Date(checkIn.toISOString());
-        const checkOutUTC = new Date(checkOut.toISOString());
+        const checkInDate = toDate(checkIn);
+        const checkOutDate = toDate(checkOut);
+
+        const checkInUTC = new Date(checkInDate.toISOString());
+        const checkOutUTC = new Date(checkOutDate.toISOString());
 
         const allowedStatuses = ['PENDING', 'CONFIRMED'] as const;
 
@@ -104,10 +114,11 @@ export const checkVillaAvailability = async (
     }
 };
 
-export const calculateTotalPrice = (pricePerNight: Decimal, checkIn: Date, checkOut: Date): Decimal => {
+export const calculateTotalPrice = (pricePerNight: Decimal, checkIn: Date | string, checkOut: Date | string): Decimal => {
     try {
-        const checkInDate = new Date(checkIn);
-        const checkOutDate = new Date(checkOut);
+        const checkInDate = toDate(checkIn);
+        const checkOutDate = toDate(checkOut);
+
         const diffTime = checkOutDate.getTime() - checkInDate.getTime();
         const numberOfNights = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
@@ -122,21 +133,26 @@ export const calculateTotalPrice = (pricePerNight: Decimal, checkIn: Date, check
     }
 };
 
-export const getDaysBetweenDates = (startDate: Date, endDate: Date): number => {
-    const diffTime = endDate.getTime() - startDate.getTime();
+export const getDaysBetweenDates = (startDate: Date | string, endDate: Date | string): number => {
+    const start = toDate(startDate);
+    const end = toDate(endDate);
+    const diffTime = end.getTime() - start.getTime();
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 };
 
-export const formatBookingDateRange = (checkIn: Date, checkOut: Date): string => {
+export const formatBookingDateRange = (checkIn: Date | string, checkOut: Date | string): string => {
     try {
-        const checkInStr = checkIn.toLocaleDateString('en-US', {
+        const checkInDate = toDate(checkIn);
+        const checkOutDate = toDate(checkOut);
+
+        const checkInStr = checkInDate.toLocaleDateString('en-US', {
             weekday: 'short',
             year: 'numeric',
             month: 'short',
             day: 'numeric'
         });
 
-        const checkOutStr = checkOut.toLocaleDateString('en-US', {
+        const checkOutStr = checkOutDate.toLocaleDateString('en-US', {
             weekday: 'short',
             year: 'numeric',
             month: 'short',
@@ -146,23 +162,27 @@ export const formatBookingDateRange = (checkIn: Date, checkOut: Date): string =>
         return `${checkInStr} - ${checkOutStr}`;
     } catch (error) {
         console.error('Error formatting date range:', error);
-        return `${checkIn.toISOString().split('T')[0]} - ${checkOut.toISOString().split('T')[0]}`;
+        const checkInDate = toDate(checkIn);
+        const checkOutDate = toDate(checkOut);
+        return `${checkInDate.toISOString().split('T')[0]} - ${checkOutDate.toISOString().split('T')[0]}`;
     }
 };
 
-export const isBookingCancellable = (booking: { checkIn: Date; status: string }): boolean => {
+export const isBookingCancellable = (booking: { checkIn: Date | string; status: string }): boolean => {
     const now = new Date();
+    const checkInDate = toDate(booking.checkIn);
     const allowedStatuses = ['PENDING', 'CONFIRMED'];
-    return allowedStatuses.includes(booking.status) && booking.checkIn > now;
+    return allowedStatuses.includes(booking.status) && checkInDate > now;
 };
 
 export const isBookingConfirmable = (booking: { status: string }): boolean => {
     return booking.status === 'PENDING';
 };
 
-export const isBookingCompletable = (booking: { checkOut: Date; status: string }): boolean => {
+export const isBookingCompletable = (booking: { checkOut: Date | string; status: string }): boolean => {
     const now = new Date();
-    return booking.status === 'CONFIRMED' && booking.checkOut <= now;
+    const checkOutDate = toDate(booking.checkOut);
+    return booking.status === 'CONFIRMED' && checkOutDate <= now;
 };
 
 export const getBookingStatusColor = (status: string): string => {

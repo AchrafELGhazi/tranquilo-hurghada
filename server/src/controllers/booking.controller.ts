@@ -23,7 +23,6 @@ export const createBookingRequest = async (req: AuthenticatedRequest, res: Respo
         const user = req.user!;
         console.log(user)
 
-        // Update user profile if needed
         try {
             await updateUserProfile(user.id, {
                 phone: req.body.phone,
