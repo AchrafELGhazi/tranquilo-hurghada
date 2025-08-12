@@ -1,19 +1,36 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Users, Phone, CreditCard, FileText, Star, Award, Shield, Clock, LogIn, X } from 'lucide-react';
-import bookingApi from '@/api/bookingApi';
+import {
+    Calendar,
+    Users,
+    Phone,
+    CreditCard,
+    FileText,
+    Star,
+    Award,
+    Shield,
+    Clock,
+    LogIn,
+    X,
+    Plus,
+    Minus,
+    Utensils,
+} from 'lucide-react';
+import bookingApi, { type ServiceSelection } from '@/api/bookingApi';
 import villaApi from '@/api/villaApi';
 import DateRangePickerModal from './DateRangePickerModal';
 import { THToast, THToaster } from '@/components/common/Toast';
-import type { PaymentMethod, User, Villa } from '@/utils/types';
+import type { PaymentMethod, User, Villa, Service } from '@/utils/types';
 
 interface FormData {
     checkIn: string;
     checkOut: string;
-    totalGuests: number;
+    totalAdults: number;
+    totalChildren: number;
     phone: string;
     dateOfBirth: string;
     paymentMethod: PaymentMethod;
     notes: string;
+    selectedServices: ServiceSelection[];
 }
 
 interface FormErrors {
@@ -21,7 +38,8 @@ interface FormErrors {
     checkOut?: string;
     phone?: string;
     dateOfBirth?: string;
-    totalGuests?: string;
+    totalAdults?: string;
+    totalChildren?: string;
     dates?: string;
 }
 
@@ -37,18 +55,42 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
     const [submitting, setSubmitting] = useState(false);
     const [showSignInModal, setShowSignInModal] = useState(false);
     const [showDatePicker, setShowDatePicker] = useState(false);
+    const [availableServices, setAvailableServices] = useState<Service[]>([]);
+    const [loadingServices, setLoadingServices] = useState(false);
 
     const [formData, setFormData] = useState<FormData>({
         checkIn: '',
         checkOut: '',
-        totalGuests: 1,
+        totalAdults: 1,
+        totalChildren: 0,
         phone: '',
         dateOfBirth: '',
         paymentMethod: 'BANK_TRANSFER',
         notes: '',
+        selectedServices: [],
     });
 
     const [formErrors, setFormErrors] = useState<FormErrors>({});
+
+    // Load villa services
+    useEffect(() => {
+        if (villa?.id) {
+            loadVillaServices();
+        }
+    }, [villa?.id]);
+
+    const loadVillaServices = async () => {
+        try {
+            setLoadingServices(true);
+            const servicesResponse = await bookingApi.getVillaServices(villa.id);
+            setAvailableServices(servicesResponse.services || []);
+        } catch (error) {
+            console.error('Failed to load villa services:', error);
+            setAvailableServices([]);
+        } finally {
+            setLoadingServices(false);
+        }
+    };
 
     // Load form data from localStorage on mount
     useEffect(() => {
@@ -59,6 +101,7 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
                 setFormData(prev => ({
                     ...prev,
                     ...parsedData,
+                    selectedServices: parsedData.selectedServices || [],
                 }));
             } catch (error) {
                 console.warn('Failed to parse saved form data:', error);
@@ -82,7 +125,6 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
 
             setFormData(prev => ({
                 ...prev,
-                // Use user data if available, otherwise fall back to saved form data
                 phone: user.phone || (savedData as any).phone || '',
                 dateOfBirth: user.dateOfBirth
                     ? new Date(user.dateOfBirth).toISOString().split('T')[0]
@@ -104,7 +146,7 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
         const { name, value } = e.target;
         const newFormData = {
             ...formData,
-            [name]: value,
+            [name]: name === 'totalAdults' || name === 'totalChildren' ? parseInt(value) || 0 : value,
         };
 
         setFormData(newFormData);
@@ -116,6 +158,66 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
                 [name]: '',
             }));
         }
+    };
+
+    // Handle guest count changes
+    const updateGuestCount = (type: 'adults' | 'children', increment: boolean) => {
+        const newFormData = { ...formData };
+
+        if (type === 'adults') {
+            const newCount = increment ? formData.totalAdults + 1 : Math.max(1, formData.totalAdults - 1);
+            if (newCount + formData.totalChildren <= villa.maxGuests) {
+                newFormData.totalAdults = newCount;
+            }
+        } else {
+            const newCount = increment ? formData.totalChildren + 1 : Math.max(0, formData.totalChildren - 1);
+            if (formData.totalAdults + newCount <= villa.maxGuests) {
+                newFormData.totalChildren = newCount;
+            }
+        }
+
+        setFormData(newFormData);
+        saveFormDataToStorage(newFormData);
+    };
+
+    // Handle service selection
+    const toggleService = (service: Service) => {
+        const existingIndex = formData.selectedServices.findIndex(s => s.serviceId === service.id);
+        const newSelectedServices = [...formData.selectedServices];
+
+        if (existingIndex >= 0) {
+            // Remove service
+            newSelectedServices.splice(existingIndex, 1);
+        } else {
+            // Add service
+            newSelectedServices.push({
+                serviceId: service.id,
+                quantity: 1,
+                numberOfGuests: formData.totalAdults + formData.totalChildren,
+            });
+        }
+
+        const newFormData = {
+            ...formData,
+            selectedServices: newSelectedServices,
+        };
+
+        setFormData(newFormData);
+        saveFormDataToStorage(newFormData);
+    };
+
+    const updateServiceQuantity = (serviceId: string, quantity: number) => {
+        const newSelectedServices = formData.selectedServices.map(service =>
+            service.serviceId === serviceId ? { ...service, quantity: Math.max(1, quantity) } : service
+        );
+
+        const newFormData = {
+            ...formData,
+            selectedServices: newSelectedServices,
+        };
+
+        setFormData(newFormData);
+        saveFormDataToStorage(newFormData);
     };
 
     // Handle date selection from modal
@@ -182,9 +284,15 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
             }
         }
 
-        if (formData.totalGuests < 1 || formData.totalGuests > villa.maxGuests) {
-            errors.totalGuests = `Must be 1-${villa.maxGuests} guests`;
-            THToast.error('Invalid Guest Count', `Number of guests must be between 1 and ${villa.maxGuests}`);
+        const totalGuests = formData.totalAdults + formData.totalChildren;
+        if (totalGuests < 1 || totalGuests > villa.maxGuests) {
+            errors.totalAdults = `Total guests must be 1-${villa.maxGuests}`;
+            THToast.error('Invalid Guest Count', `Total number of guests must be between 1 and ${villa.maxGuests}`);
+        }
+
+        if (formData.totalAdults < 1) {
+            errors.totalAdults = 'At least 1 adult required';
+            THToast.error('Invalid Adult Count', 'At least 1 adult is required for booking');
         }
 
         setFormErrors(errors);
@@ -208,11 +316,13 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
                 villaId: villa.id,
                 checkIn: formData.checkIn,
                 checkOut: formData.checkOut,
-                totalGuests: formData.totalGuests,
+                totalAdults: formData.totalAdults,
+                totalChildren: formData.totalChildren,
                 phone: formData.phone,
                 dateOfBirth: formData.dateOfBirth,
                 paymentMethod: formData.paymentMethod,
                 notes: formData.notes,
+                selectedServices: formData.selectedServices,
             };
 
             const bookingPromise = bookingApi.createBooking(bookingData);
@@ -232,8 +342,10 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
                 ...prev,
                 checkIn: '',
                 checkOut: '',
-                totalGuests: 1,
+                totalAdults: 1,
+                totalChildren: 0,
                 notes: '',
+                selectedServices: [],
             }));
 
             onBookingSuccess?.();
@@ -264,6 +376,16 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
         return villaApi.calculateNights(formData.checkIn, formData.checkOut);
     };
 
+    const calculateServicesTotal = () => {
+        return formData.selectedServices.reduce((total, selection) => {
+            const service = availableServices.find(s => s.id === selection.serviceId);
+            if (service) {
+                return total + service.price * (selection.quantity || 1);
+            }
+            return total;
+        }, 0);
+    };
+
     // Format date for display
     const formatDisplayDate = (dateString: string) => {
         if (!dateString) return '';
@@ -273,9 +395,21 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
         });
     };
 
-    const serviceFee = Math.round(calculateTotal() * 0.05); // 5% service fee
-    const cleaningFee = 150; // Fixed cleaning fee
-    const totalWithFees = calculateTotal() + serviceFee + cleaningFee;
+    const getServiceCategoryColor = (category: string) => {
+        const colorMap: Record<string, string> = {
+            INCLUDED: 'bg-green-100 text-green-800',
+            ADVENTURE: 'bg-orange-100 text-orange-800',
+            WELLNESS: 'bg-purple-100 text-purple-800',
+            CULTURAL: 'bg-blue-100 text-blue-800',
+            TRANSPORT: 'bg-gray-100 text-gray-800',
+            CUSTOM: 'bg-indigo-100 text-indigo-800',
+        };
+        return colorMap[category] || 'bg-gray-100 text-gray-800';
+    };
+
+    const servicesTotal = calculateServicesTotal();
+    const totalWithFees = calculateTotal();
+    const totalGuests = formData.totalAdults + formData.totalChildren;
 
     return (
         <>
@@ -296,7 +430,6 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
                                 ))}
                                 <span className='font-semibold text-[#C75D2C] ml-2'>5.0</span>
                             </div>
-                            <span className='text-[#C75D2C]/60'>• 127 reviews</span>
                         </div>
                     </div>
 
@@ -360,26 +493,158 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
 
                             {/* Guests */}
                             <div className='bg-white/30 border-2 border-[#F8B259]/50 rounded-xl p-4'>
-                                <label className='block text-xs font-bold text-[#C75D2C] mb-2 uppercase tracking-wider'>
+                                <label className='block text-xs font-bold text-[#C75D2C] mb-4 uppercase tracking-wider'>
                                     <Users className='w-4 h-4 inline mr-2' />
                                     Guests
                                 </label>
-                                <select
-                                    name='totalGuests'
-                                    value={formData.totalGuests}
-                                    onChange={handleInputChange}
-                                    className='w-full text-sm text-[#C75D2C] bg-transparent focus:outline-none font-medium'
-                                >
-                                    {Array.from({ length: villa.maxGuests }, (_, i) => i + 1).map(num => (
-                                        <option key={num} value={num}>
-                                            {num} {num === 1 ? 'guest' : 'guests'}
-                                        </option>
-                                    ))}
-                                </select>
-                                {formErrors.totalGuests && (
-                                    <p className='text-red-600 text-xs mt-2 font-medium'>{formErrors.totalGuests}</p>
+
+                                <div className='space-y-4'>
+                                    {/* Adults */}
+                                    <div className='flex items-center justify-between'>
+                                        <div className='flex-1'>
+                                            <div className='font-medium text-[#C75D2C]'>Adults</div>
+                                            <div className='text-xs text-[#C75D2C]/70'>Ages 13 or above</div>
+                                        </div>
+                                        <div className='flex items-center space-x-3'>
+                                            <button
+                                                type='button'
+                                                onClick={() => updateGuestCount('adults', false)}
+                                                disabled={formData.totalAdults <= 1}
+                                                className='w-8 h-8 rounded-full border border-[#F8B259] flex items-center justify-center text-[#C75D2C] hover:bg-[#F8B259]/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
+                                            >
+                                                <Minus className='w-4 h-4' />
+                                            </button>
+                                            <span className='w-8 text-center font-medium text-[#C75D2C]'>
+                                                {formData.totalAdults}
+                                            </span>
+                                            <button
+                                                type='button'
+                                                onClick={() => updateGuestCount('adults', true)}
+                                                disabled={totalGuests >= villa.maxGuests}
+                                                className='w-8 h-8 rounded-full border border-[#F8B259] flex items-center justify-center text-[#C75D2C] hover:bg-[#F8B259]/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
+                                            >
+                                                <Plus className='w-4 h-4' />
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Children */}
+                                    <div className='flex items-center justify-between'>
+                                        <div className='flex-1'>
+                                            <div className='font-medium text-[#C75D2C]'>Children</div>
+                                            <div className='text-xs text-[#C75D2C]/70'>Ages 2-12</div>
+                                        </div>
+                                        <div className='flex items-center space-x-3'>
+                                            <button
+                                                type='button'
+                                                onClick={() => updateGuestCount('children', false)}
+                                                disabled={formData.totalChildren <= 0}
+                                                className='w-8 h-8 rounded-full border border-[#F8B259] flex items-center justify-center text-[#C75D2C] hover:bg-[#F8B259]/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
+                                            >
+                                                <Minus className='w-4 h-4' />
+                                            </button>
+                                            <span className='w-8 text-center font-medium text-[#C75D2C]'>
+                                                {formData.totalChildren}
+                                            </span>
+                                            <button
+                                                type='button'
+                                                onClick={() => updateGuestCount('children', true)}
+                                                disabled={totalGuests >= villa.maxGuests}
+                                                className='w-8 h-8 rounded-full border border-[#F8B259] flex items-center justify-center text-[#C75D2C] hover:bg-[#F8B259]/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
+                                            >
+                                                <Plus className='w-4 h-4' />
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div className='text-xs text-[#C75D2C]/60 text-center'>
+                                        {totalGuests} of {villa.maxGuests} guests
+                                    </div>
+                                </div>
+
+                                {(formErrors.totalAdults || formErrors.totalChildren) && (
+                                    <p className='text-red-600 text-xs mt-2 font-medium'>
+                                        {formErrors.totalAdults || formErrors.totalChildren}
+                                    </p>
                                 )}
                             </div>
+
+                            {/* Services Selection */}
+                            {availableServices.length > 0 && (
+                                <div className='bg-white/30 border-2 border-[#F8B259]/50 rounded-xl p-4'>
+                                    <label className='block text-xs font-bold text-[#C75D2C] mb-4 uppercase tracking-wider'>
+                                        <Utensils className='w-4 h-4 inline mr-2' />
+                                        Additional Services {loadingServices && '(Loading...)'}
+                                    </label>
+
+                                    <div className='space-y-3 max-h-64 overflow-y-auto'>
+                                        {availableServices.map(service => {
+                                            const isSelected = formData.selectedServices.some(
+                                                s => s.serviceId === service.id
+                                            );
+                                            const selectedService = formData.selectedServices.find(
+                                                s => s.serviceId === service.id
+                                            );
+
+                                            return (
+                                                <div
+                                                    key={service.id}
+                                                    className='border border-[#F8B259]/30 rounded-lg p-3 hover:bg-white/20 transition-colors'
+                                                >
+                                                    <div className='flex items-start space-x-3'>
+                                                        <input
+                                                            type='checkbox'
+                                                            checked={isSelected}
+                                                            onChange={() => toggleService(service)}
+                                                            className='mt-1 w-4 h-4 text-[#D96F32] border-[#F8B259] rounded focus:ring-[#D96F32]'
+                                                        />
+                                                        <div className='flex-1 min-w-0'>
+                                                            <div className='flex items-start justify-between'>
+                                                                <div className='flex-1'>
+                                                                    <div className='flex items-center space-x-2 mb-1'>
+                                                                        <h4 className='font-medium text-[#C75D2C] text-sm'>
+                                                                            {service.title}
+                                                                        </h4>
+                                                                        <span
+                                                                            className={`px-2 py-1 rounded-full text-xs font-medium ${getServiceCategoryColor(
+                                                                                service.category
+                                                                            )}`}
+                                                                        >
+                                                                            {service.category}
+                                                                        </span>
+                                                                    </div>
+                                                                    <p className='text-xs text-[#C75D2C]/70 mb-1'>
+                                                                        {service.description}
+                                                                    </p>
+                                                                    {service.longDescription && (
+                                                                        <p className='text-xs text-[#C75D2C]/60 mb-2 line-clamp-2'>
+                                                                            {service.longDescription}
+                                                                        </p>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    {service.image && (
+                                                        <div className='mt-2'>
+                                                            <img
+                                                                src={service.image}
+                                                                alt={service.title}
+                                                                className='w-full h-20 object-cover rounded-lg'
+                                                                onError={e => {
+                                                                    const target = e.target as HTMLImageElement;
+                                                                    target.style.display = 'none';
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Contact Info */}
                             <div className='space-y-4'>
@@ -474,14 +739,34 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
                                             </span>
                                             <span className='font-semibold text-[#C75D2C]'>{calculateTotal()} EUR</span>
                                         </div>
-                                        <div className='flex justify-between items-center'>
-                                            <span className='text-[#C75D2C]/80'>Cleaning fee</span>
-                                            <span className='font-semibold text-[#C75D2C]'>{cleaningFee} EUR</span>
-                                        </div>
-                                        <div className='flex justify-between items-center'>
-                                            <span className='text-[#C75D2C]/80'>Service fee</span>
-                                            <span className='font-semibold text-[#C75D2C]'>{serviceFee} EUR</span>
-                                        </div>
+
+                                        {formData.selectedServices.length > 0 && (
+                                            <div className='border-l-2 border-[#F8B259]/50 pl-3 space-y-2'>
+                                                <div className='text-[#C75D2C]/80 font-medium'>Selected Services:</div>
+                                                {formData.selectedServices.map(selection => {
+                                                    const service = availableServices.find(
+                                                        s => s.id === selection.serviceId
+                                                    );
+                                                    if (!service) return null;
+
+                                                    const itemTotal = service.price * (selection.quantity || 1);
+                                                    return (
+                                                        <div
+                                                            key={selection.serviceId}
+                                                            className='flex justify-between items-center text-xs'
+                                                        >
+                                                            <span className='text-[#C75D2C]/70'>
+                                                                {service.title}
+                                                            </span>
+                                                         
+                                                        </div>
+                                                    );
+                                                })}
+                                               
+                                            </div>
+                                        )}
+
+                                
                                         <div className='border-t-2 border-[#F8B259]/50 pt-3 flex justify-between items-center'>
                                             <span className='font-bold text-[#C75D2C] text-lg'>Total</span>
                                             <span className='font-bold text-[#C75D2C] text-lg'>

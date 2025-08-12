@@ -21,7 +21,7 @@ export interface Language {
 export interface User {
     id: string;
     email: string;
-    password: string;
+    password: string; // Added from schema
     fullName: string;
     phone?: string;
     dateOfBirth?: Date;
