@@ -20,7 +20,22 @@ const formatZodError = (error: ZodError) => {
 export const validateRequest = (schema: z.ZodSchema) => {
     return (req: Request, res: Response, next: NextFunction) => {
         try {
-            schema.parse(req.body);
+            // Check if schema has nested structure (body, params, query)
+            const schemaShape = (schema as any)._def?.shape;
+
+            if (schemaShape && (schemaShape.body || schemaShape.params || schemaShape.query)) {
+                // Schema with nested structure - validate the whole request
+                const dataToValidate: any = {};
+                if (schemaShape.body) dataToValidate.body = req.body;
+                if (schemaShape.params) dataToValidate.params = req.params;
+                if (schemaShape.query) dataToValidate.query = req.query;
+
+                schema.parse(dataToValidate);
+            } else {
+                // Flat schema - validate query parameters
+                schema.parse(req.query);
+            }
+
             next();
         } catch (error) {
             if (error instanceof ZodError) {

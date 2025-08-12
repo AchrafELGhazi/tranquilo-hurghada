@@ -38,5 +38,6 @@ export const verifyToken = (token: string): TokenPayload | null => {
 
 export const getTokenFromRequest = (req: Request): string | null => {
     const authHeader = req.headers['authorization'];
+    logger.info('Extracting token from request headers:', authHeader);
     return authHeader?.split(' ')[1] || null;
 };

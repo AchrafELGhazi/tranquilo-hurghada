@@ -15,7 +15,7 @@ apiRouter.get('/', (req, res) => {
 
 // Route handlers
 apiRouter.use('/auth', authRouter);
-apiRouter.use('/profile', userRouter);
+apiRouter.use('/users', userRouter);
 apiRouter.use('/villas', villaRouter);
 apiRouter.use('/bookings', bookingRouter);
 

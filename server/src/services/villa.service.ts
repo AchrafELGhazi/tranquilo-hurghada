@@ -83,7 +83,11 @@ export const getVillas = async (filters: VillaFilters): Promise<PaginatedVillasR
         sortOrder = 'desc'
     } = filters;
 
-    const skip = (page - 1) * limit;
+    // Convert to numbers to ensure Prisma gets the right types
+    const pageNum = typeof page === 'string' ? parseInt(page) : page;
+    const limitNum = typeof limit === 'string' ? parseInt(limit) : limit;
+
+    const skip = (pageNum - 1) * limitNum;
 
     // Build where clause
     const where: Prisma.VillaWhereInput = {
@@ -109,21 +113,21 @@ export const getVillas = async (filters: VillaFilters): Promise<PaginatedVillasR
     // Price filters
     if (minPrice || maxPrice) {
         where.pricePerNight = {};
-        if (minPrice) where.pricePerNight.gte = minPrice;
-        if (maxPrice) where.pricePerNight.lte = maxPrice;
+        if (minPrice) where.pricePerNight.gte = typeof minPrice === 'string' ? parseFloat(minPrice) : minPrice;
+        if (maxPrice) where.pricePerNight.lte = typeof maxPrice === 'string' ? parseFloat(maxPrice) : maxPrice;
     }
 
     // Capacity filters
     if (maxGuests) {
-        where.maxGuests = { gte: maxGuests };
+        where.maxGuests = { gte: typeof maxGuests === 'string' ? parseInt(maxGuests) : maxGuests };
     }
 
     if (minBedrooms) {
-        where.bedrooms = { gte: minBedrooms };
+        where.bedrooms = { gte: typeof minBedrooms === 'string' ? parseInt(minBedrooms) : minBedrooms };
     }
 
     if (minBathrooms) {
-        where.bathrooms = { gte: minBathrooms };
+        where.bathrooms = { gte: typeof minBathrooms === 'string' ? parseInt(minBathrooms) : minBathrooms };
     }
 
     // Amenities filter
@@ -235,16 +239,16 @@ export const getVillas = async (filters: VillaFilters): Promise<PaginatedVillasR
         },
         orderBy: { [sortBy]: sortOrder },
         skip,
-        take: limit
+        take: limitNum // Use the converted number
     });
 
     return {
         villas,
         pagination: {
-            page,
-            limit,
+            page: pageNum,
+            limit: limitNum,
             total,
-            pages: Math.ceil(total / limit)
+            pages: Math.ceil(total / limitNum)
         }
     };
 };

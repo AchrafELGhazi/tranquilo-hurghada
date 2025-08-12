@@ -21,6 +21,7 @@ import prisma from '../config/database';
 export const createBookingRequest = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
         const user = req.user!;
+        console.log(user)
 
         // Update user profile if needed
         try {

@@ -86,93 +86,92 @@ export const updateVillaSchema = z.object({
     })
 });
 
+// FIXED: Remove the nested 'query' wrapper for query validation
 export const villaQuerySchema = z.object({
-    query: z.object({
-        // Location filters
-        city: z.string().trim().optional(),
-        country: z.string().trim().optional(),
+    // Location filters
+    city: z.string().trim().optional(),
+    country: z.string().trim().optional(),
 
-        // Price filters
-        minPrice: z.coerce.number()
-            .positive('Minimum price must be positive')
-            .optional(),
-        maxPrice: z.coerce.number()
-            .positive('Maximum price must be positive')
-            .optional(),
+    // Price filters
+    minPrice: z.coerce.number()
+        .positive('Minimum price must be positive')
+        .optional(),
+    maxPrice: z.coerce.number()
+        .positive('Maximum price must be positive')
+        .optional(),
 
-        // Capacity filters
-        maxGuests: z.coerce.number()
-            .int('Max guests must be a whole number')
-            .positive('Max guests must be positive')
-            .optional(),
-        minBedrooms: z.coerce.number()
-            .int('Min bedrooms must be a whole number')
-            .positive('Min bedrooms must be positive')
-            .optional(),
-        minBathrooms: z.coerce.number()
-            .int('Min bathrooms must be a whole number')
-            .positive('Min bathrooms must be positive')
-            .optional(),
+    // Capacity filters
+    maxGuests: z.coerce.number()
+        .int('Max guests must be a whole number')
+        .positive('Max guests must be positive')
+        .optional(),
+    minBedrooms: z.coerce.number()
+        .int('Min bedrooms must be a whole number')
+        .positive('Min bedrooms must be positive')
+        .optional(),
+    minBathrooms: z.coerce.number()
+        .int('Min bathrooms must be a whole number')
+        .positive('Min bathrooms must be positive')
+        .optional(),
 
-        // Amenities filter (comma-separated string)
-        amenities: z.string()
-            .transform(val => val.split(',').map(a => a.trim()).filter(Boolean))
-            .optional(),
+    // Amenities filter (comma-separated string)
+    amenities: z.string()
+        .transform(val => val.split(',').map(a => a.trim()).filter(Boolean))
+        .optional(),
 
-        // Date filters for availability
-        checkIn: z.string()
-            .regex(/^\d{4}-\d{2}-\d{2}$/, 'Check-in date must be in YYYY-MM-DD format')
-            .transform(val => new Date(val))
-            .optional(),
-        checkOut: z.string()
-            .regex(/^\d{4}-\d{2}-\d{2}$/, 'Check-out date must be in YYYY-MM-DD format')
-            .transform(val => new Date(val))
-            .optional(),
+    // Date filters for availability
+    checkIn: z.string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/, 'Check-in date must be in YYYY-MM-DD format')
+        .transform(val => new Date(val))
+        .optional(),
+    checkOut: z.string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/, 'Check-out date must be in YYYY-MM-DD format')
+        .transform(val => new Date(val))
+        .optional(),
 
-        // Villa status and ownership
-        status: z.nativeEnum(VillaStatus).optional(),
-        ownerId: z.string().optional(),
-        isActive: z.coerce.boolean().optional(),
+    // Villa status and ownership
+    status: z.nativeEnum(VillaStatus).optional(),
+    ownerId: z.string().optional(),
+    isActive: z.coerce.boolean().optional(),
 
-        // Pagination
-        page: z.coerce.number()
-            .int('Page must be a whole number')
-            .positive('Page must be positive')
-            .default(1)
-            .optional(),
-        limit: z.coerce.number()
-            .int('Limit must be a whole number')
-            .min(1, 'Limit must be at least 1')
-            .max(100, 'Limit cannot exceed 100')
-            .default(10)
-            .optional(),
+    // Pagination
+    page: z.coerce.number()
+        .int('Page must be a whole number')
+        .positive('Page must be positive')
+        .default(1)
+        .optional(),
+    limit: z.coerce.number()
+        .int('Limit must be a whole number')
+        .min(1, 'Limit must be at least 1')
+        .max(100, 'Limit cannot exceed 100')
+        .default(10)
+        .optional(),
 
-        // Sorting
-        sortBy: z.enum(['title', 'pricePerNight', 'maxGuests', 'bedrooms', 'createdAt'])
-            .default('createdAt')
-            .optional(),
-        sortOrder: z.enum(['asc', 'desc'])
-            .default('desc')
-            .optional()
-    }).refine(data => {
-        // Custom validation: checkOut must be after checkIn
-        if (data.checkIn && data.checkOut) {
-            return data.checkOut > data.checkIn;
-        }
-        return true;
-    }, {
-        message: 'Check-out date must be after check-in date',
-        path: ['checkOut']
-    }).refine(data => {
-        // Custom validation: maxPrice must be greater than minPrice
-        if (data.minPrice && data.maxPrice) {
-            return data.maxPrice >= data.minPrice;
-        }
-        return true;
-    }, {
-        message: 'Maximum price must be greater than or equal to minimum price',
-        path: ['maxPrice']
-    })
+    // Sorting
+    sortBy: z.enum(['title', 'pricePerNight', 'maxGuests', 'bedrooms', 'createdAt'])
+        .default('createdAt')
+        .optional(),
+    sortOrder: z.enum(['asc', 'desc'])
+        .default('desc')
+        .optional()
+}).refine(data => {
+    // Custom validation: checkOut must be after checkIn
+    if (data.checkIn && data.checkOut) {
+        return data.checkOut > data.checkIn;
+    }
+    return true;
+}, {
+    message: 'Check-out date must be after check-in date',
+    path: ['checkOut']
+}).refine(data => {
+    // Custom validation: maxPrice must be greater than minPrice
+    if (data.minPrice && data.maxPrice) {
+        return data.maxPrice >= data.minPrice;
+    }
+    return true;
+}, {
+    message: 'Maximum price must be greater than or equal to minimum price',
+    path: ['maxPrice']
 });
 
 // Villa params schema for single villa operations
@@ -184,7 +183,7 @@ export const villaParamsSchema = z.object({
     })
 });
 
-// Villa availability query schema
+// Villa availability query schema - FIXED: Remove nested query wrapper
 export const villaAvailabilitySchema = z.object({
     params: z.object({
         villaId: z.string()
