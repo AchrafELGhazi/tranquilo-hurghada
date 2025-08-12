@@ -99,7 +99,7 @@ class BookingApi {
     /**
      * Get all bookings with filters (role-based access)
      */
-    async getAllBookings(filters?: BookingFilters): Promise<BookingsResponse> {
+    async getAllBookings(filters?: BookingFilters): Promise<any> {
         const queryParams = new URLSearchParams();
 
         if (filters) {
@@ -114,7 +114,7 @@ class BookingApi {
         const response = await apiService.get<BookingsResponse>(url);
 
         if (response.success && response.data) {
-            return response.data;
+            return response;
         }
 
         throw new Error(response.message || 'Failed to get bookings');
@@ -435,25 +435,6 @@ class BookingApi {
         return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     }
 
-    /**
-     * Format price for display
-     */
-    formatPrice(price: number, currency: string = 'MAD'): string {
-        const currencyOptions: Record<string, { locale: string; currency: string }> = {
-            MAD: { locale: 'ar-MA', currency: 'MAD' },
-            USD: { locale: 'en-US', currency: 'USD' },
-            EUR: { locale: 'en-GB', currency: 'EUR' }
-        };
-
-        const options = currencyOptions[currency] || currencyOptions.MAD;
-
-        return new Intl.NumberFormat(options.locale, {
-            style: 'currency',
-            currency: options.currency,
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0
-        }).format(price);
-    }
 
     /**
      * Get payment status badge color and text

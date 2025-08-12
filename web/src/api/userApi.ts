@@ -65,7 +65,7 @@ export interface GetUsersResponse {
 class UserApi {
     // Get current user profile
     async getProfile(): Promise<User> {
-        const response = await apiService.get<any>('/profile');
+        const response = await apiService.get<any>('/users');
 
         if (response.success && response.data) {
             return response.data;
@@ -88,7 +88,7 @@ class UserApi {
         if (query?.isActive !== undefined) params.append('isActive', query.isActive.toString());
 
         const queryString = params.toString();
-        const endpoint = queryString ? `/profile/all?${queryString}` : '/users';
+        const endpoint = queryString ? `/users/all?${queryString}` : '/users';
 
         const response = await apiService.get<GetUsersResponse>(endpoint);
         console.log('Response from all users: ', response);
@@ -101,7 +101,7 @@ class UserApi {
     }
     // Update user profile
     async updateProfile(data: UpdateProfileData): Promise<User> {
-        const response = await apiService.put<any>('/profile', data);
+        const response = await apiService.put<any>('/users', data);
 
         if (response.success && response.data) {
             // Update user data in localStorage if it exists
@@ -119,7 +119,7 @@ class UserApi {
 
     // Change password
     async changePassword(data: ChangePasswordData): Promise<void> {
-        const response = await apiService.put<any>('/profile/password', data);
+        const response = await apiService.put<any>('/users/password', data);
 
         if (!response.success) {
             throw new Error(response.message || 'Failed to change password');
@@ -128,7 +128,7 @@ class UserApi {
 
     // Check if profile is complete
     async checkProfileComplete(): Promise<ProfileCompleteness> {
-        const response = await apiService.get<any>('/profile/complete');
+        const response = await apiService.get<any>('/users/complete');
 
         if (response.success && response.data) {
             return response.data;
@@ -139,7 +139,7 @@ class UserApi {
 
     // Deactivate account
     async deactivateAccount(password: string): Promise<void> {
-        const response = await apiService.put<ApiResponse>('/profile/deactivate', { password });
+        const response = await apiService.put<ApiResponse>('/users/deactivate', { password });
 
         if (!response.success) {
             throw new Error(response.message || 'Failed to deactivate account');

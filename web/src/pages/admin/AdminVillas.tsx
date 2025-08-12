@@ -1,16 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
-    Search,
     Eye,
     Edit,
     MapPin,
     BedDouble,
     Bath,
     Users,
-    DollarSign,
     RefreshCw,
-    Filter,
     AlertCircle,
     Home,
 } from 'lucide-react';
@@ -27,7 +24,6 @@ export const AdminVillas: React.FC = () => {
         try {
             setLoading(true);
             setError(null);
-
             const response = await villaApi.getAllVillas();
             setVillas(response.villas);
         } catch (err: any) {
@@ -38,7 +34,6 @@ export const AdminVillas: React.FC = () => {
         }
     };
 
-    // Fetch villas when query params change
     useEffect(() => {
         fetchVillas();
     }, []);
@@ -166,7 +161,6 @@ export const AdminVillas: React.FC = () => {
                                         {/* Price */}
                                         <div className='flex items-center justify-center mb-4'>
                                             <div className='flex items-center text-xl font-bold text-[#C75D2C] bg-gradient-to-r from-[#F8B259]/20 to-[#DEB887]/20 px-4 py-2 rounded-xl border border-[#F8B259]/30'>
-                                                <DollarSign className='w-5 h-5 mr-1' />
                                                 {villaApi.formatPrice(villa.pricePerNight)}
                                                 <span className='text-sm text-[#C75D2C]/70 font-normal ml-1'>
                                                     /night

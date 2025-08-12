@@ -3,12 +3,9 @@ import {
     Calendar,
     Users,
     CreditCard,
-    Clock,
-    Check,
     X,
     AlertCircle,
     Eye,
-    Star,
     RefreshCw,
     Filter,
     ChevronLeft,
@@ -21,7 +18,9 @@ import {
 } from 'lucide-react';
 import bookingApi, { type BookingFilters } from '@/api/bookingApi';
 import { useAuth } from '@/contexts/AuthContext';
+import { BookingStatusBadge } from '@/components/common/BookingStatusBadge';
 import type { Booking } from '@/utils/types';
+import villaApi from '@/api/villaApi';
 
 const MyBookings: React.FC = () => {
     const { user } = useAuth();
@@ -88,28 +87,6 @@ const MyBookings: React.FC = () => {
         } finally {
             setCancelling(null);
         }
-    };
-
-    const getStatusBadge = (status: Booking['status']) => {
-        const statusConfig = {
-            PENDING: { color: 'bg-amber-100 text-amber-800 border-amber-200', icon: Clock },
-            CONFIRMED: { color: 'bg-green-100 text-green-800 border-green-200', icon: Check },
-            COMPLETED: { color: 'bg-blue-100 text-blue-800 border-blue-200', icon: Star },
-            CANCELLED: { color: 'bg-gray-100 text-gray-800 border-gray-200', icon: X },
-            REJECTED: { color: 'bg-red-100 text-red-800 border-red-200', icon: AlertCircle },
-        };
-
-        const config = statusConfig[status];
-        const Icon = config.icon;
-
-        return (
-            <span
-                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${config.color}`}
-            >
-                <Icon className='w-3 h-3 mr-1' />
-                {bookingApi.getStatusText(status)}
-            </span>
-        );
     };
 
     const handleFilterChange = (newFilters: Partial<BookingFilters>) => {
@@ -303,7 +280,7 @@ const MyBookings: React.FC = () => {
                                                 </td>
                                                 <td className='px-6 py-4'>
                                                     <p className='font-bold text-[#C75D2C]'>
-                                                        {bookingApi.formatPrice(booking.totalPrice, 'EUR')}
+                                                        {villaApi.formatPrice(booking.totalPrice, 'EUR')}
                                                     </p>
                                                     <p className='text-xs text-[#C75D2C]/60'>
                                                         {booking.paymentMethod === 'BANK_TRANSFER'
@@ -311,7 +288,9 @@ const MyBookings: React.FC = () => {
                                                             : 'On Arrival'}
                                                     </p>
                                                 </td>
-                                                <td className='px-6 py-4'>{getStatusBadge(booking.status)}</td>
+                                                <td className='px-6 py-4'>
+                                                    <BookingStatusBadge status={booking.status} />
+                                                </td>
                                                 <td className='px-6 py-4'>
                                                     <div className='flex items-center space-x-2'>
                                                         <button
@@ -356,7 +335,7 @@ const MyBookings: React.FC = () => {
                                                 </h3>
                                                 <p className='text-xs text-[#C75D2C]/60'>#{booking.id.slice(-8)}</p>
                                             </div>
-                                            {getStatusBadge(booking.status)}
+                                            <BookingStatusBadge status={booking.status} />
                                         </div>
 
                                         <div className='grid grid-cols-2 gap-4 text-sm'>
@@ -394,7 +373,7 @@ const MyBookings: React.FC = () => {
                                             <div>
                                                 <p className='text-[#C75D2C]/60'>Total</p>
                                                 <p className='font-bold text-[#C75D2C]'>
-                                                    {bookingApi.formatPrice(booking.totalPrice, 'EUR')}
+                                                    {villaApi.formatPrice(booking.totalPrice, 'EUR')}
                                                 </p>
                                             </div>
                                         </div>
@@ -488,7 +467,7 @@ const MyBookings: React.FC = () => {
                                         <p className='text-sm text-[#C75D2C]/60'>#{selectedBooking.id}</p>
                                     </div>
                                     <div className='text-right'>
-                                        {getStatusBadge(selectedBooking.status)}
+                                        <BookingStatusBadge status={selectedBooking.status} />
                                         <p className='text-sm text-[#C75D2C]/60 mt-1'>
                                             Booked: {formatDate(selectedBooking.createdAt)}
                                         </p>
@@ -578,7 +557,7 @@ const MyBookings: React.FC = () => {
                                     <div className='flex justify-between'>
                                         <span className='text-[#C75D2C]/60'>Total Amount</span>
                                         <span className='font-bold text-[#C75D2C] text-lg'>
-                                            {bookingApi.formatPrice(selectedBooking.totalPrice, 'EUR')}
+                                            {villaApi.formatPrice(selectedBooking.totalPrice, 'EUR')}
                                         </span>
                                     </div>
                                     <div className='flex justify-between'>
@@ -616,12 +595,46 @@ const MyBookings: React.FC = () => {
                                                     <p className='font-medium text-[#C75D2C]'>
                                                         {service.service?.title || 'Service'}
                                                     </p>
-                                                    <p className='font-sm text-xs text-[#C75D2C]'>
-                                                        {service.service?.description || 'Service'}
+                                                    <p className='text-sm text-[#C75D2C]/60'>
+                                                        Qty: {service.quantity} ×{' '}
+                                                        {villaApi.formatPrice(service.unitPrice, 'EUR')}
                                                     </p>
                                                 </div>
+                                                <span className='font-medium text-[#C75D2C]'>
+                                                    {villaApi.formatPrice(service.totalPrice, 'EUR')}
+                                                </span>
                                             </div>
                                         ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Villa Information */}
+                            {selectedBooking.villa && (
+                                <div>
+                                    <h5 className='font-semibold text-[#C75D2C] mb-3 flex items-center'>
+                                        <Home className='w-4 h-4 mr-2' />
+                                        Villa Information
+                                    </h5>
+                                    <div className='bg-white/30 rounded-lg p-4 space-y-2'>
+                                        <div>
+                                            <label className='text-sm text-[#C75D2C]/60'>Villa Name</label>
+                                            <p className='font-medium text-[#C75D2C]'>{selectedBooking.villa.title}</p>
+                                        </div>
+                                        <div>
+                                            <label className='text-sm text-[#C75D2C]/60'>Location</label>
+                                            <p className='font-medium text-[#C75D2C]'>
+                                                {selectedBooking.villa.city}, {selectedBooking.villa.country}
+                                            </p>
+                                        </div>
+                                        {selectedBooking.villa.address && (
+                                            <div>
+                                                <label className='text-sm text-[#C75D2C]/60'>Address</label>
+                                                <p className='font-medium text-[#C75D2C]'>
+                                                    {selectedBooking.villa.address}
+                                                </p>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             )}

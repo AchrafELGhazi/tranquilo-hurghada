@@ -3,20 +3,28 @@ import {
     Search,
     Filter,
     Calendar,
-    DollarSign,
     CheckCircle,
     XCircle,
-    Clock,
     ChevronLeft,
     ChevronRight,
     RefreshCw,
     Eye,
     CreditCard,
+    Users,
+    Baby,
+    User,
+    Home,
+    Mail,
+    Phone,
 } from 'lucide-react';
 import { bookingApi, type BookingFilters } from '@/api/bookingApi';
 import { THToast, THToaster } from '@/components/common/Toast';
 import type { Booking, BookingStatus } from '@/utils/types';
 import { useAuth } from '@/contexts/AuthContext';
+import getPaymentBadge from '@/components/common/PaymentBadge';
+import { BookingStatusBadge } from '@/components/common/BookingStatusBadge';
+import { formatDate, formatDateTime } from '@/utils/date';
+import villaApi from '@/api/villaApi';
 
 export const AdminBookings: React.FC = () => {
     const { user } = useAuth();
@@ -55,7 +63,6 @@ export const AdminBookings: React.FC = () => {
             }
 
             const response = await bookingApi.getAllBookings(filters);
-            console.log('Fetched bookings:', response);
             setBookings(response.data);
             setTotalPages(response.pagination.totalPages);
             setTotalCount(response.pagination.totalCount);
@@ -68,13 +75,6 @@ export const AdminBookings: React.FC = () => {
         }
     };
 
-    // Apply filters - update query params and trigger API call
-    const applyFilters = () => {
-        setCurrentPage(1);
-        fetchBookings();
-    };
-
-    // Handle page change
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
     };
@@ -130,7 +130,7 @@ export const AdminBookings: React.FC = () => {
 
             await actionPromise();
             closeActionModal();
-            fetchBookings(); // Refresh the list
+            fetchBookings();
         } catch (err: any) {
             // Error is already handled by THToast.promise
         } finally {
@@ -158,7 +158,7 @@ export const AdminBookings: React.FC = () => {
             });
 
             await togglePromise();
-            fetchBookings(); // Refresh the list
+            fetchBookings();
         } catch (err: any) {
             // Error is already handled by THToast.promise
         } finally {
@@ -171,95 +171,14 @@ export const AdminBookings: React.FC = () => {
         await fetchBookings();
     };
 
-    const getStatusBadge = (status: Booking['status']) => {
-        const statusConfig = {
-            PENDING: {
-                bg: 'bg-yellow-100',
-                text: 'text-yellow-800',
-                border: 'border-yellow-200',
-                icon: Clock,
-                label: 'Pending',
-            },
-            CONFIRMED: {
-                bg: 'bg-green-100',
-                text: 'text-green-800',
-                border: 'border-green-200',
-                icon: CheckCircle,
-                label: 'Confirmed',
-            },
-            CANCELLED: {
-                bg: 'bg-red-100',
-                text: 'text-red-800',
-                border: 'border-red-200',
-                icon: XCircle,
-                label: 'Cancelled',
-            },
-            REJECTED: {
-                bg: 'bg-red-100',
-                text: 'text-red-800',
-                border: 'border-red-200',
-                icon: XCircle,
-                label: 'Rejected',
-            },
-            COMPLETED: {
-                bg: 'bg-blue-100',
-                text: 'text-blue-800',
-                border: 'border-blue-200',
-                icon: CheckCircle,
-                label: 'Completed',
-            },
-        };
 
-        const config = statusConfig[status];
-        const Icon = config.icon;
-
-        return (
-            <span
-                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${config.bg} ${config.text} ${config.border}`}
-            >
-                <Icon className='w-3 h-3 mr-1' />
-                {config.label}
-            </span>
-        );
-    };
-
-    const getPaymentBadge = (isPaid: boolean) => {
-        const paymentInfo = bookingApi.getPaymentStatusInfo(isPaid);
-
-        return (
-            <span
-                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${paymentInfo.bgColor} ${paymentInfo.textColor} border-current/20`}
-            >
-                <DollarSign className='w-3 h-3 mr-1' />
-                {paymentInfo.text}
-            </span>
-        );
-    };
-
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-        });
-    };
-
-    const formatDateTime = (dateString: string) => {
-        return new Date(dateString).toLocaleString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-        });
-    };
 
     const filteredBookings = bookings.filter(
         booking =>
-            booking.guest.fullName.toLowerCase().includes(searchInput.toLowerCase()) ||
-            booking.guest.email.toLowerCase().includes(searchInput.toLowerCase()) ||
-            booking.villa.title.toLowerCase().includes(searchInput.toLowerCase()) ||
-            booking.villa.city.toLowerCase().includes(searchInput.toLowerCase())
+            booking.guest?.fullName?.toLowerCase().includes(searchInput.toLowerCase()) ||
+            booking.guest?.email?.toLowerCase().includes(searchInput.toLowerCase()) ||
+            booking.villa?.title?.toLowerCase().includes(searchInput.toLowerCase()) ||
+            booking.villa?.city?.toLowerCase().includes(searchInput.toLowerCase())
     );
 
     const canPerformAction = (booking: Booking, action: string): boolean => {
@@ -285,20 +204,18 @@ export const AdminBookings: React.FC = () => {
                             <div>
                                 <h1 className='text-2xl font-bold text-[#C75D2C] font-butler'>Admin Bookings</h1>
                                 <p className='text-[#C75D2C]/70 mt-1'>
-                                    Manage all registered bookings{' '}
-                                    {totalCount > 0 && `(${totalCount} total, ${filteredBookings.length} shown)`}
+                                    Manage all villa reservations
+                                    {totalCount > 0 && ` (${totalCount} total, ${filteredBookings.length} shown)`}
                                 </p>
                             </div>
-                            <div className='flex items-center space-x-3'>
-                                <button
-                                    onClick={handleRefresh}
-                                    disabled={loading}
-                                    className='flex items-center space-x-2 bg-gradient-to-r from-[#D96F32] to-[#C75D2C] text-white px-4 py-2 rounded-xl font-medium hover:from-[#C75D2C] hover:to-[#D96F32] transition-all duration-300 disabled:opacity-50'
-                                >
-                                    <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                                    <span>Refresh</span>
-                                </button>
-                            </div>
+                            <button
+                                onClick={handleRefresh}
+                                disabled={loading}
+                                className='flex items-center space-x-2 bg-gradient-to-r from-[#D96F32] to-[#C75D2C] text-white px-4 py-2 rounded-xl font-medium hover:from-[#C75D2C] hover:to-[#D96F32] transition-all duration-300 disabled:opacity-50'
+                            >
+                                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                                <span>Refresh</span>
+                            </button>
                         </div>
                     </div>
 
@@ -315,7 +232,6 @@ export const AdminBookings: React.FC = () => {
                                         type='text'
                                         value={searchInput}
                                         onChange={e => setSearchInput(e.target.value)}
-                                        onKeyPress={e => e.key === 'Enter' && applyFilters()}
                                         placeholder='Search by guest name, email, or villa...'
                                         className='w-full pl-10 pr-3 py-2 border-2 border-[#F8B259]/50 rounded-xl bg-white/50 text-[#C75D2C] placeholder-[#C75D2C]/50 focus:outline-none focus:border-[#D96F32] focus:bg-white/80 transition-all duration-300 text-sm'
                                     />
@@ -352,6 +268,7 @@ export const AdminBookings: React.FC = () => {
                                 </div>
                             </div>
 
+                            {/* Sort Controls */}
                             <div className='flex flex-col sm:flex-row gap-4'>
                                 <div className='flex items-center space-x-2'>
                                     <span className='text-sm font-medium text-[#C75D2C]'>Sort By:</span>
@@ -368,7 +285,7 @@ export const AdminBookings: React.FC = () => {
                                             onClick={() => setSortBy(sort.value as any)}
                                             className={`px-3 py-1 rounded-lg text-xs font-medium transition-all duration-300 ${
                                                 sortBy === sort.value
-                                                    ? 'bg-[#DEB887] text-[#8B4513]'
+                                                    ? 'bg-[#F8B259] text-[#C75D2C]'
                                                     : 'bg-white/50 text-[#C75D2C] hover:bg-white/70'
                                             }`}
                                         >
@@ -376,23 +293,17 @@ export const AdminBookings: React.FC = () => {
                                         </button>
                                     ))}
                                 </div>
-                            </div>
-
-                            <div className='flex flex-col sm:flex-row gap-4'>
-                                <div className='flex items-center space-x-2'>
-                                    <span className='text-sm font-medium text-[#C75D2C]'>Order:</span>
-                                </div>
                                 <div className='flex flex-wrap gap-2'>
                                     {[
-                                        { label: 'Descending', value: 'desc' },
-                                        { label: 'Ascending', value: 'asc' },
+                                        { label: 'Newest First', value: 'desc' },
+                                        { label: 'Oldest First', value: 'asc' },
                                     ].map(order => (
                                         <button
                                             key={order.label}
                                             onClick={() => setSortOrder(order.value as any)}
                                             className={`px-3 py-1 rounded-lg text-xs font-medium transition-all duration-300 ${
                                                 sortOrder === order.value
-                                                    ? 'bg-[#DEB887] text-[#8B4513]'
+                                                    ? 'bg-[#F8B259] text-[#C75D2C]'
                                                     : 'bg-white/50 text-[#C75D2C] hover:bg-white/70'
                                             }`}
                                         >
@@ -420,12 +331,15 @@ export const AdminBookings: React.FC = () => {
                         ) : (
                             <>
                                 {/* Desktop Table */}
-                                <div className='block overflow-x-auto'>
+                                <div className='hidden lg:block overflow-x-auto'>
                                     <table className='w-full'>
-                                        <thead className='bg-gradient-to-r from-[#F8B259]/20 to-[#DEB887]/20 border-b-2 border-[#F8B259]/50'>
+                                        <thead className='bg-gradient-to-r from-[#F8B259]/20 to-[#D96F32]/20 border-b-2 border-[#F8B259]/50'>
                                             <tr>
                                                 <th className='px-6 py-4 text-left text-xs font-bold text-[#C75D2C] uppercase tracking-wider'>
                                                     Guest
+                                                </th>
+                                                <th className='px-6 py-4 text-left text-xs font-bold text-[#C75D2C] uppercase tracking-wider'>
+                                                    Villa
                                                 </th>
                                                 <th className='px-6 py-4 text-left text-xs font-bold text-[#C75D2C] uppercase tracking-wider'>
                                                     Check-in
@@ -446,9 +360,6 @@ export const AdminBookings: React.FC = () => {
                                                     Payment
                                                 </th>
                                                 <th className='px-6 py-4 text-left text-xs font-bold text-[#C75D2C] uppercase tracking-wider'>
-                                                    Created
-                                                </th>
-                                                <th className='px-6 py-4 text-left text-xs font-bold text-[#C75D2C] uppercase tracking-wider'>
                                                     Actions
                                                 </th>
                                             </tr>
@@ -461,58 +372,84 @@ export const AdminBookings: React.FC = () => {
                                                 >
                                                     <td className='px-6 py-4'>
                                                         <div className='flex items-center space-x-3'>
-                                                            <div className='w-12 h-12 bg-gradient-to-br from-[#F8B259]/30 to-[#DEB887]/30 rounded-lg flex items-center justify-center'>
-                                                                <span className='text-sm font-medium text-[#8B4513]'>
-                                                                    {booking.guest.fullName?.charAt(0)?.toUpperCase() ||
-                                                                        'G'}
-                                                                </span>
+                                                            <div className='w-10 h-10 bg-gradient-to-br from-[#F8B259]/30 to-[#D96F32]/30 rounded-lg flex items-center justify-center'>
+                                                                <User className='w-5 h-5 text-[#D96F32]' />
                                                             </div>
                                                             <div>
                                                                 <p className='font-semibold text-[#C75D2C]'>
-                                                                    {booking.guest.fullName || 'N/A'}
+                                                                    {booking.guest?.fullName || 'N/A'}
                                                                 </p>
                                                                 <p className='text-xs text-[#C75D2C]/60'>
-                                                                    {booking.guest.email}
+                                                                    {booking.guest?.email}
                                                                 </p>
                                                             </div>
                                                         </div>
                                                     </td>
-
-                                                    <td className='px-6 py-4 whitespace-nowrap'>
-                                                        <div className='text-sm text-[#C75D2C]'>
+                                                    <td className='px-6 py-4'>
+                                                        <div className='flex items-center space-x-2'>
+                                                            <Home className='w-4 h-4 text-[#D96F32]' />
+                                                            <div>
+                                                                <p className='font-medium text-[#C75D2C]'>
+                                                                    {booking.villa?.title || 'N/A'}
+                                                                </p>
+                                                                <p className='text-xs text-[#C75D2C]/60'>
+                                                                    {booking.villa?.city}, {booking.villa?.country}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td className='px-6 py-4'>
+                                                        <p className='text-[#C75D2C] font-medium'>
                                                             {formatDate(booking.checkIn)}
-                                                        </div>
-                                                        <div className='text-sm text-[#C75D2C]/60'>
-                                                            {bookingApi.getStayDuration(
-                                                                booking.checkIn,
-                                                                booking.checkOut
-                                                            )}{' '}
-                                                            nights
-                                                        </div>
+                                                        </p>
+                                                        <p className='text-xs text-[#C75D2C]/60'>
+                                                            {new Date(booking.checkIn).toLocaleDateString('en-US', {
+                                                                weekday: 'short',
+                                                            })}
+                                                        </p>
                                                     </td>
-
-                                                    <td className='px-6 py-4 whitespace-nowrap'>
-                                                        <div className='text-sm text-[#C75D2C]'>
+                                                    <td className='px-6 py-4'>
+                                                        <p className='text-[#C75D2C] font-medium'>
                                                             {formatDate(booking.checkOut)}
+                                                        </p>
+                                                        <p className='text-xs text-[#C75D2C]/60'>
+                                                            {new Date(booking.checkOut).toLocaleDateString('en-US', {
+                                                                weekday: 'short',
+                                                            })}
+                                                        </p>
+                                                    </td>
+                                                    <td className='px-6 py-4'>
+                                                        <div className='flex items-center space-x-3'>
+                                                            <div className='flex items-center space-x-1'>
+                                                                <Users className='w-4 h-4 text-[#D96F32]' />
+                                                                <span className='font-medium text-[#C75D2C]'>
+                                                                    {booking.totalAdults}
+                                                                </span>
+                                                            </div>
+                                                            {booking.totalChildren > 0 && (
+                                                                <div className='flex items-center space-x-1'>
+                                                                    <Baby className='w-4 h-4 text-[#D96F32]' />
+                                                                    <span className='font-medium text-[#C75D2C]'>
+                                                                        {booking.totalChildren}
+                                                                    </span>
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     </td>
-
-                                                    <td className='px-6 py-4 whitespace-nowrap text-sm text-[#C75D2C]'>
-                                                        {booking.totalGuests} guests
+                                                    <td className='px-6 py-4'>
+                                                        <p className='font-bold text-[#C75D2C]'>
+                                                            {villaApi.formatPrice(booking.totalPrice, 'EUR')}
+                                                        </p>
+                                                        <p className='text-xs text-[#C75D2C]/60'>
+                                                            {booking.paymentMethod === 'BANK_TRANSFER'
+                                                                ? 'Bank Transfer'
+                                                                : 'On Arrival'}
+                                                        </p>
                                                     </td>
-
-                                                    <td className='px-6 py-4 whitespace-nowrap'>
-                                                        <div className='flex items-center text-sm font-medium text-[#C75D2C]'>
-                                                            <DollarSign className='w-4 h-4 mr-1' />
-                                                            {bookingApi.formatPrice(booking.totalPrice)}
-                                                        </div>
+                                                    <td className='px-6 py-4'>
+                                                        <BookingStatusBadge status={booking.status} />
                                                     </td>
-
-                                                    <td className='px-6 py-4 whitespace-nowrap'>
-                                                        {getStatusBadge(booking.status)}
-                                                    </td>
-
-                                                    <td className='px-6 py-4 whitespace-nowrap'>
+                                                    <td className='px-6 py-4'>
                                                         <div className='flex items-center space-x-2'>
                                                             {getPaymentBadge(booking.isPaid)}
                                                             {user &&
@@ -524,14 +461,11 @@ export const AdminBookings: React.FC = () => {
                                                                     <button
                                                                         onClick={() => handleTogglePayment(booking)}
                                                                         disabled={paymentToggleLoading === booking.id}
-                                                                        className={`p-1 rounded-lg text-xs font-medium transition-colors duration-200 ${
+                                                                        className={`px-2 py-1 rounded-lg text-xs font-medium transition-colors ${
                                                                             booking.isPaid
                                                                                 ? 'bg-red-100 text-red-700 hover:bg-red-200'
                                                                                 : 'bg-green-100 text-green-700 hover:bg-green-200'
-                                                                        } disabled:opacity-50 disabled:cursor-not-allowed`}
-                                                                        title={`Mark as ${
-                                                                            booking.isPaid ? 'unpaid' : 'paid'
-                                                                        }`}
+                                                                        } disabled:opacity-50`}
                                                                     >
                                                                         {paymentToggleLoading === booking.id ? (
                                                                             <div className='w-3 h-3 border border-current/30 border-t-current rounded-full animate-spin'></div>
@@ -544,38 +478,40 @@ export const AdminBookings: React.FC = () => {
                                                                 )}
                                                         </div>
                                                     </td>
-
-                                                    <td className='px-6 py-4 whitespace-nowrap text-sm text-[#C75D2C]/60'>
-                                                        {formatDateTime(booking.createdAt)}
-                                                    </td>
-
                                                     <td className='px-6 py-4'>
                                                         <div className='flex items-center space-x-2'>
                                                             <button
                                                                 onClick={() => setSelectedBooking(booking)}
-                                                                className='p-2 bg-[#D96F32]/20 text-[#D96F32] rounded-lg hover:bg-[#D96F32]/30 transition-colors duration-200'
+                                                                className='p-2 bg-[#D96F32]/20 text-[#D96F32] rounded-lg hover:bg-[#D96F32]/30 transition-colors'
                                                                 title='View Details'
                                                             >
                                                                 <Eye className='w-4 h-4' />
                                                             </button>
-
                                                             {canPerformAction(booking, 'confirm') && (
                                                                 <button
                                                                     onClick={() => openActionModal(booking, 'confirm')}
-                                                                    className='p-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors duration-200'
+                                                                    className='p-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors'
                                                                     title='Confirm Booking'
                                                                 >
                                                                     <CheckCircle className='w-4 h-4' />
                                                                 </button>
                                                             )}
-
                                                             {canPerformAction(booking, 'reject') && (
                                                                 <button
                                                                     onClick={() => openActionModal(booking, 'reject')}
-                                                                    className='p-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors duration-200'
+                                                                    className='p-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors'
                                                                     title='Reject Booking'
                                                                 >
                                                                     <XCircle className='w-4 h-4' />
+                                                                </button>
+                                                            )}
+                                                            {canPerformAction(booking, 'complete') && (
+                                                                <button
+                                                                    onClick={() => openActionModal(booking, 'complete')}
+                                                                    className='p-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors'
+                                                                    title='Complete Booking'
+                                                                >
+                                                                    <CheckCircle className='w-4 h-4' />
                                                                 </button>
                                                             )}
                                                         </div>
@@ -586,9 +522,102 @@ export const AdminBookings: React.FC = () => {
                                     </table>
                                 </div>
 
+                                {/* Mobile Cards */}
+                                <div className='lg:hidden space-y-4 p-4'>
+                                    {filteredBookings.map(booking => (
+                                        <div
+                                            key={booking.id}
+                                            className='bg-white/30 border border-[#F8B259]/50 rounded-xl p-4 space-y-4'
+                                        >
+                                            <div className='flex justify-between items-start'>
+                                                <div>
+                                                    <h3 className='font-semibold text-[#C75D2C]'>
+                                                        {booking.guest?.fullName || 'Guest'}
+                                                    </h3>
+                                                    <p className='text-sm text-[#C75D2C]/60'>
+                                                        {booking.villa?.title || 'Villa'}
+                                                    </p>
+                                                    <p className='text-xs text-[#C75D2C]/60'>#{booking.id.slice(-8)}</p>
+                                                </div>
+                                                <BookingStatusBadge status={booking.status} />
+                                            </div>
+
+                                            <div className='grid grid-cols-2 gap-4 text-sm'>
+                                                <div>
+                                                    <p className='text-[#C75D2C]/60'>Check-in</p>
+                                                    <p className='font-medium text-[#C75D2C]'>
+                                                        {formatDate(booking.checkIn)}
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <p className='text-[#C75D2C]/60'>Check-out</p>
+                                                    <p className='font-medium text-[#C75D2C]'>
+                                                        {formatDate(booking.checkOut)}
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <p className='text-[#C75D2C]/60'>Guests</p>
+                                                    <div className='flex items-center space-x-2'>
+                                                        <div className='flex items-center space-x-1'>
+                                                            <Users className='w-4 h-4 text-[#D96F32]' />
+                                                            <span className='font-medium text-[#C75D2C]'>
+                                                                {booking.totalAdults}
+                                                            </span>
+                                                        </div>
+                                                        {booking.totalChildren > 0 && (
+                                                            <div className='flex items-center space-x-1'>
+                                                                <Baby className='w-4 h-4 text-[#D96F32]' />
+                                                                <span className='font-medium text-[#C75D2C]'>
+                                                                    {booking.totalChildren}
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <p className='text-[#C75D2C]/60'>Total</p>
+                                                    <p className='font-bold text-[#C75D2C]'>
+                                                        {villaApi.formatPrice(booking.totalPrice, 'EUR')}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div className='flex justify-between items-center pt-2 border-t border-[#F8B259]/30'>
+                                                <div className='flex items-center space-x-2'>
+                                                    {getPaymentBadge(booking.isPaid)}
+                                                </div>
+                                                <div className='flex items-center space-x-2'>
+                                                    <button
+                                                        onClick={() => setSelectedBooking(booking)}
+                                                        className='p-2 bg-[#D96F32]/20 text-[#D96F32] rounded-lg hover:bg-[#D96F32]/30 transition-colors'
+                                                    >
+                                                        <Eye className='w-4 h-4' />
+                                                    </button>
+                                                    {canPerformAction(booking, 'confirm') && (
+                                                        <button
+                                                            onClick={() => openActionModal(booking, 'confirm')}
+                                                            className='p-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors'
+                                                        >
+                                                            <CheckCircle className='w-4 h-4' />
+                                                        </button>
+                                                    )}
+                                                    {canPerformAction(booking, 'reject') && (
+                                                        <button
+                                                            onClick={() => openActionModal(booking, 'reject')}
+                                                            className='p-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors'
+                                                        >
+                                                            <XCircle className='w-4 h-4' />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
                                 {/* Pagination */}
                                 {totalPages > 1 && (
-                                    <div className='px-6 py-4 border-t-2 border-[#F8B259]/50 bg-gradient-to-r from-[#F8B259]/10 to-[#DEB887]/10'>
+                                    <div className='px-6 py-4 border-t-2 border-[#F8B259]/50 bg-gradient-to-r from-[#F8B259]/10 to-[#D96F32]/10'>
                                         <div className='flex items-center justify-between'>
                                             <div className='text-sm text-[#C75D2C]/70'>
                                                 Page {currentPage} of {totalPages} ({totalCount} total bookings)
@@ -597,7 +626,7 @@ export const AdminBookings: React.FC = () => {
                                                 <button
                                                     onClick={() => handlePageChange(currentPage - 1)}
                                                     disabled={currentPage === 1}
-                                                    className='p-2 rounded-lg bg-white/50 text-[#C75D2C] hover:bg-white/70 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed'
+                                                    className='p-2 rounded-lg bg-white/50 text-[#C75D2C] hover:bg-white/70 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                                                 >
                                                     <ChevronLeft className='w-4 h-4' />
                                                 </button>
@@ -605,7 +634,7 @@ export const AdminBookings: React.FC = () => {
                                                 <button
                                                     onClick={() => handlePageChange(currentPage + 1)}
                                                     disabled={currentPage === totalPages}
-                                                    className='p-2 rounded-lg bg-white/50 text-[#C75D2C] hover:bg-white/70 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed'
+                                                    className='p-2 rounded-lg bg-white/50 text-[#C75D2C] hover:bg-white/70 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                                                 >
                                                     <ChevronRight className='w-4 h-4' />
                                                 </button>
@@ -620,12 +649,10 @@ export const AdminBookings: React.FC = () => {
 
                 {/* Booking Details Modal */}
                 {selectedBooking && !actionType && (
-                    <div
-                        className='fixed inset-0 bg-black/60 backdrop-blur-sm z-[999999] flex items-center justify-center p-4'
-                        style={{ zIndex: 999999 }}
-                    >
-                        <div className='bg-white/95 backdrop-blur-md border-2 border-[#F8B259]/70 rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto'>
-                            <div className='flex items-center justify-between mb-6'>
+                    <div className='fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4'>
+                        <div className='bg-white/95 backdrop-blur-md border-2 border-[#F8B259]/70 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto'>
+                            {/* Modal Header */}
+                            <div className='flex items-center justify-between p-6 border-b border-[#F8B259]/30'>
                                 <h3 className='text-xl font-bold text-[#C75D2C] font-butler'>Booking Details</h3>
                                 <button
                                     onClick={() => setSelectedBooking(null)}
@@ -635,184 +662,290 @@ export const AdminBookings: React.FC = () => {
                                 </button>
                             </div>
 
-                            <div className='space-y-4'>
-                                <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                                    <div className='bg-white/30 border border-[#F8B259]/50 rounded-xl p-4'>
-                                        <h4 className='font-semibold text-[#C75D2C] mb-3'>Guest Information</h4>
-                                        <div className='space-y-2 text-sm'>
-                                            <div>
-                                                <p className='text-[#C75D2C]/60'>Name</p>
-                                                <p className='font-medium text-[#C75D2C]'>
-                                                    {selectedBooking.guest.fullName}
-                                                </p>
+                            {/* Modal Content */}
+                            <div className='p-6 space-y-6'>
+                                {/* Booking Overview */}
+                                <div className='bg-gradient-to-r from-[#F8B259]/10 to-[#D96F32]/10 rounded-xl p-4'>
+                                    <div className='flex justify-between items-start'>
+                                        <div>
+                                            <h4 className='text-lg font-bold text-[#C75D2C]'>
+                                                Booking #{selectedBooking.id.slice(-8)}
+                                            </h4>
+                                            <p className='text-sm text-[#C75D2C]/60'>
+                                                Created: {formatDateTime(selectedBooking.createdAt)}
+                                            </p>
+                                        </div>
+                                        <div className='text-right space-y-2'>
+                                            <BookingStatusBadge status={selectedBooking.status} />
+                                            {selectedBooking.isPaid && (
+                                                <div>
+                                                    <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200'>
+                                                        <CheckCircle className='w-3 h-3 mr-1' />
+                                                        Paid
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Guest & Villa Information */}
+                                <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                                    <div>
+                                        <h5 className='font-semibold text-[#C75D2C] mb-3 flex items-center'>
+                                            <User className='w-4 h-4 mr-2' />
+                                            Guest Information
+                                        </h5>
+                                        <div className='bg-white/30 rounded-lg p-4 space-y-3'>
+                                            <div className='flex items-center space-x-2'>
+                                                <User className='w-4 h-4 text-[#D96F32]' />
+                                                <span className='font-medium text-[#C75D2C]'>
+                                                    {selectedBooking.guest?.fullName || 'N/A'}
+                                                </span>
                                             </div>
-                                            <div>
-                                                <p className='text-[#C75D2C]/60'>Email</p>
-                                                <p className='font-medium text-[#C75D2C]'>
-                                                    {selectedBooking.guest.email}
-                                                </p>
+                                            <div className='flex items-center space-x-2'>
+                                                <Mail className='w-4 h-4 text-[#D96F32]' />
+                                                <span className='font-medium text-[#C75D2C]'>
+                                                    {selectedBooking.guest?.email || 'N/A'}
+                                                </span>
                                             </div>
+                                            {selectedBooking.guest?.phone && (
+                                                <div className='flex items-center space-x-2'>
+                                                    <Phone className='w-4 h-4 text-[#D96F32]' />
+                                                    <span className='font-medium text-[#C75D2C]'>
+                                                        {selectedBooking.guest.phone}
+                                                    </span>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
 
-                                    <div className='bg-white/30 border border-[#F8B259]/50 rounded-xl p-4'>
-                                        <h4 className='font-semibold text-[#C75D2C] mb-3'>Villa Information</h4>
-                                        <div className='space-y-2 text-sm'>
+                                    <div>
+                                        <h5 className='font-semibold text-[#C75D2C] mb-3 flex items-center'>
+                                            <Home className='w-4 h-4 mr-2' />
+                                            Villa Information
+                                        </h5>
+                                        <div className='bg-white/30 rounded-lg p-4 space-y-2'>
                                             <div>
-                                                <p className='text-[#C75D2C]/60'>Villa</p>
+                                                <label className='text-sm text-[#C75D2C]/60'>Villa Name</label>
                                                 <p className='font-medium text-[#C75D2C]'>
-                                                    {selectedBooking.villa.title}
+                                                    {selectedBooking.villa?.title || 'N/A'}
                                                 </p>
                                             </div>
                                             <div>
-                                                <p className='text-[#C75D2C]/60'>Location</p>
+                                                <label className='text-sm text-[#C75D2C]/60'>Location</label>
                                                 <p className='font-medium text-[#C75D2C]'>
-                                                    {selectedBooking.villa.city}, {selectedBooking.villa.country}
+                                                    {selectedBooking.villa?.city}, {selectedBooking.villa?.country}
                                                 </p>
+                                            </div>
+                                            {selectedBooking.villa?.address && (
+                                                <div>
+                                                    <label className='text-sm text-[#C75D2C]/60'>Address</label>
+                                                    <p className='font-medium text-[#C75D2C]'>
+                                                        {selectedBooking.villa.address}
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Stay Details */}
+                                <div>
+                                    <h5 className='font-semibold text-[#C75D2C] mb-3 flex items-center'>
+                                        <Calendar className='w-4 h-4 mr-2' />
+                                        Stay Details
+                                    </h5>
+                                    <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
+                                        <div className='bg-white/30 rounded-lg p-3 text-center'>
+                                            <p className='text-sm text-[#C75D2C]/60'>Check-in</p>
+                                            <p className='font-medium text-[#C75D2C]'>
+                                                {formatDate(selectedBooking.checkIn)}
+                                            </p>
+                                        </div>
+                                        <div className='bg-white/30 rounded-lg p-3 text-center'>
+                                            <p className='text-sm text-[#C75D2C]/60'>Check-out</p>
+                                            <p className='font-medium text-[#C75D2C]'>
+                                                {formatDate(selectedBooking.checkOut)}
+                                            </p>
+                                        </div>
+                                        <div className='bg-white/30 rounded-lg p-3 text-center'>
+                                            <p className='text-sm text-[#C75D2C]/60'>Duration</p>
+                                            <p className='font-medium text-[#C75D2C]'>
+                                                {bookingApi.getStayDuration(
+                                                    selectedBooking.checkIn,
+                                                    selectedBooking.checkOut
+                                                )}{' '}
+                                                nights
+                                            </p>
+                                        </div>
+                                        <div className='bg-white/30 rounded-lg p-3 text-center'>
+                                            <p className='text-sm text-[#C75D2C]/60'>Total Guests</p>
+                                            <p className='font-medium text-[#C75D2C]'>
+                                                {selectedBooking.totalAdults + selectedBooking.totalChildren}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className='mt-4 grid grid-cols-2 gap-4'>
+                                        <div className='bg-white/30 rounded-lg p-3 text-center'>
+                                            <Users className='w-6 h-6 text-[#D96F32] mx-auto mb-1' />
+                                            <p className='font-medium text-[#C75D2C]'>{selectedBooking.totalAdults}</p>
+                                            <p className='text-sm text-[#C75D2C]/60'>Adults</p>
+                                        </div>
+                                        <div className='bg-white/30 rounded-lg p-3 text-center'>
+                                            <Baby className='w-6 h-6 text-[#D96F32] mx-auto mb-1' />
+                                            <p className='font-medium text-[#C75D2C]'>
+                                                {selectedBooking.totalChildren}
+                                            </p>
+                                            <p className='text-sm text-[#C75D2C]/60'>Children</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Payment Information */}
+                                <div>
+                                    <h5 className='font-semibold text-[#C75D2C] mb-3 flex items-center'>
+                                        <CreditCard className='w-4 h-4 mr-2' />
+                                        Payment Information
+                                    </h5>
+                                    <div className='bg-white/30 rounded-lg p-4 space-y-3'>
+                                        <div className='flex justify-between items-center'>
+                                            <span className='text-[#C75D2C]/60'>Total Amount</span>
+                                            <span className='font-bold text-[#C75D2C] text-lg'>
+                                                {villaApi.formatPrice(selectedBooking.totalPrice, 'EUR')}
+                                            </span>
+                                        </div>
+                                        <div className='flex justify-between items-center'>
+                                            <span className='text-[#C75D2C]/60'>Payment Method</span>
+                                            <span className='font-medium text-[#C75D2C]'>
+                                                {selectedBooking.paymentMethod === 'BANK_TRANSFER'
+                                                    ? 'Bank Transfer'
+                                                    : 'Payment on Arrival'}
+                                            </span>
+                                        </div>
+                                        <div className='flex justify-between items-center'>
+                                            <span className='text-[#C75D2C]/60'>Payment Status</span>
+                                            <div className='flex items-center space-x-2'>
+                                                {getPaymentBadge(selectedBooking.isPaid)}
+                                                {user &&
+                                                    bookingApi.canTogglePayment(
+                                                        selectedBooking,
+                                                        user.id,
+                                                        user.role
+                                                    ) && (
+                                                        <button
+                                                            onClick={() => handleTogglePayment(selectedBooking)}
+                                                            disabled={paymentToggleLoading === selectedBooking.id}
+                                                            className={`px-2 py-1 rounded-lg text-xs font-medium transition-colors ${
+                                                                selectedBooking.isPaid
+                                                                    ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                                                                    : 'bg-green-100 text-green-700 hover:bg-green-200'
+                                                            } disabled:opacity-50`}
+                                                        >
+                                                            {paymentToggleLoading === selectedBooking.id ? (
+                                                                <div className='w-3 h-3 border border-current/30 border-t-current rounded-full animate-spin'></div>
+                                                            ) : selectedBooking.isPaid ? (
+                                                                'Mark Unpaid'
+                                                            ) : (
+                                                                'Mark Paid'
+                                                            )}
+                                                        </button>
+                                                    )}
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                                    <div className='bg-white/30 border border-[#F8B259]/50 rounded-xl p-4'>
-                                        <h4 className='font-semibold text-[#C75D2C] mb-3'>Booking Details</h4>
-                                        <div className='space-y-2 text-sm'>
-                                            <div>
-                                                <p className='text-[#C75D2C]/60'>Check-in</p>
-                                                <p className='font-medium text-[#C75D2C]'>
-                                                    {formatDate(selectedBooking.checkIn)}
-                                                </p>
-                                            </div>
-                                            <div>
-                                                <p className='text-[#C75D2C]/60'>Check-out</p>
-                                                <p className='font-medium text-[#C75D2C]'>
-                                                    {formatDate(selectedBooking.checkOut)}
-                                                </p>
-                                            </div>
-                                            <div>
-                                                <p className='text-[#C75D2C]/60'>Guests</p>
-                                                <p className='font-medium text-[#C75D2C]'>
-                                                    {selectedBooking.totalGuests} guests
-                                                </p>
-                                            </div>
-                                            <div>
-                                                <p className='text-[#C75D2C]/60'>Duration</p>
-                                                <p className='font-medium text-[#C75D2C]'>
-                                                    {bookingApi.getStayDuration(
-                                                        selectedBooking.checkIn,
-                                                        selectedBooking.checkOut
-                                                    )}{' '}
-                                                    nights
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className='bg-white/30 border border-[#F8B259]/50 rounded-xl p-4'>
-                                        <h4 className='font-semibold text-[#C75D2C] mb-3'>Payment Information</h4>
-                                        <div className='space-y-2 text-sm'>
-                                            <div>
-                                                <p className='text-[#C75D2C]/60'>Total Price</p>
-                                                <p className='font-medium text-[#C75D2C]'>
-                                                    {bookingApi.formatPrice(selectedBooking.totalPrice)}
-                                                </p>
-                                            </div>
-                                            <div>
-                                                <p className='text-[#C75D2C]/60'>Payment Method</p>
-                                                <p className='font-medium text-[#C75D2C]'>
-                                                    {selectedBooking.paymentMethod.replace('_', ' ')}
-                                                </p>
-                                            </div>
-                                            <div>
-                                                <p className='text-[#C75D2C]/60'>Payment Status</p>
-                                                <div className='mt-1 flex items-center space-x-2'>
-                                                    {getPaymentBadge(selectedBooking.isPaid)}
-                                                    {user &&
-                                                        bookingApi.canTogglePayment(
-                                                            selectedBooking,
-                                                            user.id,
-                                                            user.role
-                                                        ) && (
-                                                            <button
-                                                                onClick={() => handleTogglePayment(selectedBooking)}
-                                                                disabled={paymentToggleLoading === selectedBooking.id}
-                                                                className={`px-2 py-1 rounded-lg text-xs font-medium transition-colors duration-200 ${
-                                                                    selectedBooking.isPaid
-                                                                        ? 'bg-red-100 text-red-700 hover:bg-red-200'
-                                                                        : 'bg-green-100 text-green-700 hover:bg-green-200'
-                                                                } disabled:opacity-50 disabled:cursor-not-allowed`}
-                                                            >
-                                                                {paymentToggleLoading === selectedBooking.id ? (
-                                                                    <div className='w-3 h-3 border border-current/30 border-t-current rounded-full animate-spin'></div>
-                                                                ) : selectedBooking.isPaid ? (
-                                                                    'Mark Unpaid'
-                                                                ) : (
-                                                                    'Mark Paid'
-                                                                )}
-                                                            </button>
-                                                        )}
+                                {/* Additional Services */}
+                                {selectedBooking.bookingServices && selectedBooking.bookingServices.length > 0 && (
+                                    <div>
+                                        <h5 className='font-semibold text-[#C75D2C] mb-3'>Additional Services</h5>
+                                        <div className='space-y-2'>
+                                            {selectedBooking.bookingServices.map(service => (
+                                                <div
+                                                    key={service.id}
+                                                    className='bg-white/30 rounded-lg p-3 flex justify-between items-center'
+                                                >
+                                                    <div>
+                                                        <p className='font-medium text-[#C75D2C]'>
+                                                            {service.service?.title || 'Service'}
+                                                        </p>
+                                                        <p className='text-sm text-[#C75D2C]/60'>
+                                                            Qty: {service.quantity}
+                                                        </p>
+                                                    </div>
+                                                    <span className='font-medium text-[#C75D2C]'>
+                                                        {villaApi.formatPrice(service.totalPrice, 'EUR')}
+                                                    </span>
                                                 </div>
-                                            </div>
-                                            <div>
-                                                <p className='text-[#C75D2C]/60'>Booking Status</p>
-                                                <div className='mt-1'>{getStatusBadge(selectedBooking.status)}</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Notes and Reasons Section */}
-                                {(selectedBooking.notes ||
-                                    selectedBooking.rejectionReason ||
-                                    selectedBooking.cancellationReason) && (
-                                    <div className='bg-white/30 border border-[#F8B259]/50 rounded-xl p-4'>
-                                        <h4 className='font-semibold text-[#C75D2C] mb-3'>Additional Information</h4>
-                                        <div className='space-y-3 text-sm'>
-                                            {selectedBooking.notes && (
-                                                <div>
-                                                    <p className='text-[#C75D2C]/60'>Notes</p>
-                                                    <p className='font-medium text-[#C75D2C] bg-white/30 p-2 rounded-lg'>
-                                                        {selectedBooking.notes}
-                                                    </p>
-                                                </div>
-                                            )}
-                                            {selectedBooking.rejectionReason && (
-                                                <div>
-                                                    <p className='text-red-600/80'>Rejection Reason</p>
-                                                    <p className='font-medium text-red-700 bg-red-50/50 p-2 rounded-lg border border-red-200/50'>
-                                                        {selectedBooking.rejectionReason}
-                                                    </p>
-                                                </div>
-                                            )}
-                                            {selectedBooking.cancellationReason && (
-                                                <div>
-                                                    <p className='text-yellow-600/80'>Cancellation Reason</p>
-                                                    <p className='font-medium text-yellow-700 bg-yellow-50/50 p-2 rounded-lg border border-yellow-200/50'>
-                                                        {selectedBooking.cancellationReason}
-                                                    </p>
-                                                </div>
-                                            )}
+                                            ))}
                                         </div>
                                     </div>
                                 )}
 
-                                <div className='bg-white/30 border border-[#F8B259]/50 rounded-xl p-4'>
-                                    <h4 className='font-semibold text-[#C75D2C] mb-3'>Booking Timeline</h4>
-                                    <div className='grid grid-cols-1 md:grid-cols-2 gap-4 text-sm'>
-                                        <div>
-                                            <p className='text-[#C75D2C]/60'>Created</p>
-                                            <p className='font-medium text-[#C75D2C]'>
-                                                {formatDateTime(selectedBooking.createdAt)}
-                                            </p>
+                                {/* Special Notes */}
+                                {selectedBooking.notes && (
+                                    <div>
+                                        <h5 className='font-semibold text-[#C75D2C] mb-3'>Special Requests</h5>
+                                        <div className='bg-white/30 rounded-lg p-4'>
+                                            <p className='text-[#C75D2C]'>{selectedBooking.notes}</p>
                                         </div>
-                                        <div>
-                                            <p className='text-[#C75D2C]/60'>Last Updated</p>
-                                            <p className='font-medium text-[#C75D2C]'>
-                                                {formatDateTime(selectedBooking.updatedAt)}
+                                    </div>
+                                )}
+
+                                {/* Reasons */}
+                                {(selectedBooking.cancellationReason || selectedBooking.rejectionReason) && (
+                                    <div>
+                                        <h5 className='font-semibold text-red-700 mb-3'>
+                                            {selectedBooking.cancellationReason
+                                                ? 'Cancellation Reason'
+                                                : 'Rejection Reason'}
+                                        </h5>
+                                        <div className='bg-red-50 border border-red-200 rounded-lg p-4'>
+                                            <p className='text-red-700'>
+                                                {selectedBooking.cancellationReason || selectedBooking.rejectionReason}
                                             </p>
                                         </div>
                                     </div>
+                                )}
+                            </div>
+
+                            {/* Modal Actions */}
+                            <div className='flex justify-between items-center p-6 border-t border-[#F8B259]/30'>
+                                <button
+                                    onClick={() => setSelectedBooking(null)}
+                                    className='px-4 py-2 text-[#C75D2C] hover:bg-[#F8B259]/20 rounded-lg transition-colors'
+                                >
+                                    Close
+                                </button>
+                                <div className='flex items-center space-x-2'>
+                                    {canPerformAction(selectedBooking, 'confirm') && (
+                                        <button
+                                            onClick={() => openActionModal(selectedBooking, 'confirm')}
+                                            className='px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2'
+                                        >
+                                            <CheckCircle className='w-4 h-4' />
+                                            <span>Confirm</span>
+                                        </button>
+                                    )}
+                                    {canPerformAction(selectedBooking, 'reject') && (
+                                        <button
+                                            onClick={() => openActionModal(selectedBooking, 'reject')}
+                                            className='px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center space-x-2'
+                                        >
+                                            <XCircle className='w-4 h-4' />
+                                            <span>Reject</span>
+                                        </button>
+                                    )}
+                                    {canPerformAction(selectedBooking, 'complete') && (
+                                        <button
+                                            onClick={() => openActionModal(selectedBooking, 'complete')}
+                                            className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2'
+                                        >
+                                            <CheckCircle className='w-4 h-4' />
+                                            <span>Complete</span>
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -821,10 +954,7 @@ export const AdminBookings: React.FC = () => {
 
                 {/* Action Modal */}
                 {selectedBooking && actionType && (
-                    <div
-                        className='fixed inset-0 bg-black/60 backdrop-blur-sm z-[999999] flex items-center justify-center p-4'
-                        style={{ zIndex: 999999 }}
-                    >
+                    <div className='fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4'>
                         <div className='bg-white/95 backdrop-blur-md border-2 border-[#F8B259]/70 rounded-2xl p-6 w-full max-w-md'>
                             <div className='flex items-center justify-between mb-6'>
                                 <h3 className='text-xl font-bold text-[#C75D2C] font-butler'>
@@ -843,13 +973,13 @@ export const AdminBookings: React.FC = () => {
                                     <p className='text-sm text-[#C75D2C]/60 mb-2'>
                                         Guest:{' '}
                                         <span className='font-medium text-[#C75D2C]'>
-                                            {selectedBooking.guest.fullName}
+                                            {selectedBooking.guest?.fullName}
                                         </span>
                                     </p>
                                     <p className='text-sm text-[#C75D2C]/60 mb-2'>
                                         Villa:{' '}
                                         <span className='font-medium text-[#C75D2C]'>
-                                            {selectedBooking.villa.title}
+                                            {selectedBooking.villa?.title}
                                         </span>
                                     </p>
                                     <p className='text-sm text-[#C75D2C]/60'>
@@ -906,7 +1036,6 @@ export const AdminBookings: React.FC = () => {
                 )}
             </div>
 
-            {/* THToaster component */}
             <THToaster position='bottom-right' />
         </>
     );
