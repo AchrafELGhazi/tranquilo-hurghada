@@ -3,6 +3,7 @@ import { Edit3, Mail, User, Phone, Calendar, AlertCircle } from 'lucide-react';
 import { userApi, type UpdateProfileData } from '@/api/userApi';
 import type { User as ComponentUser } from '@/utils/types';
 import { THToast } from '@/components/common/Toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface EditProfileProps {
     user: ComponentUser;
@@ -57,6 +58,7 @@ const FormField: React.FC<FormFieldProps> = ({
 );
 
 const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
+    const { updateUser } = useAuth();
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [profileForm, setProfileForm] = useState<UpdateProfileData>({
@@ -72,27 +74,21 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
         let dateObj: Date;
 
         if (typeof date === 'string') {
-            // Handle various string formats
             if (date.includes('T')) {
-                // ISO string format like "2005-04-27T00:00:00.000Z"
                 dateObj = new Date(date);
             } else if (date.match(/^\d{4}-\d{2}-\d{2}$/)) {
-                // Already in yyyy-MM-dd format
                 return date;
             } else {
-                // Try to parse as general date string
                 dateObj = new Date(date);
             }
         } else {
             dateObj = date;
         }
 
-        // Check if date is valid
         if (isNaN(dateObj.getTime())) {
             return '';
         }
 
-        // Format as yyyy-MM-dd for input[type="date"]
         const year = dateObj.getFullYear();
         const month = String(dateObj.getMonth() + 1).padStart(2, '0');
         const day = String(dateObj.getDate()).padStart(2, '0');
@@ -117,20 +113,43 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
         setErrors({});
 
         try {
-            const updatePromise = userApi.updateProfileSafe(profileForm);
-            console.log('Update Profile Data:', profileForm);
-            THToast.promise(updatePromise, {
-                loading: 'Updating profile...',
-                success: 'Profile updated successfully!',
-                error: 'Failed to update profile',
-            });
+            const result = await userApi.updateProfile(profileForm);
 
-            const result = await updatePromise;
+            if (result.success && result.user) {
+                // Update user data in AuthContext and localStorage
+                updateUser({
+                    email: profileForm.email,
+                    fullName: profileForm.fullName,
+                    phone: profileForm.phone,
+                    dateOfBirth: profileForm.dateOfBirth ? new Date(profileForm.dateOfBirth) : undefined,
+                });
+                THToast.success('Profile updated successfully!');
+            } else if (result.errors) {
+                // Handle validation errors from backend
+                const errorObj: Record<string, string> = {};
+                result.errors.forEach(error => {
+                    // Parse error messages to set field-specific errors
+                    if (error.toLowerCase().includes('email')) {
+                        errorObj.email = error;
+                    } else if (error.toLowerCase().includes('phone')) {
+                        errorObj.phone = error;
+                    } else if (error.toLowerCase().includes('name')) {
+                        errorObj.fullName = error;
+                    } else if (error.toLowerCase().includes('date') || error.toLowerCase().includes('birth')) {
+                        errorObj.dateOfBirth = error;
+                    } else {
+                        // General error
+                        THToast.error('Update failed', error);
+                    }
+                });
+                setErrors(errorObj);
 
-            if (!result.success && result.errors) {
-                THToast.error('Update failed', result.errors.join(', '));
+                if (Object.keys(errorObj).length === 0) {
+                    THToast.error('Update failed', result.errors.join(', '));
+                }
             }
         } catch (error: any) {
+            THToast.error('Update failed', error.message || 'An error occurred');
         } finally {
             setLoading(false);
         }
@@ -171,7 +190,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ user }) => {
                         type='tel'
                         value={profileForm.phone || ''}
                         onChange={value => setProfileForm(prev => ({ ...prev, phone: value }))}
-                        placeholder='Enter your phone number'
+                        placeholder='Enter your phone number (+212... or 06... or 07...)'
                         error={errors.phone}
                         icon={<Phone className='w-4 h-4' />}
                     />

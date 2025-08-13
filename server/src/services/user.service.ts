@@ -2,10 +2,11 @@ import prisma from '../config/database';
 
 interface UpdateUserProfileParams {
     phone?: string;
-    dateOfBirth?: Date;
+    dateOfBirth?: string;
     fullName?: string;
     email?: string;
 }
+
 export interface GetUsersQuery {
     page?: number;
     limit?: number;
@@ -25,76 +26,24 @@ export interface GetUsersResult {
         pages: number;
     };
 }
+
 export const updateUserProfile = async (
     userId: string,
     updateData: UpdateUserProfileParams
 ): Promise<any> => {
     try {
+        // Check if user exists
         const existingUser = await prisma.user.findUnique({
             where: { id: userId },
-            select: {
-                id: true,
-                email: true,
-                fullName: true,
-                phone: true,
-                dateOfBirth: true
-            }
+            select: { id: true, email: true }
         });
 
         if (!existingUser) {
             throw new Error('User not found');
         }
 
-        // Only update fields that are provided and different from current values
-        const dataToUpdate: any = {};
-
-        if (updateData.phone && updateData.phone !== existingUser.phone) {
-            // Validate phone format
-            const phoneRegex = /^[\+]?[1-9][\d]{8,14}$/;
-            if (!phoneRegex.test(updateData.phone.replace(/[\s\-\(\)]/g, ''))) {
-                throw new Error('Invalid phone number format');
-            }
-            dataToUpdate.phone = updateData.phone;
-        }
-
-        if (updateData.dateOfBirth) {
-            // Convert string to Date if needed
-            const dateOfBirth = typeof updateData.dateOfBirth === 'string'
-                ? new Date(updateData.dateOfBirth)
-                : updateData.dateOfBirth;
-
-            // Check if it's different from existing date
-            const isDifferent = !existingUser.dateOfBirth ||
-                dateOfBirth.getTime() !== existingUser.dateOfBirth.getTime();
-
-            if (isDifferent) {
-                // Validate age (must be at least 18)
-                const today = new Date();
-                const age = today.getFullYear() - dateOfBirth.getFullYear();
-                const monthDiff = today.getMonth() - dateOfBirth.getMonth();
-                const finalAge = monthDiff < 0 || (monthDiff === 0 && today.getDate() < dateOfBirth.getDate()) ? age - 1 : age;
-
-                if (finalAge < 18) {
-                    throw new Error('User must be at least 18 years old');
-                }
-
-                if (finalAge > 120) {
-                    throw new Error('Invalid date of birth');
-                }
-
-                dataToUpdate.dateOfBirth = dateOfBirth;
-            }
-        }
-
-        if (updateData.fullName && updateData.fullName !== existingUser.fullName) {
-            if (updateData.fullName.trim().length < 2) {
-                throw new Error('Full name must be at least 2 characters long');
-            }
-            dataToUpdate.fullName = updateData.fullName.trim();
-        }
-
+        // Check email uniqueness if email is being updated
         if (updateData.email && updateData.email !== existingUser.email) {
-            // Check if email is already in use by another user
             const emailExists = await prisma.user.findFirst({
                 where: {
                     email: updateData.email,
@@ -105,19 +54,14 @@ export const updateUserProfile = async (
             if (emailExists) {
                 throw new Error('Email is already in use by another user');
             }
-
-            // Basic email validation
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(updateData.email)) {
-                throw new Error('Invalid email format');
-            }
-
-            dataToUpdate.email = updateData.email.toLowerCase();
         }
 
-        // If no changes to make, return existing user
-        if (Object.keys(dataToUpdate).length === 0) {
-            return existingUser;
+        // Prepare data for update
+        const dataToUpdate: any = { ...updateData };
+
+        // Convert dateOfBirth string to Date if provided
+        if (updateData.dateOfBirth) {
+            dataToUpdate.dateOfBirth = new Date(updateData.dateOfBirth);
         }
 
         // Update user
@@ -146,6 +90,7 @@ export const updateUserProfile = async (
         throw error;
     }
 };
+
 export const getUserProfile = async (userId: string): Promise<any> => {
     try {
         const user = await prisma.user.findUnique({
@@ -207,8 +152,6 @@ export const checkUserProfileComplete = async (userId: string): Promise<{ isComp
     }
 };
 
-
-
 export const getAllUsersService = async (query: GetUsersQuery): Promise<GetUsersResult> => {
     // Set default values
     const page = Math.max(1, Number(query.page) || 1);
@@ -219,9 +162,7 @@ export const getAllUsersService = async (query: GetUsersQuery): Promise<GetUsers
     const isActive = query.isActive !== undefined ? query.isActive : true;
 
     // Build where clause
-    const where: any = {
-        isActive
-    };
+    const where: any = { isActive };
 
     // Add search functionality
     if (query.search) {

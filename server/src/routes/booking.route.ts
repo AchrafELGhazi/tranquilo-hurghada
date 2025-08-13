@@ -1,17 +1,11 @@
 import { Router } from 'express';
-import {
-    createBookingRequest, getAllBookings, getBookingDetails, confirmBookingRequest, rejectBookingRequest, cancelBookingRequest, completeBookingRequest, getMyBookings, getVillaBookedDates, toggleBookingPaidStatus, getVillaServicesEndpoint, updateBookingServicesEndpoint
-} from '../controllers/booking.controller';
+import { createBookingRequest, getAllBookings, getBookingDetails, confirmBookingRequest, rejectBookingRequest, cancelBookingRequest, completeBookingRequest, getMyBookings, getVillaBookedDates, toggleBookingPaidStatus, updateBookingServicesEndpoint } from '../controllers/booking.controller';
 import { authenticate, requireGuest, requireHost, requireAdmin } from '../middleware/auth.middleware';
 import { validateRequest } from '../middleware/validateRequest.middleware';
-import {
-    createBookingSchema, updateBookingServicesSchema, bookingActionSchema, bookingParamsSchema, villaAvailabilityParamsSchema, bookingQuerySchema
-} from '../schemas/booking.schema';
-import { villaParamsSchema } from '../schemas/villa.schema';
+import { createBookingSchema, updateBookingServicesSchema, bookingActionSchema, bookingParamsSchema, villaAvailabilityParamsSchema, bookingQuerySchema } from '../schemas/booking.schema';
 
 const bookingRouter = Router();
 
-// All routes require authentication
 bookingRouter.use(authenticate);
 
 /**

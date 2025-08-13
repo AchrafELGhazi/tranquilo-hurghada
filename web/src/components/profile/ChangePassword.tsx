@@ -43,7 +43,7 @@ const ChangePassword: React.FC<ChangePasswordProps> = () => {
         setLoading(true);
 
         try {
-            const changePasswordPromise = userApi.changePasswordSafe(passwordForm);
+            const changePasswordPromise = userApi.changePassword(passwordForm);
 
             THToast.promise(changePasswordPromise, {
                 loading: 'Changing password...',

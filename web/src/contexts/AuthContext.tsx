@@ -11,6 +11,7 @@ interface AuthContextType {
     login: (data: LoginData) => Promise<void>;
     register: (data: RegisterData) => Promise<void>;
     logout: () => Promise<void>;
+    updateUser: (updatedUserData: Partial<User>) => void;
     hasRole: (role: 'GUEST' | 'HOST' | 'ADMIN') => boolean;
     isGuest: () => boolean;
     isHost: () => boolean;
@@ -62,7 +63,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setUser(null);
     };
 
-    // Initialize auth on app start
+    const updateUser = (updatedUserData: Partial<User>): void => {
+        if (user) {
+            const updatedUser = { ...user, ...updatedUserData };
+            setUser(updatedUser);
+            storeUser(updatedUser);
+        }
+    };
+
     useEffect(() => {
         const initializeAuth = async () => {
             try {
@@ -193,6 +201,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         login,
         register,
         logout,
+        updateUser, // Add the new method to the context value
         hasRole,
         isGuest,
         isHost,

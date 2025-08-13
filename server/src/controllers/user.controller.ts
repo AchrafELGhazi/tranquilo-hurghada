@@ -4,7 +4,6 @@ import {
     updateUserProfile,
     getUserProfile,
     checkUserProfileComplete,
-    GetUsersQuery,
     getAllUsersService
 } from '../services/user.service';
 import prisma from '../config/database';
@@ -15,7 +14,6 @@ export const getProfile = async (req: AuthenticatedRequest, res: Response): Prom
     try {
         const userId = req.user!.id;
         const userProfile = await getUserProfile(userId);
-
         ApiResponse.success(res, userProfile, 'Profile retrieved successfully');
     } catch (error: any) {
         console.error('Get profile error:', error);
@@ -30,30 +28,11 @@ export const getProfile = async (req: AuthenticatedRequest, res: Response): Prom
 export const updateProfile = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
         const userId = req.user!.id;
-        const { phone, dateOfBirth, fullName, email } = req.body;
-
-        const updateData: any = {};
-
-        if (phone !== undefined) updateData.phone = phone;
-        if (fullName !== undefined) updateData.fullName = fullName;
-        if (email !== undefined) updateData.email = email;
-        if (dateOfBirth !== undefined) {
-            updateData.dateOfBirth = new Date(dateOfBirth);
-        }
-
-        const updatedUser = await updateUserProfile(userId, updateData);
-
+        const updatedUser = await updateUserProfile(userId, req.body);
         ApiResponse.success(res, updatedUser, 'Profile updated successfully');
     } catch (error: any) {
         console.error('Update profile error:', error);
-
-        if (error.message.includes('Invalid phone number format') ||
-            error.message.includes('Invalid email format') ||
-            error.message.includes('Full name must be at least 2 characters') ||
-            error.message.includes('User must be at least 18 years old') ||
-            error.message.includes('Invalid date of birth')) {
-            ApiResponse.badRequest(res, error.message);
-        } else if (error.message === 'Email is already in use by another user') {
+        if (error.message === 'Email is already in use by another user') {
             ApiResponse.conflict(res, error.message);
         } else if (error.message === 'User not found') {
             ApiResponse.notFound(res, 'User not found');
@@ -66,22 +45,7 @@ export const updateProfile = async (req: AuthenticatedRequest, res: Response): P
 export const changePassword = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
         const userId = req.user!.id;
-        const { currentPassword, newPassword, confirmPassword } = req.body;
-
-        if (!currentPassword || !newPassword || !confirmPassword) {
-            ApiResponse.badRequest(res, 'Current password, new password, and confirm password are required');
-            return;
-        }
-
-        if (newPassword !== confirmPassword) {
-            ApiResponse.badRequest(res, 'New password and confirm password do not match');
-            return;
-        }
-
-        if (newPassword.length < 8) {
-            ApiResponse.badRequest(res, 'New password must be at least 8 characters long');
-            return;
-        }
+        const { currentPassword, newPassword } = req.body;
 
         const currentUser = await prisma.user.findUnique({
             where: { id: userId },
@@ -120,7 +84,6 @@ export const checkProfileComplete = async (req: AuthenticatedRequest, res: Respo
     try {
         const userId = req.user!.id;
         const profileStatus = await checkUserProfileComplete(userId);
-
         ApiResponse.success(res, profileStatus, 'Profile completeness checked');
     } catch (error: any) {
         console.error('Check profile complete error:', error);
@@ -136,11 +99,6 @@ export const deactivateAccount = async (req: AuthenticatedRequest, res: Response
     try {
         const userId = req.user!.id;
         const { password } = req.body;
-
-        if (!password) {
-            ApiResponse.badRequest(res, 'Password is required to deactivate account');
-            return;
-        }
 
         const currentUser = await prisma.user.findUnique({
             where: { id: userId },
@@ -180,25 +138,13 @@ export const deactivateAccount = async (req: AuthenticatedRequest, res: Response
 
 export const getAllUsers = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-        const query: GetUsersQuery = {
-            page: req.query.page ? parseInt(req.query.page as string) : undefined,
-            limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
-            search: req.query.search as string,
-            role: req.query.role as string,
-            sortBy: req.query.sortBy as 'fullName' | 'email' | 'createdAt' | 'updatedAt',
-            sortOrder: req.query.sortOrder as 'asc' | 'desc',
-            isActive: req.query.isActive ? req.query.isActive === 'true' : undefined
-        };
-
-        const result = await getAllUsersService(query);
-
+        const result = await getAllUsersService(req.query as any);
         ApiResponse.successWithPagination(
             res,
             result.users,
             result.pagination,
             'Users retrieved successfully'
         );
-
     } catch (error: any) {
         console.error('Get all users error:', error);
         ApiResponse.serverError(res, 'Failed to retrieve users');
