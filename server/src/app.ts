@@ -44,7 +44,7 @@ app.use(compression({
 
 
 
-app.use('/api', rateLimit(baseRateLimit));
+app.use(apiPrefix, rateLimit(baseRateLimit));
 
 app.use(cors({
     origin: (origin, callback) => {

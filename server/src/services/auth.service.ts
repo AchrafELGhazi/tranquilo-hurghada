@@ -3,7 +3,6 @@ import prisma from '../config/database';
 import { generateTokens, verifyToken } from '../utils/jwt';
 import { hashPassword, comparePasswords } from '../utils/password';
 import { determineUserRole } from '../utils/determinUserRole';
-import { sendWelcomeEmail } from '../utils/emailService';
 import logger from '../config/logger';
 
 interface RegisterParams {
@@ -39,13 +38,6 @@ export const registerUser = async ({
             role,
         },
     });
-
-    try {
-        await sendWelcomeEmail(user.email, user.fullName);
-        logger.info(`Welcome email sent to ${user.email}`);
-    } catch (emailError) {
-        logger.error(`Failed to send welcome email to ${user.email}:`, emailError);
-    }
 
     const tokens = generateTokens(user);
     const { password: _, ...userWithoutPassword } = user;

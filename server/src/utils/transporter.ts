@@ -1,12 +1,11 @@
 import { createTransport, TransportOptions } from 'nodemailer';
-import { env } from '../config/env';
 
-export const transporter = createTransport({
-    service: 'Outlook',
-    port: 587,
+export const createTransporter = createTransport({
+    host: 'smtpout.secureserver.net',
+    port: 465,
+    secure: true, 
     auth: {
-        user: env.ADMIN_EMAIL,
-        pass: env.ADMIN_PASSWORD,
-    },
+        user: 'admin@tranquilo-hughada.com', 
+        pass: 'Abcdef123$' 
+    }
 } as TransportOptions);
-

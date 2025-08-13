@@ -2,7 +2,6 @@ import cron from 'node-cron';
 import prisma from '../config/database';
 import logger from '../config/logger';
 import { BookingStatus } from '@prisma/client';
-import { sendBookingNotificationEmails } from '../utils/emailService';
 
 /**
  * Auto-complete bookings after checkout date
@@ -25,9 +24,6 @@ export const startBookingAutoCompletionJob = () => {
     logger.info('Booking auto-completion job scheduled to run daily at 2:00 AM UTC');
 };
 
-/**
- * Find and complete bookings that are past their checkout date
- */
 export const autoCompleteBookings = async (): Promise<void> => {
     try {
         const now = new Date();
@@ -145,111 +141,6 @@ export const autoCompleteBookings = async (): Promise<void> => {
 
     } catch (error) {
         logger.error('Error in autoCompleteBookings:', error);
-        throw error;
-    }
-};
-
-/**
- * Manual trigger for testing or administrative purposes
- * Can be called from an admin endpoint or CLI
- */
-export const triggerBookingAutoCompletion = async (): Promise<{
-    success: boolean;
-    message: string;
-    details?: any;
-}> => {
-    try {
-        logger.info('Manual booking auto-completion triggered');
-
-        const startTime = new Date();
-        await autoCompleteBookings();
-        const endTime = new Date();
-        const duration = endTime.getTime() - startTime.getTime();
-
-        const result = {
-            success: true,
-            message: 'Booking auto-completion completed successfully',
-            details: {
-                startTime: startTime.toISOString(),
-                endTime: endTime.toISOString(),
-                durationMs: duration
-            }
-        };
-
-        logger.info('Manual booking auto-completion completed:', result.details);
-        return result;
-
-    } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-        logger.error('Manual booking auto-completion failed:', errorMessage);
-
-        return {
-            success: false,
-            message: `Booking auto-completion failed: ${errorMessage}`
-        };
-    }
-};
-
-/**
- * Get statistics about bookings eligible for auto-completion
- * Useful for monitoring and debugging
- */
-export const getAutoCompletionStats = async (): Promise<{
-    pendingCompletion: number;
-    completedToday: number;
-    completedThisWeek: number;
-    completedThisMonth: number;
-}> => {
-    try {
-        const now = new Date();
-        const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const startOfWeek = new Date(startOfToday);
-        startOfWeek.setDate(startOfToday.getDate() - startOfToday.getDay());
-        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-
-        const [pendingCompletion, completedToday, completedThisWeek, completedThisMonth] = await Promise.all([
-            // Bookings eligible for completion
-            prisma.booking.count({
-                where: {
-                    status: BookingStatus.CONFIRMED,
-                    checkOut: { lt: startOfToday }
-                }
-            }),
-
-            // Completed today
-            prisma.booking.count({
-                where: {
-                    status: BookingStatus.COMPLETED,
-                    completedAt: { gte: startOfToday }
-                }
-            }),
-
-            // Completed this week
-            prisma.booking.count({
-                where: {
-                    status: BookingStatus.COMPLETED,
-                    completedAt: { gte: startOfWeek }
-                }
-            }),
-
-            // Completed this month
-            prisma.booking.count({
-                where: {
-                    status: BookingStatus.COMPLETED,
-                    completedAt: { gte: startOfMonth }
-                }
-            })
-        ]);
-
-        return {
-            pendingCompletion,
-            completedToday,
-            completedThisWeek,
-            completedThisMonth
-        };
-
-    } catch (error) {
-        logger.error('Error getting auto-completion stats:', error);
         throw error;
     }
 };
