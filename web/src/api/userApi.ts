@@ -72,7 +72,6 @@ class UserApi {
         throw new Error(response.message || 'Failed to get profile');
     }
 
-    // Get all users with pagination support
     async getAllUsers(query?: GetUsersQuery): Promise<any> {
         const params = new URLSearchParams();
 
@@ -96,7 +95,6 @@ class UserApi {
         throw new Error(response.message || 'Failed to get all users');
     }
 
-    // Update user profile
     async updateProfile(data: UpdateProfileData): Promise<{ success: boolean; user?: User; errors?: string[] }> {
         try {
             const response = await apiService.put<any>('/user', data);
@@ -111,7 +109,6 @@ class UserApi {
         }
     }
 
-    // Change password
     async changePassword(data: ChangePasswordData): Promise<{ success: boolean; errors?: string[] }> {
         try {
             const response = await apiService.put<any>('/user/password', data);
@@ -126,7 +123,6 @@ class UserApi {
         }
     }
 
-    // Check if profile is complete
     async checkProfileComplete(): Promise<ProfileCompleteness> {
         const response = await apiService.get<any>('/user/complete');
 
@@ -137,7 +133,6 @@ class UserApi {
         throw new Error(response.message || 'Failed to check profile completeness');
     }
 
-    // Deactivate account
     async deactivateAccount(password: string): Promise<void> {
         const response = await apiService.put<ApiResponse>('/user/deactivate', { password });
 
@@ -145,28 +140,10 @@ class UserApi {
             throw new Error(response.message || 'Failed to deactivate account');
         }
 
-        // Clear auth data after successful deactivation
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');
         apiService.clearAuthToken();
-    }
-
-    // Utility method to get user from storage
-    getUserFromStorage(): User | null {
-        const userData = localStorage.getItem('user');
-        return userData ? JSON.parse(userData) : null;
-    }
-
-    // Get all users with error handling
-    async getAllUsersWithErrorHandling(query?: GetUsersQuery): Promise<{ success: boolean; data?: GetUsersResponse; error?: string }> {
-        try {
-            const data = await this.getAllUsers(query);
-            return { success: true, data };
-        } catch (error: any) {
-            console.error('Failed to get all users:', error);
-            return { success: false, error: error.message || 'Failed to get all users' };
-        }
     }
 }
 

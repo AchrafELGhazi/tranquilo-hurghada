@@ -35,27 +35,22 @@ export interface CurrentUserResponse {
 }
 
 class AuthApi {
-    // Register user
     async register(data: RegisterData): Promise<AuthResponse> {
         return await apiService.post<AuthResponseData>('/auth/register', data);
     }
 
-    // Login user
     async login(data: LoginData): Promise<AuthResponse> {
         return await apiService.post<AuthResponseData>('/auth/login', data);
     }
 
-    // Logout user
     async logout(): Promise<void> {
         await apiService.post('/auth/logout');
     }
 
-    // Refresh token
     async refreshToken(refreshToken: string): Promise<AuthResponse> {
         return await apiService.post<AuthResponseData>('/auth/refresh-token', { refreshToken });
     }
 
-    // Get current user
     async getCurrentUser(): Promise<CurrentUserResponse> {
         return await apiService.get<CurrentUserResponseData>('/auth/me');
     }

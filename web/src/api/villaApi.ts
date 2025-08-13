@@ -1,5 +1,4 @@
 import apiService from "@/utils/api";
-import { POPULAR_AMENITIES, POPULAR_CITIES } from "@/utils/constants";
 import type { Villa, VillaStatus, Service } from "@/utils/types";
 
 export interface VillaFilters {
@@ -42,7 +41,7 @@ export interface CreateVillaData {
     bathrooms: number;
     amenities?: string[];
     images?: string[];
-    serviceIds?: string[]; // Added serviceIds for creation
+    serviceIds?: string[];
 }
 
 export interface UpdateVillaData {
@@ -59,7 +58,7 @@ export interface UpdateVillaData {
     images?: string[];
     status?: VillaStatus;
     isActive?: boolean;
-    serviceIds?: string[]; // Added serviceIds for updates
+    serviceIds?: string[];
 }
 
 export interface PaginationInfo {
@@ -128,9 +127,6 @@ export interface ApiResponse<T> {
 }
 
 class VillaApi {
-    /**
-     * Get all villas with filters (public endpoint)
-     */
     async getAllVillas(filters?: VillaFilters): Promise<VillasResponse> {
         const queryParams = new URLSearchParams();
 
@@ -159,9 +155,6 @@ class VillaApi {
         throw new Error(response.message || 'Failed to get villas');
     }
 
-    /**
-     * Get current user's villas (hosts and admins only)
-     */
     async getMyVillas(filters?: MyVillaFilters): Promise<VillasResponse> {
         const queryParams = new URLSearchParams();
 
@@ -183,9 +176,6 @@ class VillaApi {
         throw new Error(response.message || 'Failed to get your villas');
     }
 
-    /**
-     * Create a new villa (hosts and admins only)
-     */
     async createVilla(data: CreateVillaData): Promise<Villa> {
         if (!data || Object.keys(data).length === 0) {
             throw new Error('Villa data is required');
@@ -200,9 +190,6 @@ class VillaApi {
         throw new Error(response.message || 'Failed to create villa');
     }
 
-    /**
-     * Get specific villa details by ID (public endpoint)
-     */
     async getVillaById(villaId: string): Promise<Villa> {
         if (!villaId) {
             throw new Error('Villa ID is required');
@@ -217,9 +204,6 @@ class VillaApi {
         throw new Error(response.message || 'Failed to get villa details');
     }
 
-    /**
-     * Get villa availability calendar
-     */
     async getVillaAvailability(villaId: string, params?: VillaAvailabilityParams): Promise<VillaAvailabilityResponse> {
         if (!villaId) {
             throw new Error('Villa ID is required');
@@ -245,9 +229,6 @@ class VillaApi {
         throw new Error(response.message || 'Failed to get villa availability');
     }
 
-    /**
-     * Get all services available for a villa
-     */
     async getVillaServices(villaId: string): Promise<VillaServicesResponse> {
         if (!villaId) {
             throw new Error('Villa ID is required');
@@ -262,9 +243,6 @@ class VillaApi {
         throw new Error(response.message || 'Failed to get villa services');
     }
 
-    /**
-     * Get villa statistics and analytics (villa owner and admins only)
-     */
     async getVillaStatistics(villaId: string): Promise<VillaStatisticsResponse> {
         if (!villaId) {
             throw new Error('Villa ID is required');
@@ -279,9 +257,6 @@ class VillaApi {
         throw new Error(response.message || 'Failed to get villa statistics');
     }
 
-    /**
-     * Update villa details (villa owners and admins only)
-     */
     async updateVilla(villaId: string, data: UpdateVillaData): Promise<Villa> {
         if (!villaId) {
             throw new Error('Villa ID is required');
@@ -300,9 +275,6 @@ class VillaApi {
         throw new Error(response.message || 'Failed to update villa');
     }
 
-    /**
-     * Delete villa (admins only) - soft delete
-     */
     async deleteVilla(villaId: string): Promise<Villa> {
         if (!villaId) {
             throw new Error('Villa ID is required');
@@ -316,11 +288,6 @@ class VillaApi {
 
         throw new Error(response.message || 'Failed to delete villa');
     }
-
- 
-
-
-
 }
 
 export const villaApi = new VillaApi();
