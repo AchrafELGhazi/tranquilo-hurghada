@@ -209,9 +209,7 @@ const AdminEditVilla: React.FC = () => {
 
             await promise;
 
-            // TODO: Update villa services association
-            // This would require an API endpoint to update villa-service relationships
-            // For now, we're just updating the villa data
+        
             if (formData.services.length > 0) {
                 toast.info('Service associations updated');
             }

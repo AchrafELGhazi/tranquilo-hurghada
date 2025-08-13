@@ -56,7 +56,6 @@ export const AdminVillaDetails: React.FC = () => {
 
                 setVilla(villaResponse);
 
-                // Handle both possible response formats
                 if (Array.isArray(bookingsResponse.data)) {
                     setBookings(bookingsResponse.data);
                 } else if (bookingsResponse && bookingsResponse.data) {
@@ -153,7 +152,7 @@ export const AdminVillaDetails: React.FC = () => {
 
     if (loading) {
         return (
-            <div className='min-h-screen bg-[#E8DCC6] py-8 px-4 sm:px-6 lg:px-8'>
+            <div className='min-h-screen '>
                 <div className='max-w-7xl mx-auto space-y-6'>
                     <div className='bg-white/40 backdrop-blur-md border-2 border-[#F8B259]/70 rounded-2xl p-8 text-center'>
                         <div className='w-8 h-8 border-2 border-[#D96F32]/30 border-t-[#D96F32] rounded-full animate-spin mx-auto mb-4'></div>
@@ -219,7 +218,6 @@ export const AdminVillaDetails: React.FC = () => {
                                         )}
                                     </div>
                                 </div>
-                                <p className='text-sm text-[#C75D2C]/60 mt-1'>ID: {villa.id}</p>
                             </div>
                         </div>
                         <div className='flex items-center space-x-3'>
@@ -355,38 +353,6 @@ export const AdminVillaDetails: React.FC = () => {
                                         </div>
                                     </div>
 
-                                    {/* Owner Information */}
-                                    {villa.owner && (
-                                        <div className='bg-white/30 border border-[#F8B259]/50 rounded-xl p-6'>
-                                            <h3 className='font-semibold text-[#C75D2C] mb-4'>Owner Information</h3>
-                                            <div className='space-y-3'>
-                                                <div className='flex items-center space-x-3'>
-                                                    <div className='w-10 h-10 bg-gradient-to-br from-[#F8B259]/30 to-[#D96F32]/30 rounded-lg flex items-center justify-center'>
-                                                        <Users className='w-5 h-5 text-[#D96F32]' />
-                                                    </div>
-                                                    <div>
-                                                        <p className='font-medium text-[#C75D2C]'>
-                                                            {villa.owner.fullName}
-                                                        </p>
-                                                        <div className='flex items-center space-x-1 mt-1'>
-                                                            {getRoleBadge(villa.owner.role)}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className='flex items-center space-x-2 text-sm text-[#C75D2C]/70'>
-                                                    <Mail className='w-4 h-4 text-[#D96F32]' />
-                                                    <span>{villa.owner.email}</span>
-                                                </div>
-                                                {villa.owner.phone && (
-                                                    <div className='flex items-center space-x-2 text-sm text-[#C75D2C]/70'>
-                                                        <Phone className='w-4 h-4 text-[#D96F32]' />
-                                                        <span>{villa.owner.phone}</span>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    )}
-
                                     {/* Timestamps */}
                                     <div className='bg-white/30 border border-[#F8B259]/50 rounded-xl p-6'>
                                         <h3 className='font-semibold text-[#C75D2C] mb-4'>Timeline</h3>
@@ -407,7 +373,7 @@ export const AdminVillaDetails: React.FC = () => {
                                     </div>
                                 </div>
 
-                                {/* Description and Amenities */}
+                                {/* Description, services, and Amenities */}
                                 <div className='lg:col-span-3 space-y-6'>
                                     {/* Description */}
                                     {villa.description && (
@@ -416,6 +382,34 @@ export const AdminVillaDetails: React.FC = () => {
                                             <p className='text-[#C75D2C]/80 leading-relaxed'>{villa.description}</p>
                                         </div>
                                     )}
+
+                                    {/* Services */}
+                                    <div className='bg-white/30 border border-[#F8B259]/50 rounded-xl p-6'>
+                                        <h3 className='font-semibold text-[#C75D2C] mb-4'>
+                                            Services ({villa.services?.length || 0})
+                                        </h3>
+                                        {villa.services && villa.services.length > 0 ? (
+                                            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3'>
+                                                {villa.services.map((service, index) => (
+                                                    <div
+                                                        key={index}
+                                                        className='flex items-center space-x-3 p-3 bg-white/40 rounded-lg border border-[#F8B259]/30'
+                                                    >
+                                                        <div className='text-[#C75D2C]'>
+                                                            <span className='text-sm font-medium'>{service.title}</span>
+                                                            {service.description && (
+                                                                <p className='text-xs text-[#C75D2C]/70 mt-1'>
+                                                                    {service.description}
+                                                                </p>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <p className='text-[#C75D2C]/60'>No services listed</p>
+                                        )}
+                                    </div>
 
                                     {/* Amenities */}
                                     <div className='bg-white/30 border border-[#F8B259]/50 rounded-xl p-6'>
@@ -549,10 +543,7 @@ export const AdminVillaDetails: React.FC = () => {
                                                                 </td>
                                                                 <td className='px-6 py-4'>
                                                                     <p className='font-bold text-[#C75D2C]'>
-                                                                        {formatPrice(
-                                                                            Number(booking.totalPrice),
-                                                                            'EUR'
-                                                                        )}
+                                                                        {formatPrice(Number(booking.totalPrice), 'EUR')}
                                                                     </p>
                                                                     <p className='text-xs text-[#C75D2C]/60'>
                                                                         {booking.paymentMethod === 'BANK_TRANSFER'
@@ -639,10 +630,7 @@ export const AdminVillaDetails: React.FC = () => {
                                                         <div>
                                                             <p className='text-[#C75D2C]/60'>Total</p>
                                                             <p className='font-bold text-[#C75D2C]'>
-                                                                {formatPrice(
-                                                                    Number(booking.totalPrice),
-                                                                    'EUR'
-                                                                )}
+                                                                {formatPrice(Number(booking.totalPrice), 'EUR')}
                                                             </p>
                                                         </div>
                                                     </div>

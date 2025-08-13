@@ -1,17 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import {
-    Eye,
-    Edit,
-    MapPin,
-    BedDouble,
-    Bath,
-    Users,
-    RefreshCw,
-    AlertCircle,
-    Home,
-} from 'lucide-react';
-import { villaApi, type VillaFilters } from '@/api/villaApi';
+import { Eye, Edit, MapPin, BedDouble, Bath, Users, RefreshCw, AlertCircle, Home } from 'lucide-react';
+import { villaApi } from '@/api/villaApi';
 import type { Villa } from '@/utils/types';
 import { formatPrice } from '@/utils/bookingUtils';
 
