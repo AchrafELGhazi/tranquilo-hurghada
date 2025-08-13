@@ -110,7 +110,7 @@ const Booking: React.FC = () => {
             <div className='min-h-screen bg-[#E8DCC6]'>
                 {/* Header with villa status */}
                 <div className='bg-gradient-to-r from-[#F8B259]/20 to-[#D96F32]/20 border-b border-[#F8B259]/30'>
-                    <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4'>
+                    <div className='max-w-12xl mx-auto px-4 sm:px-6 lg:px-8 py-4'>
                         <div className='flex items-center justify-between'>
                             <div>
                                 <h1 className='text-2xl font-bold text-[#C75D2C] font-butler'>Book Your Stay</h1>
@@ -146,7 +146,7 @@ const Booking: React.FC = () => {
                 </div>
 
                 {/* Main content */}
-                <div className='relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
+                <div className='relative  grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
                     <div className='lg:col-span-2'>
                         <VillaDetails villa={villa} />
                     </div>
