@@ -29,7 +29,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    // Local Storage Management
     const getAccessToken = (): string | null => {
         return localStorage.getItem('accessToken');
     };
@@ -75,7 +74,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
                     apiService.setAuthToken(accessToken);
 
                     try {
-                        // Verify token is still valid
+                        // Verify token is still valid by fetching current user
                         const response = await authApi.getCurrentUser();
                         setUser(response.data.user);
                         storeUser(response.data.user);
@@ -93,6 +92,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
         };
 
         initializeAuth();
+    }, []);
+
+    useEffect(() => {
+        const handleAuthFailure = () => {
+            clearAuthData();
+            setError('Your session has expired. Please log in again.');
+        };
+
+        window.addEventListener('auth:failure', handleAuthFailure);
+
+        return () => {
+            window.removeEventListener('auth:failure', handleAuthFailure);
+        };
     }, []);
 
     const login = async (data: LoginData): Promise<void> => {

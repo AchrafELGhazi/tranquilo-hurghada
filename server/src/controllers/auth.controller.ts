@@ -3,31 +3,12 @@ import { registerUser, loginUser, refreshUserToken } from '../services/auth.serv
 import { ApiResponse } from '../utils/apiResponse';
 import logger from '../config/logger';
 import { AuthenticatedRequest } from '../middleware/auth.middleware';
+import type { RegisterBody, LoginBody, RefreshTokenBody } from '../schemas/auth.schema';
 
 export const register = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { email, password, fullName } = req.body;
-
-        if (!email || !password || !fullName) {
-            ApiResponse.badRequest(res, 'Missing required fields: email, password, and fullName are required');
-            return;
-        }
-
-        // Email validation
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            ApiResponse.badRequest(res, 'Invalid email format');
-            return;
-        }
-
-        // Password validation (minimum 6 characters)
-        if (password.length < 6) {
-            ApiResponse.badRequest(res, 'Password must be at least 6 characters long');
-            return;
-        }
-
+        const { email, password, fullName } = req.body as RegisterBody;
         const authData = await registerUser({ email, password, fullName });
-
         ApiResponse.created(res, authData, 'User registered successfully');
     } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Registration failed';
@@ -43,13 +24,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
 export const login = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { email, password } = req.body;
-
-        if (!email || !password) {
-            ApiResponse.badRequest(res, 'Email and password are required');
-            return;
-        }
-
+        const { email, password } = req.body as LoginBody;
         const authData = await loginUser(email, password);
         ApiResponse.success(res, authData, 'Login successful');
     } catch (error: unknown) {
@@ -61,13 +36,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
 export const refreshToken = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { refreshToken } = req.body;
-
-        if (!refreshToken) {
-            ApiResponse.badRequest(res, 'Refresh token is required');
-            return;
-        }
-
+        const { refreshToken } = req.body as RefreshTokenBody;
         const authData = await refreshUserToken(refreshToken);
         ApiResponse.success(res, authData, 'Token refreshed successfully');
     } catch (error: unknown) {
@@ -96,7 +65,6 @@ export const currentUser = async (
             ApiResponse.unauthorized(res, 'Not authenticated');
             return;
         }
-
         ApiResponse.success(res, { user: req.user }, 'User retrieved successfully');
     } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to get user';

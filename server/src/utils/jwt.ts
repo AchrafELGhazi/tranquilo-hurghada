@@ -21,8 +21,13 @@ export const generateTokens = (user: User): {
         updatedAt: user.updatedAt.toISOString(),
     };
 
-    const accessToken = jwt.sign(payload, env.JWT_SECRET, { expiresIn: '7d' });
-    const refreshToken = jwt.sign({ id: user.id, email: user.email }, env.JWT_SECRET, { expiresIn: '90d' });
+    const accessToken = jwt.sign(payload, env.JWT_SECRET, { expiresIn: '15m' });
+
+    const refreshToken = jwt.sign(
+        { id: user.id, email: user.email },
+        env.JWT_SECRET,
+        { expiresIn: '30d' }
+    );
 
     return { accessToken, refreshToken };
 };

@@ -1,4 +1,5 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from 'axios';
+import { useParams } from 'react-router-dom';
 
 interface ApiResponse<T = any> {
     success: boolean;
@@ -6,9 +7,17 @@ interface ApiResponse<T = any> {
     data: T;
 }
 
+interface RefreshTokenResponse {
+    accessToken: string;
+    refreshToken: string;
+    user: any;
+}
+
 class ApiService {
     private api: AxiosInstance;
     private authToken: string | null = null;
+    private isRefreshing = false;
+    private refreshPromise: Promise<string> | null = null;
 
     constructor() {
         this.api = axios.create({
@@ -23,7 +32,6 @@ class ApiService {
     }
 
     private initializeInterceptors(): void {
-        // Request interceptor - add auth token
         this.api.interceptors.request.use(
             (config) => {
                 if (this.authToken) {
@@ -34,30 +42,122 @@ class ApiService {
             (error) => Promise.reject(error)
         );
 
-        // Response interceptor - handle errors simply
+        // Response interceptor - handle errors and token refresh
         this.api.interceptors.response.use(
             (response) => response,
-            (error) => {
-                // Handle network errors
-                if (error.code === 'ERR_NETWORK') {
-                    throw new Error('Network connection failed');
+            async (error) => {
+                const originalRequest = error.config;
+
+                // Handle 401 errors (unauthorized) - potentially expired token
+                if (error.response?.status === 401 && !originalRequest._retry) {
+                    originalRequest._retry = true;
+
+                    try {
+                        const newAccessToken = await this.handleTokenRefresh();
+
+                        // Retry the original request with new token
+                        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+                        return this.api(originalRequest);
+                    } catch (refreshError) {
+                        this.handleAuthFailure();
+                        return Promise.reject(refreshError);
+                    }
                 }
 
-                // Handle timeout errors
-                if (error.code === 'ECONNABORTED') {
-                    throw new Error('Request timed out');
-                }
-
-                // Handle HTTP errors
-                if (error.response) {
-                    const message = this.extractErrorMessage(error.response);
-                    throw new Error(message || `Request failed with status ${error.response.status}`);
-                }
-
-                // Fallback error
-                throw new Error(error.message || 'An unexpected error occurred');
+                // Handle other errors
+                return this.handleApiError(error);
             }
         );
+    }
+
+    private async handleTokenRefresh(): Promise<string> {
+        // If already refreshing, wait for that promise to complete
+        if (this.isRefreshing && this.refreshPromise) {
+            return this.refreshPromise;
+        }
+
+        this.isRefreshing = true;
+
+        this.refreshPromise = (async () => {
+            try {
+                const refreshToken = localStorage.getItem('refreshToken');
+
+                if (!refreshToken) {
+                    throw new Error('No refresh token available');
+                }
+
+                // Make refresh request without using the interceptor to avoid infinite loop
+                const response = await axios.post<ApiResponse<RefreshTokenResponse>>(
+                    `${import.meta.env.VITE_API_URL}/auth/refresh-token`,
+                    { refreshToken },
+                    {
+                        headers: { 'Content-Type': 'application/json' },
+                        timeout: 30000
+                    }
+                );
+
+                const { accessToken, refreshToken: newRefreshToken } = response.data.data;
+
+                // Update stored tokens
+                localStorage.setItem('accessToken', accessToken);
+                localStorage.setItem('refreshToken', newRefreshToken);
+
+                // Update instance token
+                this.setAuthToken(accessToken);
+
+                return accessToken;
+            } catch (error) {
+                // Clear auth data on refresh failure
+                this.clearAuthData();
+                throw error;
+            } finally {
+                this.isRefreshing = false;
+                this.refreshPromise = null;
+            }
+        })();
+
+        return this.refreshPromise;
+    }
+
+    private handleAuthFailure(): void {
+        this.clearAuthData();
+        const {lang} = useParams()
+        window.dispatchEvent(new CustomEvent('auth:failure', {
+            detail: { reason: 'token_refresh_failed' }
+        }));
+
+        // Redirect to login page
+        if (typeof window !== 'undefined') {
+            window.location.href = `/${lang}/login`;
+        }
+    }
+
+    private clearAuthData(): void {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+        this.authToken = null;
+    }
+
+    private handleApiError(error: any): Promise<never> {
+        // Handle network errors
+        if (error.code === 'ERR_NETWORK') {
+            throw new Error('Network connection failed');
+        }
+
+        // Handle timeout errors
+        if (error.code === 'ECONNABORTED') {
+            throw new Error('Request timed out');
+        }
+
+        // Handle HTTP errors
+        if (error.response) {
+            const message = this.extractErrorMessage(error.response);
+            throw new Error(message || `Request failed with status ${error.response.status}`);
+        }
+
+        // Fallback error
+        throw new Error(error.message || 'An unexpected error occurred');
     }
 
     private extractErrorMessage(response: any): string {
