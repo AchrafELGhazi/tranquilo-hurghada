@@ -1,57 +1,44 @@
 import React, { useState, useEffect } from 'react';
 import villaApi from '@/api/villaApi';
-import authApi from '@/api/authApi';
+import { useAuth } from '@/contexts/AuthContext';
 import VillaDetails from '@/components/booking/VillaDetails';
 import BookingComponent from '@/components/booking/BookingComponent';
 import { THToast, THToaster } from '@/components/common/Toast';
-import type { User, Villa } from '@/utils/types';
+import type { Villa } from '@/utils/types';
 
 const Booking: React.FC = () => {
     const [villa, setVilla] = useState<Villa | null>(null);
-    const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
 
+    const { user, isLoading: authLoading } = useAuth();
+
     useEffect(() => {
-        const loadData = async () => {
+        const loadVilla = async () => {
             try {
                 setLoading(true);
 
-                try {
-                    const currentUser = await authApi.getCurrentUser();
-                    setUser(currentUser);
-                } catch (userError) {
-                    console.log('User not authenticated:', userError);
-                    setUser(null);
-                }
+                const villasResponse = await villaApi.getAllVillas({
+                    limit: 1,
+                });
 
-                try {
-                    const villasResponse = await villaApi.getAllVillas({
-                        limit: 1,
-                    });
-
-                    if (villasResponse.villas && villasResponse.villas.length > 0) {
-                        setVilla(villasResponse.villas[0]);
-                    } else {
-                        THToast.error('No Villas Available', 'There are currently no villas available for booking');
-                    }
-                } catch (villaError) {
-                    console.error('Failed to load villa:', villaError);
-                    THToast.error('Loading Error', 'Failed to load villa data. Please try again.');
+                if (villasResponse.villas && villasResponse.villas.length > 0) {
+                    setVilla(villasResponse.villas[0]);
+                } else {
+                    THToast.error('No Villas Available', 'There are currently no villas available for booking');
                 }
-            } catch (err) {
-                console.error('General error loading data:', err);
-                const errorMsg = err instanceof Error ? err.message : 'Failed to load data';
-                THToast.error('Loading Error', errorMsg);
+            } catch (villaError) {
+                console.error('Failed to load villa:', villaError);
+                THToast.error('Loading Error', 'Failed to load villa data. Please try again.');
             } finally {
                 setLoading(false);
             }
         };
 
-        loadData();
-    }, []);
+            loadVilla();
+      
+    }, [authLoading]);
 
     const handleBookingSuccess = () => {
-
         if (villa?.id) {
             villaApi
                 .getVillaById(villa.id)
@@ -60,7 +47,7 @@ const Booking: React.FC = () => {
         }
     };
 
-    if (loading) {
+    if (loading || authLoading) {
         return (
             <div className='min-h-screen bg-gradient-to-br from-[#E8DCC6] to-[#F8B259]/20 flex items-center justify-center'>
                 <div className='flex flex-col items-center space-y-6'>
@@ -150,9 +137,9 @@ const Booking: React.FC = () => {
                                             <div className='text-xs'>Temporarily unavailable</div>
                                         </div>
                                     </div>
-                                ):('')}
-
-                            
+                                ) : (
+                                    ''
+                                )}
                             </div>
                         </div>
                     </div>
