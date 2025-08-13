@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import { authApi, type LoginData, type RegisterData} from '../api/authApi';
+import { authApi, type LoginData, type RegisterData } from '../api/authApi';
+import apiService from '@/utils/api';
 import type { User } from '@/utils/types';
 
 interface AuthContextType {
@@ -28,32 +29,64 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const isAuthenticated = !!user && !!authApi.getAccessToken();
+    // Local Storage Management
+    const getAccessToken = (): string | null => {
+        return localStorage.getItem('accessToken');
+    };
 
+    const storeTokens = (accessToken: string, refreshToken: string): void => {
+        localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('refreshToken', refreshToken);
+        apiService.setAuthToken(accessToken);
+    };
+
+    const storeUser = (user: User): void => {
+        localStorage.setItem('user', JSON.stringify(user));
+    };
+
+    const isAuthenticated = !!user && !!getAccessToken();
+
+    const getRefreshToken = (): string | null => {
+        return localStorage.getItem('refreshToken');
+    };
+
+    const getUserFromStorage = (): User | null => {
+        const userData = localStorage.getItem('user');
+        return userData ? JSON.parse(userData) : null;
+    };
+
+    const clearAuthData = (): void => {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+        apiService.clearAuthToken();
+        setUser(null);
+    };
+
+    // Initialize auth on app start
     useEffect(() => {
         const initializeAuth = async () => {
             try {
-                setIsLoading(true);
-
-                const storedUser = authApi.getUserFromStorage();
-                const accessToken = authApi.getAccessToken();
+                const storedUser = getUserFromStorage();
+                const accessToken = getAccessToken();
 
                 if (storedUser && accessToken) {
+                    // Set token in API service
+                    apiService.setAuthToken(accessToken);
+
                     try {
-                        const currentUser = await authApi.getCurrentUser();
-                        setUser(currentUser);
+                        // Verify token is still valid
+                        const response = await authApi.getCurrentUser();
+                        setUser(response.data.user);
+                        storeUser(response.data.user);
                     } catch (error) {
                         console.warn('Token validation failed, clearing auth data');
-                        authApi.clearAuthData();
-                        setUser(null);
+                        clearAuthData();
                     }
-                } else {
-                    setUser(null);
                 }
             } catch (error) {
                 console.error('Auth initialization failed:', error);
-                authApi.clearAuthData();
-                setUser(null);
+                clearAuthData();
             } finally {
                 setIsLoading(false);
             }
@@ -65,9 +98,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const login = async (data: LoginData): Promise<void> => {
         setIsLoading(true);
         setError(null);
+
         try {
-            const user = await authApi.login(data);
-            setUser(user);
+            const response = await authApi.login(data);
+
+            if (response.success && response.data) {
+                storeTokens(response.data.accessToken, response.data.refreshToken);
+                storeUser(response.data.user);
+                setUser(response.data.user);
+            } else {
+                throw new Error(response.message || 'Login failed');
+            }
         } catch (error: any) {
             const errorMessage = error.message || 'Login failed';
             setError(errorMessage);
@@ -80,9 +121,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const register = async (data: RegisterData): Promise<void> => {
         setIsLoading(true);
         setError(null);
+
         try {
-            const user = await authApi.register(data);
-            setUser(user);
+            const response = await authApi.register(data);
+
+            if (response.success && response.data) {
+                storeTokens(response.data.accessToken, response.data.refreshToken);
+                storeUser(response.data.user);
+                setUser(response.data.user);
+            } else {
+                throw new Error(response.message || 'Registration failed');
+            }
         } catch (error: any) {
             const errorMessage = error.message || 'Registration failed';
             setError(errorMessage);
@@ -95,23 +144,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const logout = async (): Promise<void> => {
         setIsLoading(true);
         setError(null);
+
         try {
             await authApi.logout();
-            setUser(null);
         } catch (error: any) {
-            console.warn('Logout error:', error);
-            authApi.clearAuthData();
-            setUser(null);
+            console.warn('Server logout failed, clearing local data anyway');
         } finally {
+            clearAuthData();
             setIsLoading(false);
         }
     };
 
+    // Role checking functions
     const hasRole = (role: 'GUEST' | 'HOST' | 'ADMIN'): boolean => {
         if (!user) return false;
 
         if (user.role === 'ADMIN') return true;
-
         if (user.role === 'HOST' && (role === 'HOST' || role === 'GUEST')) return true;
 
         return user.role === role;
