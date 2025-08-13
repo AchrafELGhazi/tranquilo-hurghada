@@ -21,6 +21,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { BookingStatusBadge } from '@/components/common/BookingStatusBadge';
 import type { Booking } from '@/utils/types';
 import villaApi from '@/api/villaApi';
+import { formatPrice } from '@/utils/bookingUtils';
 
 const MyBookings: React.FC = () => {
     const { user } = useAuth();
@@ -280,7 +281,7 @@ const MyBookings: React.FC = () => {
                                                 </td>
                                                 <td className='px-6 py-4'>
                                                     <p className='font-bold text-[#C75D2C]'>
-                                                        {villaApi.formatPrice(booking.totalPrice, 'EUR')}
+                                                        {formatPrice(booking.totalPrice, 'EUR')}
                                                     </p>
                                                     <p className='text-xs text-[#C75D2C]/60'>
                                                         {booking.paymentMethod === 'BANK_TRANSFER'
@@ -373,7 +374,7 @@ const MyBookings: React.FC = () => {
                                             <div>
                                                 <p className='text-[#C75D2C]/60'>Total</p>
                                                 <p className='font-bold text-[#C75D2C]'>
-                                                    {villaApi.formatPrice(booking.totalPrice, 'EUR')}
+                                                    {formatPrice(booking.totalPrice, 'EUR')}
                                                 </p>
                                             </div>
                                         </div>
@@ -557,7 +558,7 @@ const MyBookings: React.FC = () => {
                                     <div className='flex justify-between'>
                                         <span className='text-[#C75D2C]/60'>Total Amount</span>
                                         <span className='font-bold text-[#C75D2C] text-lg'>
-                                            {villaApi.formatPrice(selectedBooking.totalPrice, 'EUR')}
+                                            {formatPrice(selectedBooking.totalPrice, 'EUR')}
                                         </span>
                                     </div>
                                     <div className='flex justify-between'>
@@ -597,11 +598,11 @@ const MyBookings: React.FC = () => {
                                                     </p>
                                                     <p className='text-sm text-[#C75D2C]/60'>
                                                         Qty: {service.quantity} ×{' '}
-                                                        {villaApi.formatPrice(service.unitPrice, 'EUR')}
+                                                        {formatPrice(service.unitPrice, 'EUR')}
                                                     </p>
                                                 </div>
                                                 <span className='font-medium text-[#C75D2C]'>
-                                                    {villaApi.formatPrice(service.totalPrice, 'EUR')}
+                                                    {formatPrice(service.totalPrice, 'EUR')}
                                                 </span>
                                             </div>
                                         ))}
