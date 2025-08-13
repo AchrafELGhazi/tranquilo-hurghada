@@ -27,6 +27,7 @@ import { bookingApi } from '@/api/bookingApi';
 import { BookingStatusBadge } from '@/components/common/BookingStatusBadge';
 import type { Villa, Booking } from '@/utils/types';
 import { getAmenityDisplayName, getAmenityIcon } from '@/utils/amenitiesUtils';
+import { formatPrice } from '@/utils/bookingUtils';
 
 export const AdminVillaDetails: React.FC = () => {
     const { villaId, lang } = useParams<{ villaId: string; lang: string }>();
@@ -346,7 +347,7 @@ export const AdminVillaDetails: React.FC = () => {
                                                 <div className='text-center bg-white/40 rounded-lg p-3'>
                                                     <DollarSign className='w-6 h-6 text-[#D96F32] mx-auto mb-1' />
                                                     <p className='font-bold text-[#C75D2C]'>
-                                                        {villaApi.formatPrice(Number(villa.pricePerNight), 'EUR')}
+                                                        {formatPrice(Number(villa.pricePerNight), 'EUR')}
                                                     </p>
                                                     <p className='text-xs text-[#C75D2C]/60'>Per Night</p>
                                                 </div>
@@ -548,7 +549,7 @@ export const AdminVillaDetails: React.FC = () => {
                                                                 </td>
                                                                 <td className='px-6 py-4'>
                                                                     <p className='font-bold text-[#C75D2C]'>
-                                                                        {villaApi.formatPrice(
+                                                                        {formatPrice(
                                                                             Number(booking.totalPrice),
                                                                             'EUR'
                                                                         )}
@@ -638,7 +639,7 @@ export const AdminVillaDetails: React.FC = () => {
                                                         <div>
                                                             <p className='text-[#C75D2C]/60'>Total</p>
                                                             <p className='font-bold text-[#C75D2C]'>
-                                                                {villaApi.formatPrice(
+                                                                {formatPrice(
                                                                     Number(booking.totalPrice),
                                                                     'EUR'
                                                                 )}
@@ -699,7 +700,7 @@ export const AdminVillaDetails: React.FC = () => {
                                                 <div className='text-center bg-white/40 rounded-lg p-4'>
                                                     <DollarSign className='w-8 h-8 text-[#D96F32] mx-auto mb-2' />
                                                     <p className='font-bold text-[#C75D2C] text-xl'>
-                                                        {villaApi.formatPrice(
+                                                        {formatPrice(
                                                             bookings
                                                                 .filter(b =>
                                                                     ['CONFIRMED', 'COMPLETED'].includes(b.status)

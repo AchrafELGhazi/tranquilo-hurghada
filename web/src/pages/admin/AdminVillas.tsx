@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { villaApi, type VillaFilters } from '@/api/villaApi';
 import type { Villa } from '@/utils/types';
+import { formatPrice } from '@/utils/bookingUtils';
 
 export const AdminVillas: React.FC = () => {
     const { lang } = useParams();
@@ -161,7 +162,7 @@ export const AdminVillas: React.FC = () => {
                                         {/* Price */}
                                         <div className='flex items-center justify-center mb-4'>
                                             <div className='flex items-center text-xl font-bold text-[#C75D2C] bg-gradient-to-r from-[#F8B259]/20 to-[#DEB887]/20 px-4 py-2 rounded-xl border border-[#F8B259]/30'>
-                                                {villaApi.formatPrice(villa.pricePerNight)}
+                                                {formatPrice(villa.pricePerNight)}
                                                 <span className='text-sm text-[#C75D2C]/70 font-normal ml-1'>
                                                     /night
                                                 </span>

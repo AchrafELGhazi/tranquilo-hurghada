@@ -20,6 +20,7 @@ import villaApi from '@/api/villaApi';
 import DateRangePickerModal from './DateRangePickerModal';
 import { THToast, THToaster } from '@/components/common/Toast';
 import type { PaymentMethod, User, Villa, Service } from '@/utils/types';
+import { calculateNights, calculateTotalPrice } from '@/utils/bookingUtils';
 
 interface FormData {
     checkIn: string;
@@ -368,13 +369,13 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
 
     const calculateTotal = () => {
         if (!formData.checkIn || !formData.checkOut) return 0;
-        return villaApi.calculateTotalPrice(villa.pricePerNight, formData.checkIn, formData.checkOut);
+        return calculateTotalPrice(villa.pricePerNight, formData.checkIn, formData.checkOut);
     };
 
-    const calculateNights = () => {
-        if (!formData.checkIn || !formData.checkOut) return 0;
-        return villaApi.calculateNights(formData.checkIn, formData.checkOut);
-    };
+  const getCalculatedNights = () => {
+      if (!formData.checkIn || !formData.checkOut) return 0;
+      return calculateNights(formData.checkIn, formData.checkOut);
+  };
 
     const calculateServicesTotal = () => {
         return formData.selectedServices.reduce((total, selection) => {
@@ -477,7 +478,8 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
                                         <div className='flex items-center justify-center space-x-2 mt-2'>
                                             <Clock className='w-4 h-4 text-[#D96F32]' />
                                             <span className='text-sm font-semibold text-[#C75D2C]'>
-                                                {calculateNights()} {calculateNights() === 1 ? 'night' : 'nights'}
+                                                {getCalculatedNights()}{' '}
+                                                {getCalculatedNights() === 1 ? 'night' : 'nights'}
                                             </span>
                                         </div>
                                     </div>
@@ -735,7 +737,7 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
                                     <div className='space-y-3 text-sm'>
                                         <div className='flex justify-between items-center'>
                                             <span className='text-[#C75D2C]/80'>
-                                                {villa.pricePerNight} EUR × {calculateNights()} nights
+                                                {villa.pricePerNight} EUR × {getCalculatedNights()} nights
                                             </span>
                                             <span className='font-semibold text-[#C75D2C]'>{calculateTotal()} EUR</span>
                                         </div>
@@ -755,18 +757,13 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
                                                             key={selection.serviceId}
                                                             className='flex justify-between items-center text-xs'
                                                         >
-                                                            <span className='text-[#C75D2C]/70'>
-                                                                {service.title}
-                                                            </span>
-                                                         
+                                                            <span className='text-[#C75D2C]/70'>{service.title}</span>
                                                         </div>
                                                     );
                                                 })}
-                                               
                                             </div>
                                         )}
 
-                                
                                         <div className='border-t-2 border-[#F8B259]/50 pt-3 flex justify-between items-center'>
                                             <span className='font-bold text-[#C75D2C] text-lg'>Total</span>
                                             <span className='font-bold text-[#C75D2C] text-lg'>
