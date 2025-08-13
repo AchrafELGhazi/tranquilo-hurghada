@@ -25,7 +25,7 @@ const baseVillaSchema = {
         .trim(),
     pricePerNight: z.number()
         .positive('Price per night must be positive')
-        .max(10000, 'Price per night cannot exceed 10,000')
+        .max(100000, 'Price per night cannot exceed 100,000')
         .multipleOf(0.01, 'Price must have at most 2 decimal places'),
     maxGuests: z.number()
         .int('Max guests must be a whole number')

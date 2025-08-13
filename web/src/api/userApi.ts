@@ -119,7 +119,7 @@ class UserApi {
 
     // Change password
     async changePassword(data: ChangePasswordData): Promise<void> {
-        const response = await apiService.put<any>('/users/password', data);
+        const response = await apiService.put<any>('/profile/password', data);
 
         if (!response.success) {
             throw new Error(response.message || 'Failed to change password');
@@ -128,7 +128,7 @@ class UserApi {
 
     // Check if profile is complete
     async checkProfileComplete(): Promise<ProfileCompleteness> {
-        const response = await apiService.get<any>('/users/complete');
+        const response = await apiService.get<any>('/profile/complete');
 
         if (response.success && response.data) {
             return response.data;
@@ -139,7 +139,7 @@ class UserApi {
 
     // Deactivate account
     async deactivateAccount(password: string): Promise<void> {
-        const response = await apiService.put<ApiResponse>('/users/deactivate', { password });
+        const response = await apiService.put<ApiResponse>('/profile/deactivate', { password });
 
         if (!response.success) {
             throw new Error(response.message || 'Failed to deactivate account');

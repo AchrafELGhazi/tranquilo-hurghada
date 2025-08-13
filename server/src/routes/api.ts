@@ -5,6 +5,7 @@ import bookingRouter from './booking.route';
 import userRouter from './user.route';
 import { env } from '../config/env';
 import generateRootResponse from '../utils/generateRootResponse';
+import serviceRouter from './service.route';
 
 const apiRouter = Router();
 
@@ -18,6 +19,7 @@ apiRouter.use('/auth', authRouter);
 apiRouter.use('/users', userRouter);
 apiRouter.use('/villas', villaRouter);
 apiRouter.use('/bookings', bookingRouter);
+apiRouter.use('/service', serviceRouter);
 
 // Health check endpoint
 apiRouter.get('/health', (_req, res) => {
