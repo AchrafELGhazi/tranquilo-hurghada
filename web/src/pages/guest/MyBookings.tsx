@@ -20,7 +20,6 @@ import bookingApi, { type BookingFilters } from '@/api/bookingApi';
 import { useAuth } from '@/contexts/AuthContext';
 import { BookingStatusBadge } from '@/components/common/BookingStatusBadge';
 import type { Booking } from '@/utils/types';
-import villaApi from '@/api/villaApi';
 import { canCancelBooking, formatPrice, getStatusText, getStayDuration } from '@/utils/bookingUtils';
 
 const MyBookings: React.FC = () => {
@@ -296,7 +295,7 @@ const MyBookings: React.FC = () => {
                                                     <div className='flex items-center space-x-2'>
                                                         <button
                                                             onClick={() => setSelectedBooking(booking)}
-                                                            className='p-2 bg-[#D96F32]/20 text-[#D96F32] rounded-lg hover:bg-[#D96F32]/30 transition-colors'
+                                                            className='p-2 bg-[#D96F32]/20 cursor-pointer text-[#D96F32] rounded-lg hover:bg-[#D96F32]/30 transition-colors'
                                                             title='View Details'
                                                         >
                                                             <Eye className='w-4 h-4' />
@@ -308,7 +307,7 @@ const MyBookings: React.FC = () => {
                                                                     setShowCancelModal(true);
                                                                 }}
                                                                 disabled={cancelling === booking.id}
-                                                                className='p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors disabled:opacity-50'
+                                                                className='p-2 bg-red-100 cursor-pointer text-red-600 rounded-lg hover:bg-red-200 transition-colors disabled:opacity-50'
                                                                 title='Cancel Booking'
                                                             >
                                                                 <X className='w-4 h-4' />
@@ -388,7 +387,7 @@ const MyBookings: React.FC = () => {
                                             <div className='flex items-center space-x-2'>
                                                 <button
                                                     onClick={() => setSelectedBooking(booking)}
-                                                    className='p-2 bg-[#D96F32]/20 text-[#D96F32] rounded-lg hover:bg-[#D96F32]/30 transition-colors'
+                                                    className='p-2 bg-[#D96F32]/20 cursor-pointer text-[#D96F32] rounded-lg hover:bg-[#D96F32]/30 transition-colors'
                                                 >
                                                     <Eye className='w-4 h-4' />
                                                 </button>
@@ -399,7 +398,7 @@ const MyBookings: React.FC = () => {
                                                             setShowCancelModal(true);
                                                         }}
                                                         disabled={cancelling === booking.id}
-                                                        className='p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors disabled:opacity-50'
+                                                        className='p-2 bg-red-100 text-red-600 cursor-pointer rounded-lg hover:bg-red-200 transition-colors disabled:opacity-50'
                                                     >
                                                         <X className='w-4 h-4' />
                                                     </button>
@@ -450,7 +449,7 @@ const MyBookings: React.FC = () => {
                             <h3 className='text-xl font-bold text-[#C75D2C] font-butler'>Booking Details</h3>
                             <button
                                 onClick={() => setSelectedBooking(null)}
-                                className='p-2 hover:bg-[#F8B259]/20 rounded-xl transition-colors'
+                                className='p-2 hover:bg-[#F8B259]/20 rounded-xl cursor-pointer transition-colors'
                             >
                                 <X className='w-5 h-5 text-[#C75D2C]' />
                             </button>
@@ -498,11 +497,7 @@ const MyBookings: React.FC = () => {
                                     <div>
                                         <label className='text-sm text-[#C75D2C]/60'>Duration</label>
                                         <p className='font-medium text-[#C75D2C]'>
-                                            {getStayDuration(
-                                                selectedBooking.checkIn,
-                                                selectedBooking.checkOut
-                                            )}{' '}
-                                            nights
+                                            {getStayDuration(selectedBooking.checkIn, selectedBooking.checkOut)} nights
                                         </p>
                                     </div>
                                     <div>
@@ -573,10 +568,10 @@ const MyBookings: React.FC = () => {
                                         <span className='text-[#C75D2C]/60'>Payment Status</span>
                                         <span
                                             className={`font-medium ${
-                                                selectedBooking.isPaid ? 'text-green-600' : 'text-amber-600'
+                                                selectedBooking.isPaid ? 'text-green-600' : 'text-red-600'
                                             }`}
                                         >
-                                            {selectedBooking.isPaid ? 'Paid' : 'Pending'}
+                                            {selectedBooking.isPaid ? 'Paid' : 'Not Paid'}
                                         </span>
                                     </div>
                                 </div>
@@ -668,7 +663,7 @@ const MyBookings: React.FC = () => {
                         </div>
 
                         {/* Modal Actions */}
-                        <div className='flex justify-between items-center p-6 border-t border-[#F8B259]/30'>
+                        <div className='flex justify-between cursor-pointer items-center p-6 border-t border-[#F8B259]/30'>
                             <button
                                 onClick={() => setSelectedBooking(null)}
                                 className='px-4 py-2 text-[#C75D2C] hover:bg-[#F8B259]/20 rounded-lg transition-colors'
@@ -678,7 +673,7 @@ const MyBookings: React.FC = () => {
                             {canCancelBooking(selectedBooking, user.id, user.role) && (
                                 <button
                                     onClick={() => setShowCancelModal(true)}
-                                    className='px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center space-x-2'
+                                    className='px-4 py-2 bg-red-600 text-white cursor-pointer rounded-lg hover:bg-red-700 transition-colors flex items-center space-x-2'
                                 >
                                     <X className='w-4 h-4' />
                                     <span>Cancel Booking</span>
