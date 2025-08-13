@@ -1,4 +1,4 @@
-import { Villa, VillaStatus, Prisma } from '@prisma/client';
+import { Villa, VillaStatus, Prisma, ServiceCategory, ServiceDifficulty } from '@prisma/client';
 import prisma from '../config/database';
 
 interface VillaFilters {
@@ -46,6 +46,25 @@ interface CreateVillaParams {
     ownerId: string;
 }
 
+// Service interface for villa services
+interface ServiceData {
+    id?: string; // For updates - if provided, update existing service
+    title: string;
+    description: string;
+    longDescription?: string | null;
+    category: ServiceCategory;
+    price: number;
+    duration: string;
+    difficulty?: ServiceDifficulty | null;
+    maxGroupSize?: number | null;
+    highlights?: string[];
+    included?: string[];
+    image?: string | null;
+    isActive?: boolean;
+    isFeatured?: boolean;
+}
+
+// Updated interface to include services
 interface UpdateVillaParams {
     title?: string;
     description?: string;
@@ -60,6 +79,12 @@ interface UpdateVillaParams {
     images?: string[];
     status?: VillaStatus;
     isActive?: boolean;
+    // Services update operations
+    services?: {
+        create?: ServiceData[];
+        update?: (ServiceData & { id: string })[];
+        delete?: string[];
+    };
 }
 
 export const getVillas = async (filters: VillaFilters): Promise<PaginatedVillasResponse> => {
@@ -368,12 +393,12 @@ export const createVilla = async (params: CreateVillaParams): Promise<any> => {
 
 export const updateVilla = async (villaId: string, params: UpdateVillaParams): Promise<any> => {
     try {
-        // Build update data object
+        // Build update data object for villa
         const updateData: any = {
             updatedAt: new Date()
         };
 
-        // Only include fields that are provided
+        // Only include villa fields that are provided
         if (params.title !== undefined) updateData.title = params.title.trim();
         if (params.description !== undefined) updateData.description = params.description?.trim() || null;
         if (params.address !== undefined) updateData.address = params.address.trim();
@@ -388,55 +413,208 @@ export const updateVilla = async (villaId: string, params: UpdateVillaParams): P
         if (params.status !== undefined) updateData.status = params.status;
         if (params.isActive !== undefined) updateData.isActive = params.isActive;
 
-        const villa = await prisma.villa.update({
-            where: { id: villaId },
-            data: updateData,
-            include: {
-                owner: {
-                    select: {
-                        id: true,
-                        fullName: true,
-                        email: true,
-                        phone: true,
-                        role: true
-                    }
-                },
-                services: {
-                    where: { isActive: true },
-                    select: {
-                        id: true,
-                        title: true,
-                        description: true,
-                        category: true,
-                        price: true,
-                        duration: true,
-                        difficulty: true,
-                        maxGroupSize: true,
-                        image: true,
-                        isFeatured: true
-                    }
-                },
-                _count: {
-                    select: {
-                        bookings: {
+        // Use Prisma transaction to handle villa and services updates atomically
+        const result = await prisma.$transaction(async (tx) => {
+            // Update villa first
+            const updatedVilla = await tx.villa.update({
+                where: { id: villaId },
+                data: updateData
+            });
+
+            // Handle service operations if provided
+            if (params.services) {
+                // Create new services
+                if (params.services.create && params.services.create.length > 0) {
+                    const servicesToCreate = params.services.create.map((service: ServiceData) => ({
+                        title: service.title.trim(),
+                        description: service.description.trim(),
+                        longDescription: service.longDescription?.trim() || null,
+                        category: service.category,
+                        price: Number(service.price), // Ensure it's a number
+                        duration: service.duration.trim(),
+                        difficulty: service.difficulty || null,
+                        maxGroupSize: service.maxGroupSize ? Number(service.maxGroupSize) : null,
+                        highlights: service.highlights || [],
+                        included: service.included || [],
+                        image: service.image?.trim() || null,
+                        isActive: Boolean(service.isActive ?? true),
+                        isFeatured: Boolean(service.isFeatured ?? false),
+                        villaId: villaId,
+                        createdAt: new Date(),
+                        updatedAt: new Date()
+                    }));
+
+                    await tx.service.createMany({
+                        data: servicesToCreate
+                    });
+                }
+
+                // Update existing services
+                if (params.services.update && params.services.update.length > 0) {
+                    for (const service of params.services.update) {
+                        if (!service.id) {
+                            throw new Error('Service ID is required for updates');
+                        }
+
+                        // Verify service belongs to this villa
+                        const existingService = await tx.service.findFirst({
                             where: {
-                                status: {
-                                    in: ['PENDING', 'CONFIRMED']
-                                }
+                                id: service.id,
+                                villaId: villaId
+                            }
+                        });
+
+                        if (!existingService) {
+                            throw new Error(`Service with ID ${service.id} not found for this villa`);
+                        }
+
+                        const serviceUpdateData: any = {
+                            updatedAt: new Date()
+                        };
+
+                        if (service.title !== undefined) serviceUpdateData.title = service.title.trim();
+                        if (service.description !== undefined) serviceUpdateData.description = service.description.trim();
+                        if (service.longDescription !== undefined) serviceUpdateData.longDescription = service.longDescription?.trim() || null;
+                        if (service.category !== undefined) serviceUpdateData.category = service.category;
+                        if (service.price !== undefined) serviceUpdateData.price = Number(service.price);
+                        if (service.duration !== undefined) serviceUpdateData.duration = service.duration.trim();
+                        if (service.difficulty !== undefined) serviceUpdateData.difficulty = service.difficulty || null;
+                        if (service.maxGroupSize !== undefined) serviceUpdateData.maxGroupSize = service.maxGroupSize ? Number(service.maxGroupSize) : null;
+                        if (service.highlights !== undefined) serviceUpdateData.highlights = service.highlights || [];
+                        if (service.included !== undefined) serviceUpdateData.included = service.included || [];
+                        if (service.image !== undefined) serviceUpdateData.image = service.image?.trim() || null;
+                        if (service.isActive !== undefined) serviceUpdateData.isActive = Boolean(service.isActive);
+                        if (service.isFeatured !== undefined) serviceUpdateData.isFeatured = Boolean(service.isFeatured);
+
+                        await tx.service.update({
+                            where: { id: service.id },
+                            data: serviceUpdateData
+                        });
+                    }
+                }
+
+                // Delete services (soft delete by setting isActive to false, or hard delete)
+                if (params.services.delete && params.services.delete.length > 0) {
+                    // Verify all services belong to this villa before deletion
+                    const servicesToDelete = await tx.service.findMany({
+                        where: {
+                            id: { in: params.services.delete },
+                            villaId: villaId
+                        },
+                        select: { id: true }
+                    });
+
+                    const validServiceIds = servicesToDelete.map(s => s.id);
+                    const invalidServiceIds = params.services.delete.filter((id: string) => !validServiceIds.includes(id));
+
+                    if (invalidServiceIds.length > 0) {
+                        throw new Error(`Services with IDs [${invalidServiceIds.join(', ')}] not found for this villa`);
+                    }
+
+                    // Check if any services are linked to active bookings
+                    const servicesWithBookings = await tx.bookingService.findMany({
+                        where: {
+                            serviceId: { in: params.services.delete },
+                            booking: {
+                                status: { in: ['PENDING', 'CONFIRMED'] }
                             }
                         },
-                        services: {
-                            where: { isActive: true }
+                        select: { serviceId: true },
+                        distinct: ['serviceId']
+                    });
+
+                    if (servicesWithBookings.length > 0) {
+                        const activeServiceIds = servicesWithBookings.map(bs => bs.serviceId);
+                        throw new Error(`Cannot delete services [${activeServiceIds.join(', ')}] as they have active bookings. Please soft delete by setting isActive to false instead.`);
+                    }
+
+                    // Perform hard delete if no active bookings
+                    await tx.service.deleteMany({
+                        where: {
+                            id: { in: params.services.delete }
+                        }
+                    });
+                }
+            }
+
+            // Return the updated villa with all related data
+            return await tx.villa.findUnique({
+                where: { id: villaId },
+                include: {
+                    owner: {
+                        select: {
+                            id: true,
+                            fullName: true,
+                            email: true,
+                            phone: true,
+                            role: true
+                        }
+                    },
+                    services: {
+                        where: { isActive: true },
+                        select: {
+                            id: true,
+                            title: true,
+                            description: true,
+                            longDescription: true,
+                            category: true,
+                            price: true,
+                            duration: true,
+                            difficulty: true,
+                            maxGroupSize: true,
+                            highlights: true,
+                            included: true,
+                            image: true,
+                            isFeatured: true,
+                            isActive: true,
+                            createdAt: true,
+                            updatedAt: true
+                        },
+                        orderBy: [
+                            { isFeatured: 'desc' },
+                            { createdAt: 'desc' }
+                        ]
+                    },
+                    _count: {
+                        select: {
+                            bookings: {
+                                where: {
+                                    status: { in: ['PENDING', 'CONFIRMED'] }
+                                }
+                            },
+                            services: {
+                                where: { isActive: true }
+                            }
                         }
                     }
                 }
+            });
+        });
+
+        return result;
+    } catch (error) {
+        console.error('Error updating villa:', error);
+        if (error instanceof Error) {
+            throw error; // Re-throw with original message
+        }
+        throw new Error('Failed to update villa and services');
+    }
+};
+
+// Helper function to validate service ownership
+export const validateServiceOwnership = async (serviceIds: string[], villaId: string): Promise<boolean> => {
+    try {
+        const services = await prisma.service.findMany({
+            where: {
+                id: { in: serviceIds },
+                villaId: villaId
             }
         });
 
-        return villa;
+        return services.length === serviceIds.length;
     } catch (error) {
-        console.error('Error updating villa:', error);
-        throw new Error('Failed to update villa');
+        console.error('Error validating service ownership:', error);
+        return false;
     }
 };
 

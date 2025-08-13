@@ -9,7 +9,8 @@ import {
     createVilla,
     updateVilla as updateVillaService,
     deleteVilla as deleteVillaService,
-    getVillaStatistics
+    getVillaStatistics,
+    validateServiceOwnership
 } from '../services/villa.service';
 import prisma from '../config/database';
 
@@ -103,6 +104,7 @@ export const updateVilla = async (req: AuthenticatedRequest, res: Response): Pro
         const { villaId } = req.params;
         const user = req.user!;
 
+        // Check if villa exists and user has permission
         const existingVilla = await getVillaById(villaId);
         if (!existingVilla) {
             ApiResponse.notFound(res, 'Villa not found');
@@ -114,11 +116,69 @@ export const updateVilla = async (req: AuthenticatedRequest, res: Response): Pro
             return;
         }
 
+        // Additional validation for service operations
+        if (req.body.services) {
+            // Validate service update permissions
+            if (req.body.services.update && req.body.services.update.length > 0) {
+                const serviceIds = req.body.services.update
+                    .map((service: any) => service.id)
+                    .filter(Boolean);
+
+                if (serviceIds.length > 0) {
+                    const isValid = await validateServiceOwnership(serviceIds, villaId);
+                    if (!isValid) {
+                        ApiResponse.badRequest(res, 'One or more services do not belong to this villa');
+                        return;
+                    }
+                }
+            }
+
+            // Validate service delete permissions
+            if (req.body.services.delete && req.body.services.delete.length > 0) {
+                const isValid = await validateServiceOwnership(req.body.services.delete, villaId);
+                if (!isValid) {
+                    ApiResponse.badRequest(res, 'One or more services to delete do not belong to this villa');
+                    return;
+                }
+            }
+        }
+
         const updatedVilla = await updateVillaService(villaId, req.body);
-        ApiResponse.success(res, updatedVilla, 'Villa updated successfully');
+
+        // Log the update activity
+        logger.info(`Villa updated successfully`, {
+            villaId,
+            userId: user.id,
+            updateFields: Object.keys(req.body),
+            hasServiceUpdates: !!req.body.services
+        });
+
+        ApiResponse.success(res, updatedVilla, 'Villa and services updated successfully');
     } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to update villa';
-        logger.error('Update villa error:', errorMessage);
+        logger.error('Update villa error:', {
+            villaId: req.params.villaId,
+            userId: req.user?.id,
+            error: errorMessage,
+            stack: error instanceof Error ? error.stack : undefined
+        });
+
+        // Handle specific error types
+        if (error instanceof Error) {
+            if (error.message.includes('Service with ID') && error.message.includes('not found')) {
+                ApiResponse.badRequest(res, error.message);
+                return;
+            }
+            if (error.message.includes('Cannot delete services') && error.message.includes('active bookings')) {
+                ApiResponse.conflict(res, error.message);
+                return;
+            }
+            if (error.message.includes('Service ID is required for updates')) {
+                ApiResponse.badRequest(res, error.message);
+                return;
+            }
+        }
+
         ApiResponse.serverError(res, errorMessage);
     }
 };

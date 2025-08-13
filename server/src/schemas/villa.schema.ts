@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { VillaStatus } from '@prisma/client';
+import { VillaStatus, ServiceCategory, ServiceDifficulty } from '@prisma/client';
 
 const baseVillaSchema = {
     title: z.string()
@@ -49,6 +49,82 @@ const baseVillaSchema = {
         .optional()
 };
 
+// Relaxed service schema for villa services - more permissive validation
+const serviceSchema = z.object({
+    id: z.string().optional(), // For updates - if provided, update existing service
+    title: z.string()
+        .min(1, 'Service title is required')
+        .max(200, 'Service title cannot exceed 200 characters')
+        .trim(),
+    description: z.string()
+        .min(1, 'Service description is required')
+        .max(1000, 'Service description cannot exceed 1000 characters')
+        .trim(),
+    longDescription: z.string()
+        .max(2000, 'Long description cannot exceed 2000 characters')
+        .trim()
+        .optional()
+        .nullable(),
+    category: z.nativeEnum(ServiceCategory),
+    price: z.union([z.number(), z.string()])
+        .transform((val) => {
+            const num = typeof val === 'string' ? parseFloat(val) : val;
+            return isNaN(num) ? 0 : num;
+        })
+        .refine((val) => val >= 0, 'Service price must be non-negative'),
+    duration: z.string()
+        .min(1, 'Duration is required')
+        .max(100, 'Duration cannot exceed 100 characters')
+        .trim(),
+    difficulty: z.nativeEnum(ServiceDifficulty).optional().nullable(),
+    maxGroupSize: z.union([z.number(), z.string(), z.null(), z.undefined()])
+        .transform((val) => {
+            if (val === null || val === undefined || val === '') return null;
+            const num = typeof val === 'string' ? parseInt(val) : val;
+            return isNaN(num) ? null : num;
+        })
+        .optional()
+        .nullable(),
+    highlights: z.array(z.string().trim())
+        .max(30, 'Cannot have more than 30 highlights')
+        .default([])
+        .optional(),
+    included: z.array(z.string().trim())
+        .max(50, 'Cannot have more than 50 included items')
+        .default([])
+        .optional(),
+    image: z.union([z.string(), z.null(), z.undefined()])
+        .transform((val) => {
+            if (!val || val.trim() === '') return null;
+            // Basic URL validation - more permissive
+            const trimmed = val.trim();
+            if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+                return trimmed;
+            }
+            return null; // Invalid URL becomes null instead of throwing error
+        })
+        .optional()
+        .nullable(),
+    isActive: z.union([z.boolean(), z.string()])
+        .transform((val) => {
+            if (typeof val === 'boolean') return val;
+            if (typeof val === 'string') {
+                return val.toLowerCase() === 'true' || val === '1';
+            }
+            return true; // default
+        })
+        .optional(),
+    isFeatured: z.union([z.boolean(), z.string()])
+        .transform((val) => {
+            if (typeof val === 'boolean') return val;
+            if (typeof val === 'string') {
+                return val.toLowerCase() === 'true' || val === '1';
+            }
+            return false; // default
+        })
+        .optional()
+});
+
 export const createVillaSchema = z.object({
     body: z.object({
         ...baseVillaSchema,
@@ -59,7 +135,9 @@ export const createVillaSchema = z.object({
         pricePerNight: baseVillaSchema.pricePerNight,
         maxGuests: baseVillaSchema.maxGuests,
         bedrooms: baseVillaSchema.bedrooms,
-        bathrooms: baseVillaSchema.bathrooms
+        bathrooms: baseVillaSchema.bathrooms,
+        // Services can be added during creation
+        services: z.array(serviceSchema).max(50, 'Cannot add more than 50 services').optional()
     })
 });
 
@@ -77,7 +155,15 @@ export const updateVillaSchema = z.object({
         amenities: baseVillaSchema.amenities,
         images: baseVillaSchema.images,
         status: z.nativeEnum(VillaStatus).optional(),
-        isActive: z.boolean().optional()
+        isActive: z.boolean().optional(),
+        // Services update operations - very permissive
+        services: z.object({
+            create: z.array(serviceSchema).max(50, 'Cannot create more than 50 services').optional(),
+            update: z.array(serviceSchema.extend({
+                id: z.string().min(1, 'Service ID is required for updates')
+            })).max(100, 'Cannot update more than 100 services').optional(),
+            delete: z.array(z.string().min(1)).max(100, 'Cannot delete more than 100 services').optional()
+        }).optional()
     }),
     params: z.object({
         villaId: z.string()
@@ -86,7 +172,7 @@ export const updateVillaSchema = z.object({
     })
 });
 
-// FIXED: Remove the nested 'query' wrapper for query validation
+// Rest of your existing schemas remain the same...
 export const villaQuerySchema = z.object({
     // Location filters
     city: z.string().trim().optional(),
@@ -183,7 +269,7 @@ export const villaParamsSchema = z.object({
     })
 });
 
-// Villa availability query schema - FIXED: Remove nested query wrapper
+// Villa availability query schema
 export const villaAvailabilitySchema = z.object({
     params: z.object({
         villaId: z.string()
@@ -219,3 +305,4 @@ export type UpdateVillaInput = z.infer<typeof updateVillaSchema>;
 export type VillaQueryInput = z.infer<typeof villaQuerySchema>;
 export type VillaParamsInput = z.infer<typeof villaParamsSchema>;
 export type VillaAvailabilityInput = z.infer<typeof villaAvailabilitySchema>;
+export type ServiceInput = z.infer<typeof serviceSchema>;

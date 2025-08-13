@@ -1,5 +1,5 @@
 import apiService from "@/utils/api";
-import type { Villa, VillaStatus, Service } from "@/utils/types";
+import type { Villa, VillaStatus, Service, ServiceCategory, ServiceDifficulty } from "@/utils/types";
 
 export interface VillaFilters {
     city?: string;
@@ -29,6 +29,24 @@ export interface MyVillaFilters {
     sortOrder?: 'asc' | 'desc';
 }
 
+// Service data interface for creating/updating services
+export interface ServiceData {
+    id?: string; // For updates - if provided, update existing service
+    title: string;
+    description: string;
+    longDescription?: string | null;
+    category: ServiceCategory;
+    price: number;
+    duration: string;
+    difficulty?: ServiceDifficulty | null;
+    maxGroupSize?: number | null;
+    highlights?: string[];
+    included?: string[];
+    image?: string | null;
+    isActive?: boolean;
+    isFeatured?: boolean;
+}
+
 export interface CreateVillaData {
     title: string;
     description?: string;
@@ -41,7 +59,8 @@ export interface CreateVillaData {
     bathrooms: number;
     amenities?: string[];
     images?: string[];
-    serviceIds?: string[];
+    // Services can be added during creation
+    services?: ServiceData[];
 }
 
 export interface UpdateVillaData {
@@ -58,7 +77,12 @@ export interface UpdateVillaData {
     images?: string[];
     status?: VillaStatus;
     isActive?: boolean;
-    serviceIds?: string[];
+    // Services update operations
+    services?: {
+        create?: ServiceData[];
+        update?: (ServiceData & { id: string })[];
+        delete?: string[];
+    };
 }
 
 export interface PaginationInfo {
@@ -287,6 +311,27 @@ class VillaApi {
         }
 
         throw new Error(response.message || 'Failed to delete villa');
+    }
+
+    // Helper methods for service management
+    async updateVillaServices(villaId: string, operations: {
+        create?: ServiceData[];
+        update?: (ServiceData & { id: string })[];
+        delete?: string[];
+    }): Promise<Villa> {
+        return this.updateVilla(villaId, { services: operations });
+    }
+
+    async addServicesToVilla(villaId: string, services: ServiceData[]): Promise<Villa> {
+        return this.updateVilla(villaId, {
+            services: { create: services }
+        });
+    }
+
+    async removeServicesFromVilla(villaId: string, serviceIds: string[]): Promise<Villa> {
+        return this.updateVilla(villaId, {
+            services: { delete: serviceIds }
+        });
     }
 }
 

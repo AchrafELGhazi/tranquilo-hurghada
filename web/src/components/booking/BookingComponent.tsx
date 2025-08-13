@@ -257,11 +257,6 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
             }
         }
 
-        if (formData.phone && !/^[\+]?[1-9][\d]{8,14}$/.test(formData.phone.replace(/[\s\-\(\)]/g, ''))) {
-            errors.phone = 'Invalid phone number';
-            THToast.error('Invalid Phone Number', 'Please enter a valid phone number');
-        }
-
         if (formData.dateOfBirth) {
             const today = new Date();
             const dobDate = new Date(formData.dateOfBirth);
