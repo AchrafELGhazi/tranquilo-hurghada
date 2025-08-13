@@ -20,7 +20,7 @@ import villaApi from '@/api/villaApi';
 import DateRangePickerModal from './DateRangePickerModal';
 import { THToast, THToaster } from '@/components/common/Toast';
 import type { PaymentMethod, User, Villa, Service } from '@/utils/types';
-import { calculateNights, calculateTotalPrice } from '@/utils/bookingUtils';
+import { calculateNights, calculateTotalPrice, validateBookingDates } from '@/utils/bookingUtils';
 
 interface FormData {
     checkIn: string;
@@ -76,23 +76,11 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
     // Load villa services
     useEffect(() => {
         if (villa?.id) {
-            loadVillaServices();
+            setAvailableServices(villa.services || []);
         }
     }, [villa?.id]);
 
-    const loadVillaServices = async () => {
-        try {
-            setLoadingServices(true);
-            const servicesResponse = await bookingApi.getVillaServices(villa.id);
-            setAvailableServices(servicesResponse.services || []);
-        } catch (error) {
-            console.error('Failed to load villa services:', error);
-            setAvailableServices([]);
-        } finally {
-            setLoadingServices(false);
-        }
-    };
-
+    
     // Load form data from localStorage on mount
     useEffect(() => {
         const savedFormData = localStorage.getItem(FORM_STORAGE_KEY);
@@ -262,7 +250,7 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
         }
 
         if (formData.checkIn && formData.checkOut) {
-            const dateValidation = bookingApi.validateBookingDates(formData.checkIn, formData.checkOut);
+            const dateValidation = validateBookingDates(formData.checkIn, formData.checkOut);
             if (!dateValidation.isValid) {
                 errors.dates = dateValidation.error;
                 THToast.error('Invalid Dates', dateValidation.error);

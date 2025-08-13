@@ -56,15 +56,7 @@ bookingRouter.get('/villa/:villaId/booked-dates',
     getVillaBookedDates
 );
 
-/**
- * @route   GET /api/bookings/villa/:villaId/services
- * @desc    Get available services for a villa
- * @access  Private (All roles)
- */
-bookingRouter.get('/villa/:villaId/services',
-    validateRequest(villaParamsSchema),
-    getVillaServicesEndpoint
-);
+
 
 /**
  * @route   GET /api/bookings/:bookingId

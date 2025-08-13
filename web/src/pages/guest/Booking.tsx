@@ -51,12 +51,7 @@ const Booking: React.FC = () => {
     }, []);
 
     const handleBookingSuccess = () => {
-        THToast.success(
-            'Booking Submitted!',
-            'Your booking request has been submitted successfully. We will contact you within 24 hours to confirm your reservation.'
-        );
 
-        // Optionally reload villa data to update availability
         if (villa?.id) {
             villaApi
                 .getVillaById(villa.id)

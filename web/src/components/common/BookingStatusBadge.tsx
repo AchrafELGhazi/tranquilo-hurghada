@@ -2,6 +2,7 @@ import React from 'react';
 import { Clock, Check, Star, X, AlertCircle } from 'lucide-react';
 import { bookingApi } from '@/api/bookingApi';
 import type { Booking } from '@/utils/types';
+import { getStatusText } from '@/utils/bookingUtils';
 
 interface BookingStatusBadgeProps {
     status: Booking['status'];
@@ -25,7 +26,7 @@ export const BookingStatusBadge: React.FC<BookingStatusBadgeProps> = ({ status, 
             className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${config.color} ${className}`}
         >
             <Icon className='w-3 h-3 mr-1' />
-            {bookingApi.getStatusText(status)}
+            {getStatusText(status)}
         </span>
     );
 };

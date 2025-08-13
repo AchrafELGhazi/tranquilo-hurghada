@@ -21,7 +21,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { BookingStatusBadge } from '@/components/common/BookingStatusBadge';
 import type { Booking } from '@/utils/types';
 import villaApi from '@/api/villaApi';
-import { formatPrice } from '@/utils/bookingUtils';
+import { canCancelBooking, formatPrice, getStatusText, getStayDuration } from '@/utils/bookingUtils';
 
 const MyBookings: React.FC = () => {
     const { user } = useAuth();
@@ -159,7 +159,7 @@ const MyBookings: React.FC = () => {
                                             : 'bg-white/50 text-[#C75D2C] hover:bg-white/70'
                                     }`}
                                 >
-                                    {status === 'ALL' ? 'All' : bookingApi.getStatusText(status as any)}
+                                    {status === 'ALL' ? 'All' : getStatusText(status as any)}
                                 </button>
                             ))}
                         </div>
@@ -301,7 +301,7 @@ const MyBookings: React.FC = () => {
                                                         >
                                                             <Eye className='w-4 h-4' />
                                                         </button>
-                                                        {bookingApi.canCancelBooking(booking, user.id, user.role) && (
+                                                        {canCancelBooking(booking, user.id, user.role) && (
                                                             <button
                                                                 onClick={() => {
                                                                     setSelectedBooking(booking);
@@ -392,7 +392,7 @@ const MyBookings: React.FC = () => {
                                                 >
                                                     <Eye className='w-4 h-4' />
                                                 </button>
-                                                {bookingApi.canCancelBooking(booking, user.id, user.role) && (
+                                                {canCancelBooking(booking, user.id, user.role) && (
                                                     <button
                                                         onClick={() => {
                                                             setSelectedBooking(booking);
@@ -498,7 +498,7 @@ const MyBookings: React.FC = () => {
                                     <div>
                                         <label className='text-sm text-[#C75D2C]/60'>Duration</label>
                                         <p className='font-medium text-[#C75D2C]'>
-                                            {bookingApi.getStayDuration(
+                                            {getStayDuration(
                                                 selectedBooking.checkIn,
                                                 selectedBooking.checkOut
                                             )}{' '}
@@ -675,7 +675,7 @@ const MyBookings: React.FC = () => {
                             >
                                 Close
                             </button>
-                            {bookingApi.canCancelBooking(selectedBooking, user.id, user.role) && (
+                            {canCancelBooking(selectedBooking, user.id, user.role) && (
                                 <button
                                     onClick={() => setShowCancelModal(true)}
                                     className='px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center space-x-2'

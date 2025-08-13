@@ -1,8 +1,8 @@
-import bookingApi from "@/api/bookingApi";
+import { getPaymentStatusInfo } from "@/utils/bookingUtils";
 import { DollarSign } from "lucide-react";
 
 const getPaymentBadge = (isPaid: boolean) => {
-    const paymentInfo = bookingApi.getPaymentStatusInfo(isPaid);
+    const paymentInfo = getPaymentStatusInfo(isPaid);
 
     return (
         <span

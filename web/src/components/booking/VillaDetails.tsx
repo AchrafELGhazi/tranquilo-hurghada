@@ -3,26 +3,14 @@ import {
     ChevronLeft,
     ChevronRight,
     Star,
-    Wifi,
-    Car,
-    Utensils,
-    Snowflake,
-    Waves,
-    Trees,
     MapPin,
     Users,
     Bed,
     Bath,
     Home,
-    Calendar,
-    User,
-    Mail,
-    Phone,
-    Crown,
     CheckCircle,
     XCircle,
     Wrench,
-    Award,
 } from 'lucide-react';
 import Map from './Map';
 import type { Villa } from '@/utils/types';
@@ -68,14 +56,6 @@ const VillaDetails: React.FC<VillaDetailsProps> = ({ villa }) => {
             default:
                 return 'bg-gray-100 text-gray-800 border-gray-200';
         }
-    };
-
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-        });
     };
 
     const getServiceCategoryColor = (category: string) => {

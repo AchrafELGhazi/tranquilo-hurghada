@@ -25,7 +25,7 @@ import getPaymentBadge from '@/components/common/PaymentBadge';
 import { BookingStatusBadge } from '@/components/common/BookingStatusBadge';
 import { formatDate, formatDateTime } from '@/utils/date';
 import villaApi from '@/api/villaApi';
-import { formatPrice } from '@/utils/bookingUtils';
+import { canTogglePayment, formatPrice, getStayDuration } from '@/utils/bookingUtils';
 
 export const AdminBookings: React.FC = () => {
     const { user } = useAuth();
@@ -140,7 +140,7 @@ export const AdminBookings: React.FC = () => {
     };
 
     const handleTogglePayment = async (booking: Booking) => {
-        if (!user || !bookingApi.canTogglePayment(booking, user.id, user.role)) {
+        if (!user || !canTogglePayment(booking, user.id, user.role)) {
             THToast.error('Access Denied', 'You do not have permission to update payment status');
             return;
         }
@@ -454,7 +454,7 @@ export const AdminBookings: React.FC = () => {
                                                         <div className='flex items-center space-x-2'>
                                                             {getPaymentBadge(booking.isPaid)}
                                                             {user &&
-                                                                bookingApi.canTogglePayment(
+                                                                canTogglePayment(
                                                                     booking,
                                                                     user.id,
                                                                     user.role
@@ -773,7 +773,7 @@ export const AdminBookings: React.FC = () => {
                                         <div className='bg-white/30 rounded-lg p-3 text-center'>
                                             <p className='text-sm text-[#C75D2C]/60'>Duration</p>
                                             <p className='font-medium text-[#C75D2C]'>
-                                                {bookingApi.getStayDuration(
+                                                {getStayDuration(
                                                     selectedBooking.checkIn,
                                                     selectedBooking.checkOut
                                                 )}{' '}
@@ -829,7 +829,7 @@ export const AdminBookings: React.FC = () => {
                                             <div className='flex items-center space-x-2'>
                                                 {getPaymentBadge(selectedBooking.isPaid)}
                                                 {user &&
-                                                    bookingApi.canTogglePayment(
+                                                    canTogglePayment(
                                                         selectedBooking,
                                                         user.id,
                                                         user.role
