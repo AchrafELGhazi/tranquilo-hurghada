@@ -1,5 +1,6 @@
 import type { Language } from "./types";
 
+export const API_URL = import.meta.env.VITE_API_URL || '/api'
 export const supportedLanguages = ['en', 'fr', 'ru', 'de'] as const;
 
 export const languages: Language[] = [

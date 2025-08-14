@@ -1,5 +1,6 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from 'axios';
 import { useParams } from 'react-router-dom';
+import { API_URL } from './constants';
 
 interface ApiResponse<T = any> {
     success: boolean;
@@ -21,7 +22,7 @@ class ApiService {
 
     constructor() {
         this.api = axios.create({
-            baseURL: import.meta.env.VITE_API_URL,
+            baseURL: API_URL,
             timeout: 30000,
             headers: {
                 'Content-Type': 'application/json',
@@ -88,7 +89,7 @@ class ApiService {
 
                 // Make refresh request without using the interceptor to avoid infinite loop
                 const response = await axios.post<ApiResponse<RefreshTokenResponse>>(
-                    `${import.meta.env.VITE_API_URL}/auth/refresh-token`,
+                    `${API_URL}/auth/refresh-token`,
                     { refreshToken },
                     {
                         headers: { 'Content-Type': 'application/json' },
