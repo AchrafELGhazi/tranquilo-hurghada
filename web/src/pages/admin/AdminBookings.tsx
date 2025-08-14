@@ -20,16 +20,14 @@ import {
 import { bookingApi, type BookingFilters } from '@/api/bookingApi';
 import emailApi from '@/api/emailApi';
 import { THToast, THToaster } from '@/components/common/Toast';
+import { Modal } from '@/components/common/Modal';
 import type { Booking, BookingStatus } from '@/utils/types';
 import { useAuth } from '@/contexts/AuthContext';
 import getPaymentBadge from '@/components/common/PaymentBadge';
 import { BookingStatusBadge } from '@/components/common/BookingStatusBadge';
 import { formatDate, formatDateTime } from '@/utils/date';
 import { canTogglePayment, formatPrice, getStayDuration } from '@/utils/bookingUtils';
-import {
-    transformBookingDataForConfirmation,
-    transformBookingDataForRejection,
-} from '@/utils/emailUtils';
+import { transformBookingDataForConfirmation, transformBookingDataForRejection } from '@/utils/emailUtils';
 
 export const AdminBookings: React.FC = () => {
     const { user } = useAuth();
@@ -45,8 +43,10 @@ export const AdminBookings: React.FC = () => {
     const [sortBy, setSortBy] = useState<'createdAt' | 'checkIn' | 'checkOut' | 'totalPrice'>('createdAt');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
-    // Action modal state
+    // Modal state
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+    const [showDetailsModal, setShowDetailsModal] = useState(false);
+    const [showActionModal, setShowActionModal] = useState(false);
     const [actionType, setActionType] = useState<'confirm' | 'reject' | 'complete' | null>(null);
     const [actionReason, setActionReason] = useState('');
     const [actionLoading, setActionLoading] = useState(false);
@@ -140,16 +140,28 @@ export const AdminBookings: React.FC = () => {
         fetchBookings();
     }, [currentPage, statusFilter, sortBy, sortOrder]);
 
+    const openDetailsModal = (booking: Booking) => {
+        setSelectedBooking(booking);
+        setShowDetailsModal(true);
+    };
+
+    const closeDetailsModal = () => {
+        setSelectedBooking(null);
+        setShowDetailsModal(false);
+    };
+
     const openActionModal = (booking: Booking, action: 'confirm' | 'reject' | 'complete') => {
         setSelectedBooking(booking);
         setActionType(action);
         setActionReason('');
+        setShowActionModal(true);
     };
 
     const closeActionModal = () => {
         setSelectedBooking(null);
         setActionType(null);
         setActionReason('');
+        setShowActionModal(false);
     };
 
     const handleBookingAction = async () => {
@@ -535,7 +547,7 @@ export const AdminBookings: React.FC = () => {
                                                     <td className='px-6 py-4'>
                                                         <div className='flex items-center space-x-2'>
                                                             <button
-                                                                onClick={() => setSelectedBooking(booking)}
+                                                                onClick={() => openDetailsModal(booking)}
                                                                 className='p-2 bg-[#D96F32]/20 text-[#D96F32] rounded-lg hover:bg-[#D96F32]/30 transition-colors'
                                                                 title='View Details'
                                                             >
@@ -609,272 +621,28 @@ export const AdminBookings: React.FC = () => {
                 </div>
 
                 {/* Booking Details Modal */}
-                {selectedBooking && !actionType && (
-                    <div className='fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4'>
-                        <div className='bg-white/95 backdrop-blur-md border-2 border-[#F8B259]/70 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto'>
-                            {/* Modal Header */}
-                            <div className='flex items-center justify-between p-6 border-b border-[#F8B259]/30'>
-                                <h3 className='text-xl font-bold text-[#C75D2C] font-butler'>Booking Details</h3>
-                                <button
-                                    onClick={() => setSelectedBooking(null)}
-                                    className='p-2 hover:bg-[#F8B259]/20 rounded-xl transition-colors'
-                                >
-                                    <XCircle className='w-5 h-5 text-[#C75D2C]' />
-                                </button>
-                            </div>
-
-                            {/* Modal Content */}
-                            <div className='p-6 space-y-6'>
-                                {/* Booking Overview */}
-                                <div className='bg-gradient-to-r from-[#F8B259]/10 to-[#D96F32]/10 rounded-xl p-4'>
-                                    <div className='flex justify-between items-start'>
-                                        <div>
-                                            <h4 className='text-lg font-bold text-[#C75D2C]'>
-                                                Booking #{selectedBooking.id.slice(-8)}
-                                            </h4>
-                                            <p className='text-sm text-[#C75D2C]/60'>
-                                                Created: {formatDateTime(selectedBooking.createdAt)}
-                                            </p>
-                                        </div>
-                                        <div className='text-right space-y-2'>
-                                            <BookingStatusBadge status={selectedBooking.status} />
-                                            {selectedBooking.isPaid && (
-                                                <div>
-                                                    <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200'>
-                                                        <CheckCircle className='w-3 h-3 mr-1' />
-                                                        Paid
-                                                    </span>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Guest & Villa Information */}
-                                <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                                    <div>
-                                        <h5 className='font-semibold text-[#C75D2C] mb-3 flex items-center'>
-                                            <User className='w-4 h-4 mr-2' />
-                                            Guest Information
-                                        </h5>
-                                        <div className='bg-white/30 rounded-lg p-4 space-y-3'>
-                                            <div className='flex items-center space-x-2'>
-                                                <User className='w-4 h-4 text-[#D96F32]' />
-                                                <span className='font-medium text-[#C75D2C]'>
-                                                    {selectedBooking.guest?.fullName || 'N/A'}
-                                                </span>
-                                            </div>
-                                            <div className='flex items-center space-x-2'>
-                                                <Mail className='w-4 h-4 text-[#D96F32]' />
-                                                <span className='font-medium text-[#C75D2C]'>
-                                                    {selectedBooking.guest?.email || 'N/A'}
-                                                </span>
-                                            </div>
-                                            {selectedBooking.guest?.phone && (
-                                                <div className='flex items-center space-x-2'>
-                                                    <Phone className='w-4 h-4 text-[#D96F32]' />
-                                                    <span className='font-medium text-[#C75D2C]'>
-                                                        {selectedBooking.guest.phone}
-                                                    </span>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <h5 className='font-semibold text-[#C75D2C] mb-3 flex items-center'>
-                                            <Home className='w-4 h-4 mr-2' />
-                                            Villa Information
-                                        </h5>
-                                        <div className='bg-white/30 rounded-lg p-4 space-y-2'>
-                                            <div>
-                                                <label className='text-sm text-[#C75D2C]/60'>Villa Name</label>
-                                                <p className='font-medium text-[#C75D2C]'>
-                                                    {selectedBooking.villa?.title || 'N/A'}
-                                                </p>
-                                            </div>
-                                            <div>
-                                                <label className='text-sm text-[#C75D2C]/60'>Location</label>
-                                                <p className='font-medium text-[#C75D2C]'>
-                                                    {selectedBooking.villa?.city}, {selectedBooking.villa?.country}
-                                                </p>
-                                            </div>
-                                            {selectedBooking.villa?.address && (
-                                                <div>
-                                                    <label className='text-sm text-[#C75D2C]/60'>Address</label>
-                                                    <p className='font-medium text-[#C75D2C]'>
-                                                        {selectedBooking.villa.address}
-                                                    </p>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Stay Details */}
-                                <div>
-                                    <h5 className='font-semibold text-[#C75D2C] mb-3 flex items-center'>
-                                        <Calendar className='w-4 h-4 mr-2' />
-                                        Stay Details
-                                    </h5>
-                                    <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
-                                        <div className='bg-white/30 rounded-lg p-3 text-center'>
-                                            <p className='text-sm text-[#C75D2C]/60'>Check-in</p>
-                                            <p className='font-medium text-[#C75D2C]'>
-                                                {formatDate(selectedBooking.checkIn)}
-                                            </p>
-                                        </div>
-                                        <div className='bg-white/30 rounded-lg p-3 text-center'>
-                                            <p className='text-sm text-[#C75D2C]/60'>Check-out</p>
-                                            <p className='font-medium text-[#C75D2C]'>
-                                                {formatDate(selectedBooking.checkOut)}
-                                            </p>
-                                        </div>
-                                        <div className='bg-white/30 rounded-lg p-3 text-center'>
-                                            <p className='text-sm text-[#C75D2C]/60'>Duration</p>
-                                            <p className='font-medium text-[#C75D2C]'>
-                                                {getStayDuration(selectedBooking.checkIn, selectedBooking.checkOut)}{' '}
-                                                nights
-                                            </p>
-                                        </div>
-                                        <div className='bg-white/30 rounded-lg p-3 text-center'>
-                                            <p className='text-sm text-[#C75D2C]/60'>Total Guests</p>
-                                            <p className='font-medium text-[#C75D2C]'>
-                                                {selectedBooking.totalAdults + selectedBooking.totalChildren}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className='mt-4 grid grid-cols-2 gap-4'>
-                                        <div className='bg-white/30 rounded-lg p-3 text-center'>
-                                            <Users className='w-6 h-6 text-[#D96F32] mx-auto mb-1' />
-                                            <p className='font-medium text-[#C75D2C]'>{selectedBooking.totalAdults}</p>
-                                            <p className='text-sm text-[#C75D2C]/60'>Adults</p>
-                                        </div>
-                                        <div className='bg-white/30 rounded-lg p-3 text-center'>
-                                            <Baby className='w-6 h-6 text-[#D96F32] mx-auto mb-1' />
-                                            <p className='font-medium text-[#C75D2C]'>
-                                                {selectedBooking.totalChildren}
-                                            </p>
-                                            <p className='text-sm text-[#C75D2C]/60'>Children</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Payment Information */}
-                                <div>
-                                    <h5 className='font-semibold text-[#C75D2C] mb-3 flex items-center'>
-                                        <CreditCard className='w-4 h-4 mr-2' />
-                                        Payment Information
-                                    </h5>
-                                    <div className='bg-white/30 rounded-lg p-4 space-y-3'>
-                                        <div className='flex justify-between items-center'>
-                                            <span className='text-[#C75D2C]/60'>Total Amount</span>
-                                            <span className='font-bold text-[#C75D2C] text-lg'>
-                                                {formatPrice(selectedBooking.totalPrice, 'EUR')}
-                                            </span>
-                                        </div>
-                                        <div className='flex justify-between items-center'>
-                                            <span className='text-[#C75D2C]/60'>Payment Method</span>
-                                            <span className='font-medium text-[#C75D2C]'>
-                                                {selectedBooking.paymentMethod === 'BANK_TRANSFER'
-                                                    ? 'Bank Transfer'
-                                                    : 'Payment on Arrival'}
-                                            </span>
-                                        </div>
-                                        <div className='flex justify-between items-center'>
-                                            <span className='text-[#C75D2C]/60'>Payment Status</span>
-                                            <div className='flex items-center space-x-2'>
-                                                {getPaymentBadge(selectedBooking.isPaid)}
-                                                {user && canTogglePayment(selectedBooking, user.id, user.role) && (
-                                                    <button
-                                                        onClick={() => handleTogglePayment(selectedBooking)}
-                                                        disabled={paymentToggleLoading === selectedBooking.id}
-                                                        className={`px-2 py-1 rounded-lg text-xs font-medium transition-colors ${
-                                                            selectedBooking.isPaid
-                                                                ? 'bg-red-100 text-red-700 hover:bg-red-200'
-                                                                : 'bg-green-100 text-green-700 hover:bg-green-200'
-                                                        } disabled:opacity-50`}
-                                                    >
-                                                        {paymentToggleLoading === selectedBooking.id ? (
-                                                            <div className='w-3 h-3 border border-current/30 border-t-current rounded-full animate-spin'></div>
-                                                        ) : selectedBooking.isPaid ? (
-                                                            'Mark Unpaid'
-                                                        ) : (
-                                                            'Mark Paid'
-                                                        )}
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Additional Services */}
-                                {selectedBooking.bookingServices && selectedBooking.bookingServices.length > 0 && (
-                                    <div>
-                                        <h5 className='font-semibold text-[#C75D2C] mb-3'>Additional Services</h5>
-                                        <div className='space-y-2'>
-                                            {selectedBooking.bookingServices.map(service => (
-                                                <div
-                                                    key={service.id}
-                                                    className='bg-white/30 rounded-lg p-3 flex justify-between items-center'
-                                                >
-                                                    <div>
-                                                        <p className='font-medium text-[#C75D2C]'>
-                                                            {service.service?.title || 'Service'}
-                                                        </p>
-                                                        <p className='text-sm text-[#C75D2C]/60'>
-                                                            Qty: {service.quantity}
-                                                        </p>
-                                                    </div>
-                                                    <span className='font-medium text-[#C75D2C]'>
-                                                        {formatPrice(service.totalPrice, 'EUR')}
-                                                    </span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Special Notes */}
-                                {selectedBooking.notes && (
-                                    <div>
-                                        <h5 className='font-semibold text-[#C75D2C] mb-3'>Special Requests</h5>
-                                        <div className='bg-white/30 rounded-lg p-4'>
-                                            <p className='text-[#C75D2C]'>{selectedBooking.notes}</p>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Reasons */}
-                                {(selectedBooking.cancellationReason || selectedBooking.rejectionReason) && (
-                                    <div>
-                                        <h5 className='font-semibold text-red-700 mb-3'>
-                                            {selectedBooking.cancellationReason
-                                                ? 'Cancellation Reason'
-                                                : 'Rejection Reason'}
-                                        </h5>
-                                        <div className='bg-red-50 border border-red-200 rounded-lg p-4'>
-                                            <p className='text-red-700'>
-                                                {selectedBooking.cancellationReason || selectedBooking.rejectionReason}
-                                            </p>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Modal Actions */}
-                            <div className='flex justify-between items-center p-6 border-t border-[#F8B259]/30'>
-                                <button
-                                    onClick={() => setSelectedBooking(null)}
-                                    className='px-4 py-2 text-[#C75D2C] hover:bg-[#F8B259]/20 rounded-lg transition-colors'
-                                >
-                                    Close
-                                </button>
+                <Modal
+                    isOpen={showDetailsModal}
+                    onClose={closeDetailsModal}
+                    title='Booking Details'
+                    maxWidth='max-w-4xl'
+                    maxHeight='max-h-[90vh]'
+                    actions={
+                        <div className='flex justify-between items-center w-full'>
+                            <button
+                                onClick={closeDetailsModal}
+                                className='px-4 py-2 text-[#C75D2C] hover:bg-[#F8B259]/20 rounded-lg transition-colors'
+                            >
+                                Close
+                            </button>
+                            {selectedBooking && (
                                 <div className='flex items-center space-x-2'>
                                     {canPerformAction(selectedBooking, 'confirm') && (
                                         <button
-                                            onClick={() => openActionModal(selectedBooking, 'confirm')}
+                                            onClick={() => {
+                                                closeDetailsModal();
+                                                openActionModal(selectedBooking, 'confirm');
+                                            }}
                                             className='px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2'
                                         >
                                             <CheckCircle className='w-4 h-4' />
@@ -883,7 +651,10 @@ export const AdminBookings: React.FC = () => {
                                     )}
                                     {canPerformAction(selectedBooking, 'reject') && (
                                         <button
-                                            onClick={() => openActionModal(selectedBooking, 'reject')}
+                                            onClick={() => {
+                                                closeDetailsModal();
+                                                openActionModal(selectedBooking, 'reject');
+                                            }}
                                             className='px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center space-x-2'
                                         >
                                             <XCircle className='w-4 h-4' />
@@ -892,7 +663,10 @@ export const AdminBookings: React.FC = () => {
                                     )}
                                     {canPerformAction(selectedBooking, 'complete') && (
                                         <button
-                                            onClick={() => openActionModal(selectedBooking, 'complete')}
+                                            onClick={() => {
+                                                closeDetailsModal();
+                                                openActionModal(selectedBooking, 'complete');
+                                            }}
                                             className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2'
                                         >
                                             <CheckCircle className='w-4 h-4' />
@@ -900,53 +674,301 @@ export const AdminBookings: React.FC = () => {
                                         </button>
                                     )}
                                 </div>
-                            </div>
+                            )}
                         </div>
-                    </div>
-                )}
-
-                {/* Action Modal */}
-                {selectedBooking && actionType && (
-                    <div className='fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4'>
-                        <div className='bg-white/95 backdrop-blur-md border-2 border-[#F8B259]/70 rounded-2xl p-6 w-full max-w-md'>
-                            <div className='flex items-center justify-between mb-6'>
-                                <h3 className='text-xl font-bold text-[#C75D2C] font-butler'>
-                                    {actionType.charAt(0).toUpperCase() + actionType.slice(1)} Booking
-                                </h3>
-                                <button
-                                    onClick={closeActionModal}
-                                    className='p-2 hover:bg-[#F8B259]/20 rounded-xl transition-colors'
-                                >
-                                    <XCircle className='w-5 h-5 text-[#C75D2C]' />
-                                </button>
-                            </div>
-
-                            <div className='mb-4'>
-                                <div className='bg-white/30 border border-[#F8B259]/50 rounded-xl p-4'>
-                                    <p className='text-sm text-[#C75D2C]/60 mb-2'>
-                                        Guest:{' '}
-                                        <span className='font-medium text-[#C75D2C]'>
-                                            {selectedBooking.guest?.fullName}
-                                        </span>
-                                    </p>
-                                    <p className='text-sm text-[#C75D2C]/60 mb-2'>
-                                        Villa:{' '}
-                                        <span className='font-medium text-[#C75D2C]'>
-                                            {selectedBooking.villa?.title}
-                                        </span>
-                                    </p>
-                                    <p className='text-sm text-[#C75D2C]/60'>
-                                        Dates:{' '}
-                                        <span className='font-medium text-[#C75D2C]'>
-                                            {formatDate(selectedBooking.checkIn)} -{' '}
-                                            {formatDate(selectedBooking.checkOut)}
-                                        </span>
-                                    </p>
+                    }
+                >
+                    {selectedBooking && (
+                        <div className='space-y-6'>
+                            {/* Booking Overview */}
+                            <div className='bg-gradient-to-r from-[#F8B259]/10 to-[#D96F32]/10 rounded-xl p-4'>
+                                <div className='flex justify-between items-start'>
+                                    <div>
+                                        <h4 className='text-lg font-bold text-[#C75D2C]'>
+                                            Booking #{selectedBooking.id.slice(-8)}
+                                        </h4>
+                                        <p className='text-sm text-[#C75D2C]/60'>
+                                            Created: {formatDateTime(selectedBooking.createdAt)}
+                                        </p>
+                                    </div>
+                                    <div className='text-right space-y-2'>
+                                        <BookingStatusBadge status={selectedBooking.status} />
+                                        {selectedBooking.isPaid && (
+                                            <div>
+                                                <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200'>
+                                                    <CheckCircle className='w-3 h-3 mr-1' />
+                                                    Paid
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
 
+                            {/* Guest & Villa Information */}
+                            <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                                <div>
+                                    <h5 className='font-semibold text-[#C75D2C] mb-3 flex items-center'>
+                                        <User className='w-4 h-4 mr-2' />
+                                        Guest Information
+                                    </h5>
+                                    <div className='bg-white/30 rounded-lg p-4 space-y-3'>
+                                        <div className='flex items-center space-x-2'>
+                                            <User className='w-4 h-4 text-[#D96F32]' />
+                                            <span className='font-medium text-[#C75D2C]'>
+                                                {selectedBooking.guest?.fullName || 'N/A'}
+                                            </span>
+                                        </div>
+                                        <div className='flex items-center space-x-2'>
+                                            <Mail className='w-4 h-4 text-[#D96F32]' />
+                                            <span className='font-medium text-[#C75D2C]'>
+                                                {selectedBooking.guest?.email || 'N/A'}
+                                            </span>
+                                        </div>
+                                        {selectedBooking.guest?.phone && (
+                                            <div className='flex items-center space-x-2'>
+                                                <Phone className='w-4 h-4 text-[#D96F32]' />
+                                                <span className='font-medium text-[#C75D2C]'>
+                                                    {selectedBooking.guest.phone}
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h5 className='font-semibold text-[#C75D2C] mb-3 flex items-center'>
+                                        <Home className='w-4 h-4 mr-2' />
+                                        Villa Information
+                                    </h5>
+                                    <div className='bg-white/30 rounded-lg p-4 space-y-2'>
+                                        <div>
+                                            <label className='text-sm text-[#C75D2C]/60'>Villa Name</label>
+                                            <p className='font-medium text-[#C75D2C]'>
+                                                {selectedBooking.villa?.title || 'N/A'}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <label className='text-sm text-[#C75D2C]/60'>Location</label>
+                                            <p className='font-medium text-[#C75D2C]'>
+                                                {selectedBooking.villa?.city}, {selectedBooking.villa?.country}
+                                            </p>
+                                        </div>
+                                        {selectedBooking.villa?.address && (
+                                            <div>
+                                                <label className='text-sm text-[#C75D2C]/60'>Address</label>
+                                                <p className='font-medium text-[#C75D2C]'>
+                                                    {selectedBooking.villa.address}
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Stay Details */}
+                            <div>
+                                <h5 className='font-semibold text-[#C75D2C] mb-3 flex items-center'>
+                                    <Calendar className='w-4 h-4 mr-2' />
+                                    Stay Details
+                                </h5>
+                                <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
+                                    <div className='bg-white/30 rounded-lg p-3 text-center'>
+                                        <p className='text-sm text-[#C75D2C]/60'>Check-in</p>
+                                        <p className='font-medium text-[#C75D2C]'>
+                                            {formatDate(selectedBooking.checkIn)}
+                                        </p>
+                                    </div>
+                                    <div className='bg-white/30 rounded-lg p-3 text-center'>
+                                        <p className='text-sm text-[#C75D2C]/60'>Check-out</p>
+                                        <p className='font-medium text-[#C75D2C]'>
+                                            {formatDate(selectedBooking.checkOut)}
+                                        </p>
+                                    </div>
+                                    <div className='bg-white/30 rounded-lg p-3 text-center'>
+                                        <p className='text-sm text-[#C75D2C]/60'>Duration</p>
+                                        <p className='font-medium text-[#C75D2C]'>
+                                            {getStayDuration(selectedBooking.checkIn, selectedBooking.checkOut)} nights
+                                        </p>
+                                    </div>
+                                    <div className='bg-white/30 rounded-lg p-3 text-center'>
+                                        <p className='text-sm text-[#C75D2C]/60'>Total Guests</p>
+                                        <p className='font-medium text-[#C75D2C]'>
+                                            {selectedBooking.totalAdults + selectedBooking.totalChildren}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className='mt-4 grid grid-cols-2 gap-4'>
+                                    <div className='bg-white/30 rounded-lg p-3 text-center'>
+                                        <Users className='w-6 h-6 text-[#D96F32] mx-auto mb-1' />
+                                        <p className='font-medium text-[#C75D2C]'>{selectedBooking.totalAdults}</p>
+                                        <p className='text-sm text-[#C75D2C]/60'>Adults</p>
+                                    </div>
+                                    <div className='bg-white/30 rounded-lg p-3 text-center'>
+                                        <Baby className='w-6 h-6 text-[#D96F32] mx-auto mb-1' />
+                                        <p className='font-medium text-[#C75D2C]'>{selectedBooking.totalChildren}</p>
+                                        <p className='text-sm text-[#C75D2C]/60'>Children</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Payment Information */}
+                            <div>
+                                <h5 className='font-semibold text-[#C75D2C] mb-3 flex items-center'>
+                                    <CreditCard className='w-4 h-4 mr-2' />
+                                    Payment Information
+                                </h5>
+                                <div className='bg-white/30 rounded-lg p-4 space-y-3'>
+                                    <div className='flex justify-between items-center'>
+                                        <span className='text-[#C75D2C]/60'>Total Amount</span>
+                                        <span className='font-bold text-[#C75D2C] text-lg'>
+                                            {formatPrice(selectedBooking.totalPrice, 'EUR')}
+                                        </span>
+                                    </div>
+                                    <div className='flex justify-between items-center'>
+                                        <span className='text-[#C75D2C]/60'>Payment Method</span>
+                                        <span className='font-medium text-[#C75D2C]'>
+                                            {selectedBooking.paymentMethod === 'BANK_TRANSFER'
+                                                ? 'Bank Transfer'
+                                                : 'Payment on Arrival'}
+                                        </span>
+                                    </div>
+                                    <div className='flex justify-between items-center'>
+                                        <span className='text-[#C75D2C]/60'>Payment Status</span>
+                                        <div className='flex items-center space-x-2'>
+                                            {getPaymentBadge(selectedBooking.isPaid)}
+                                            {user && canTogglePayment(selectedBooking, user.id, user.role) && (
+                                                <button
+                                                    onClick={() => handleTogglePayment(selectedBooking)}
+                                                    disabled={paymentToggleLoading === selectedBooking.id}
+                                                    className={`px-2 py-1 rounded-lg text-xs font-medium transition-colors ${
+                                                        selectedBooking.isPaid
+                                                            ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                                                            : 'bg-green-100 text-green-700 hover:bg-green-200'
+                                                    } disabled:opacity-50`}
+                                                >
+                                                    {paymentToggleLoading === selectedBooking.id ? (
+                                                        <div className='w-3 h-3 border border-current/30 border-t-current rounded-full animate-spin'></div>
+                                                    ) : selectedBooking.isPaid ? (
+                                                        'Mark Unpaid'
+                                                    ) : (
+                                                        'Mark Paid'
+                                                    )}
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Additional Services */}
+                            {selectedBooking.bookingServices && selectedBooking.bookingServices.length > 0 && (
+                                <div>
+                                    <h5 className='font-semibold text-[#C75D2C] mb-3'>Additional Services</h5>
+                                    <div className='space-y-2'>
+                                        {selectedBooking.bookingServices.map(service => (
+                                            <div
+                                                key={service.id}
+                                                className='bg-white/30 rounded-lg p-3 flex justify-between items-center'
+                                            >
+                                                <div>
+                                                    <p className='font-medium text-[#C75D2C]'>
+                                                        {service.service?.title || 'Service'}
+                                                    </p>
+                                                    <p className='text-sm text-[#C75D2C]/60'>Qty: {service.quantity}</p>
+                                                </div>
+                                                <span className='font-medium text-[#C75D2C]'>
+                                                    {formatPrice(service.totalPrice, 'EUR')}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Special Notes */}
+                            {selectedBooking.notes && (
+                                <div>
+                                    <h5 className='font-semibold text-[#C75D2C] mb-3'>Special Requests</h5>
+                                    <div className='bg-white/30 rounded-lg p-4'>
+                                        <p className='text-[#C75D2C]'>{selectedBooking.notes}</p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Reasons */}
+                            {(selectedBooking.cancellationReason || selectedBooking.rejectionReason) && (
+                                <div>
+                                    <h5 className='font-semibold text-red-700 mb-3'>
+                                        {selectedBooking.cancellationReason
+                                            ? 'Cancellation Reason'
+                                            : 'Rejection Reason'}
+                                    </h5>
+                                    <div className='bg-red-50 border border-red-200 rounded-lg p-4'>
+                                        <p className='text-red-700'>
+                                            {selectedBooking.cancellationReason || selectedBooking.rejectionReason}
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </Modal>
+
+                {/* Action Modal */}
+                <Modal
+                    isOpen={showActionModal}
+                    onClose={closeActionModal}
+                    title={`${actionType?.charAt(0).toUpperCase()}${actionType?.slice(1)} Booking`}
+                    maxWidth='max-w-md'
+                    actions={
+                        <>
+                            <button
+                                onClick={handleBookingAction}
+                                disabled={actionLoading || (actionType === 'reject' && !actionReason.trim())}
+                                className='px-4 py-2 bg-gradient-to-r from-[#D96F32] to-[#C75D2C] cursor-pointer text-white rounded-xl hover:from-[#C75D2C] hover:to-[#D96F32] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-medium flex items-center'
+                            >
+                                {actionLoading ? (
+                                    <div className='w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2'></div>
+                                ) : (
+                                    <CheckCircle className='w-4 h-4 mr-2' />
+                                )}
+                                {actionLoading
+                                    ? 'Processing...'
+                                    : `${actionType?.charAt(0).toUpperCase()}${actionType?.slice(1)}`}
+                            </button>
+                            <button
+                                onClick={closeActionModal}
+                                className='px-4 py-2 bg-gray-100 text-[#C75D2C] cursor-pointer rounded-xl hover:bg-gray-200 transition-all duration-300 font-medium '
+                            >
+                                Cancel
+                            </button>
+                        </>
+                    }
+                >
+                    {selectedBooking && (
+                        <div className='space-y-4'>
+                            <div className='bg-white/30 border border-[#F8B259]/50 rounded-xl p-4'>
+                                <p className='text-sm text-[#C75D2C]/60 mb-2'>
+                                    Guest:{' '}
+                                    <span className='font-medium text-[#C75D2C]'>
+                                        {selectedBooking.guest?.fullName}
+                                    </span>
+                                </p>
+                                <p className='text-sm text-[#C75D2C]/60 mb-2'>
+                                    Villa:{' '}
+                                    <span className='font-medium text-[#C75D2C]'>{selectedBooking.villa?.title}</span>
+                                </p>
+                                <p className='text-sm text-[#C75D2C]/60'>
+                                    Dates:{' '}
+                                    <span className='font-medium text-[#C75D2C]'>
+                                        {formatDate(selectedBooking.checkIn)} - {formatDate(selectedBooking.checkOut)}
+                                    </span>
+                                </p>
+                            </div>
+
                             {actionType === 'reject' && (
-                                <div className='mb-4'>
+                                <div>
                                     <label className='block text-sm font-medium text-[#C75D2C] mb-2'>
                                         Reason (Required)
                                     </label>
@@ -960,33 +982,9 @@ export const AdminBookings: React.FC = () => {
                                     />
                                 </div>
                             )}
-
-                            <div className='flex space-x-3'>
-                                <button
-                                    onClick={handleBookingAction}
-                                    disabled={actionLoading || (actionType === 'reject' && !actionReason.trim())}
-                                    className='flex-1 inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-[#D96F32] to-[#C75D2C] text-white rounded-xl hover:from-[#C75D2C] hover:to-[#D96F32] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-medium'
-                                >
-                                    {actionLoading ? (
-                                        <div className='w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2'></div>
-                                    ) : (
-                                        <CheckCircle className='w-4 h-4 mr-2' />
-                                    )}
-                                    {actionLoading
-                                        ? 'Processing...'
-                                        : `${actionType.charAt(0).toUpperCase() + actionType.slice(1)}`}
-                                </button>
-
-                                <button
-                                    onClick={closeActionModal}
-                                    className='flex-1 inline-flex items-center justify-center px-4 py-2 bg-white/50 text-[#C75D2C] rounded-xl hover:bg-white/70 transition-all duration-300 font-medium'
-                                >
-                                    Cancel
-                                </button>
-                            </div>
                         </div>
-                    </div>
-                )}
+                    )}
+                </Modal>
             </div>
 
             <THToaster position='bottom-right' />
