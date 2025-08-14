@@ -51,16 +51,6 @@ app.use(cors({
         if (!origin && !isProduction) {
             return callback(null, true);
         }
-        
-        console.log('=== CORS Debug ===');
-        console.log('Request origin:', origin);
-        console.log('Is production:', isProduction);
-        console.log('FRONTEND_URL from env:', env.FRONTEND_URL);
-        console.log('Allowed origins:', allowedOrigins);
-        console.log('Origin in allowed origins:', origin ? allowedOrigins.includes(origin) : 'N/A (no origin)');
-        console.log('==================');
-        
-        // Fix: Check if origin exists before using includes()
         if (!origin || (origin && allowedOrigins.includes(origin))) {
             callback(null, true);
         } else {
