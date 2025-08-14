@@ -15,8 +15,7 @@ import {
     Utensils,
 } from 'lucide-react';
 import bookingApi, { type ServiceSelection } from '@/api/bookingApi';
-import villaApi from '@/api/villaApi';
-import emailApi from '@/api/emailApi'; // Import the email API
+import emailApi from '@/api/emailApi';
 import DateRangePickerModal from './DateRangePickerModal';
 import SignInModal from './SignInModal';
 import { THToast, THToaster } from '@/components/common/Toast';
@@ -74,14 +73,12 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
 
     const [formErrors, setFormErrors] = useState<FormErrors>({});
 
-    // Load villa services
     useEffect(() => {
         if (villa?.id) {
             setAvailableServices(villa.services || []);
         }
     }, [villa?.id]);
 
-    // Load form data from localStorage on mount
     useEffect(() => {
         const savedFormData = localStorage.getItem(FORM_STORAGE_KEY);
         if (savedFormData) {
@@ -98,7 +95,6 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
         }
     }, []);
 
-    // Initialize form with user data when user is available
     useEffect(() => {
         if (user) {
             const savedFormData = localStorage.getItem(FORM_STORAGE_KEY);
@@ -122,7 +118,6 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
         }
     }, [user]);
 
-    // Save form data to localStorage whenever it changes
     const saveFormDataToStorage = (data: FormData) => {
         try {
             localStorage.setItem(FORM_STORAGE_KEY, JSON.stringify(data));
@@ -671,22 +666,9 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
                                                                         <h4 className='font-medium text-[#C75D2C] text-sm'>
                                                                             {service.title}
                                                                         </h4>
-                                                                        <span
-                                                                            className={`px-2 py-1 rounded-full text-xs font-medium ${getServiceCategoryColor(
-                                                                                service.category
-                                                                            )}`}
-                                                                        >
-                                                                            {service.category}
-                                                                        </span>
+                                                                       
                                                                     </div>
-                                                                    <p className='text-xs text-[#C75D2C]/70 mb-1'>
-                                                                        {service.description}
-                                                                    </p>
-                                                                    {service.longDescription && (
-                                                                        <p className='text-xs text-[#C75D2C]/60 mb-2 line-clamp-2'>
-                                                                            {service.longDescription}
-                                                                        </p>
-                                                                    )}
+                                                                  
                                                                 </div>
                                                             </div>
                                                         </div>
