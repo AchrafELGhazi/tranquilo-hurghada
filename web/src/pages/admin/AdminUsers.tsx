@@ -14,7 +14,8 @@ import {
     ChevronRight,
     Search,
     AlertCircle,
-} from 'lucide-react';
+} from 'lucide-react'
+import { Modal } from '@/components/common/Modal';
 import userApi, { type GetUsersQuery, type GetUsersResponse } from '@/api/userApi';
 import type { User } from '@/utils/types';
 
@@ -80,6 +81,11 @@ const AdminUsers: React.FC = () => {
         setQueryParams(prev => ({ ...prev, page }));
     };
 
+    // Close user details modal
+    const handleCloseUserModal = () => {
+        setSelectedUser(null);
+    };
+
     // Fetch users when query params change
     useEffect(() => {
         fetchUsers();
@@ -141,6 +147,15 @@ const AdminUsers: React.FC = () => {
     const users = usersData?.data || [];
     const pagination = usersData?.pagination;
 
+    const userDetailsActions = (
+        <button
+            onClick={handleCloseUserModal}
+            className='px-6 py-2 bg-gradient-to-r from-[#D96F32] to-[#C75D2C] text-white rounded-xl hover:from-[#C75D2C] hover:to-[#D96F32] transition-all duration-300 font-medium cursor-pointer'
+        >
+            Close
+        </button>
+    );
+
     return (
         <div className='min-h-screen'>
             <div className='max-w-7xl mx-auto space-y-6'>
@@ -158,7 +173,7 @@ const AdminUsers: React.FC = () => {
                             <button
                                 onClick={fetchUsers}
                                 disabled={loading}
-                                className='flex items-center space-x-2 bg-gradient-to-r from-[#D96F32] to-[#C75D2C] text-white px-4 py-2 rounded-xl font-medium hover:from-[#C75D2C] hover:to-[#D96F32] transition-all duration-300 disabled:opacity-50'
+                                className='flex items-center space-x-2 bg-gradient-to-r from-[#D96F32] to-[#C75D2C] text-white px-4 py-2 rounded-xl font-medium hover:from-[#C75D2C] hover:to-[#D96F32] transition-all duration-300 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed'
                             >
                                 <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
                                 <span>Refresh</span>
@@ -202,7 +217,7 @@ const AdminUsers: React.FC = () => {
                                     <button
                                         key={status.label}
                                         onClick={() => setStatusFilter(status.value)}
-                                        className={`px-3 py-1 rounded-lg text-xs font-medium transition-all duration-300 ${
+                                        className={`px-3 py-1 rounded-lg text-xs font-medium transition-all duration-300 cursor-pointer ${
                                             statusFilter === status.value
                                                 ? 'bg-[#D96F32] text-white'
                                                 : 'bg-white/50 text-[#C75D2C] hover:bg-white/70'
@@ -228,7 +243,7 @@ const AdminUsers: React.FC = () => {
                                     <button
                                         key={role.label}
                                         onClick={() => setRoleFilter(role.value)}
-                                        className={`px-3 py-1 rounded-lg text-xs font-medium transition-all duration-300 ${
+                                        className={`px-3 py-1 rounded-lg text-xs font-medium transition-all duration-300 cursor-pointer ${
                                             roleFilter === role.value
                                                 ? 'bg-[#DEB887] text-[#8B4513]'
                                                 : 'bg-white/50 text-[#C75D2C] hover:bg-white/70'
@@ -244,13 +259,13 @@ const AdminUsers: React.FC = () => {
                         <div className='flex items-center space-x-2 pt-2 border-t border-[#F8B259]/30'>
                             <button
                                 onClick={applyFilters}
-                                className='px-4 py-2 bg-gradient-to-r from-[#D96F32] to-[#C75D2C] text-white rounded-xl hover:from-[#C75D2C] hover:to-[#D96F32] transition-all duration-300 font-medium'
+                                className='px-4 py-2 bg-gradient-to-r from-[#D96F32] to-[#C75D2C] text-white rounded-xl hover:from-[#C75D2C] hover:to-[#D96F32] transition-all duration-300 font-medium cursor-pointer'
                             >
                                 Apply Filters
                             </button>
                             <button
                                 onClick={clearFilters}
-                                className='px-4 py-2 bg-white/50 text-[#C75D2C] rounded-xl hover:bg-white/70 transition-all duration-300 font-medium'
+                                className='px-4 py-2 bg-white/50 text-[#C75D2C] rounded-xl hover:bg-white/70 transition-all duration-300 font-medium cursor-pointer'
                             >
                                 Clear All
                             </button>
@@ -304,7 +319,6 @@ const AdminUsers: React.FC = () => {
                                             <th className='px-6 py-4 text-left text-xs font-bold text-[#C75D2C] uppercase tracking-wider'>
                                                 Role
                                             </th>
-
                                             <th className='px-6 py-4 text-left text-xs font-bold text-[#C75D2C] uppercase tracking-wider'>
                                                 Actions
                                             </th>
@@ -359,12 +373,11 @@ const AdminUsers: React.FC = () => {
                                                 <td className='px-6 py-4 whitespace-nowrap'>
                                                     {getRoleBadge(user.role)}
                                                 </td>
-
                                                 <td className='px-6 py-4'>
                                                     <div className='flex items-center space-x-2'>
                                                         <button
                                                             onClick={() => setSelectedUser(user)}
-                                                            className='p-2 bg-[#D96F32]/20 text-[#D96F32] rounded-lg hover:bg-[#D96F32]/30 transition-colors duration-200'
+                                                            className='p-2 bg-[#D96F32]/20 text-[#D96F32] rounded-lg hover:bg-[#D96F32]/30 transition-colors duration-200 cursor-pointer'
                                                             title='View Details'
                                                         >
                                                             <Eye className='w-4 h-4' />
@@ -389,7 +402,7 @@ const AdminUsers: React.FC = () => {
                                             <button
                                                 onClick={() => handlePageChange(pagination.page - 1)}
                                                 disabled={pagination.page === 1}
-                                                className='p-2 rounded-lg bg-white/50 text-[#C75D2C] hover:bg-white/70 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed'
+                                                className='p-2 rounded-lg bg-white/50 text-[#C75D2C] hover:bg-white/70 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer'
                                             >
                                                 <ChevronLeft className='w-4 h-4' />
                                             </button>
@@ -397,7 +410,7 @@ const AdminUsers: React.FC = () => {
                                             <button
                                                 onClick={() => handlePageChange(pagination.page + 1)}
                                                 disabled={pagination.page === pagination.pages}
-                                                className='p-2 rounded-lg bg-white/50 text-[#C75D2C] hover:bg-white/70 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed'
+                                                className='p-2 rounded-lg bg-white/50 text-[#C75D2C] hover:bg-white/70 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer'
                                             >
                                                 <ChevronRight className='w-4 h-4' />
                                             </button>
@@ -410,47 +423,77 @@ const AdminUsers: React.FC = () => {
                 </div>
             </div>
 
-            {/* User Details Modal */}
-            {selectedUser && (
-                <div
-                    className='fixed inset-0 bg-black/60 backdrop-blur-sm z-[999999] flex items-center justify-center p-4'
-                    style={{ zIndex: 999999 }}
-                >
-                    <div className='bg-white/95 backdrop-blur-md border-2 border-[#F8B259]/70 rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto'>
-                        <div className='flex items-center justify-between mb-6'>
-                            <h3 className='text-xl font-bold text-[#C75D2C] font-butler'>User Details</h3>
-                            <button
-                                onClick={() => setSelectedUser(null)}
-                                className='p-2 hover:bg-[#F8B259]/20 rounded-xl transition-colors'
-                            >
-                                <XCircle className='w-5 h-5 text-[#C75D2C]' />
-                            </button>
+            <Modal
+                isOpen={!!selectedUser}
+                onClose={handleCloseUserModal}
+                title='User Details'
+                actions={userDetailsActions}
+                maxWidth='max-w-2xl'
+                maxHeight='max-h-[90vh]'
+            >
+                {selectedUser && (
+                    <div className='space-y-4'>
+                        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                            <div className='bg-white/60 backdrop-blur-sm border border-[#F8B259]/50 rounded-xl p-4'>
+                                <label className='block text-sm font-medium text-[#C75D2C]/70 mb-1'>Full Name</label>
+                                <p className='text-[#C75D2C] font-medium'>{selectedUser.fullName || 'N/A'}</p>
+                            </div>
+
+                            <div className='bg-white/60 backdrop-blur-sm border border-[#F8B259]/50 rounded-xl p-4'>
+                                <label className='block text-sm font-medium text-[#C75D2C]/70 mb-1'>Email</label>
+                                <p className='text-[#C75D2C] font-medium'>{selectedUser.email}</p>
+                            </div>
+
+                            <div className='bg-white/60 backdrop-blur-sm border border-[#F8B259]/50 rounded-xl p-4'>
+                                <label className='block text-sm font-medium text-[#C75D2C]/70 mb-1'>Phone</label>
+                                <p className='text-[#C75D2C] font-medium'>{selectedUser.phone || 'Not provided'}</p>
+                            </div>
+
+                            <div className='bg-white/60 backdrop-blur-sm border border-[#F8B259]/50 rounded-xl p-4'>
+                                <label className='block text-sm font-medium text-[#C75D2C]/70 mb-1'>
+                                    Date of Birth
+                                </label>
+                                <p className='text-[#C75D2C] font-medium'>{formatDate(selectedUser.dateOfBirth)}</p>
+                            </div>
+
+                            <div className='bg-white/60 backdrop-blur-sm border border-[#F8B259]/50 rounded-xl p-4'>
+                                <label className='block text-sm font-medium text-[#C75D2C]/70 mb-1'>Role</label>
+                                <div>{getRoleBadge(selectedUser.role)}</div>
+                            </div>
+
+                            <div className='bg-white/60 backdrop-blur-sm border border-[#F8B259]/50 rounded-xl p-4'>
+                                <label className='block text-sm font-medium text-[#C75D2C]/70 mb-1'>Status</label>
+                                <div>{getStatusBadge(selectedUser.isActive)}</div>
+                            </div>
                         </div>
 
-                        <div className='space-y-4'>
-                            <div className='grid grid-cols-1 md:grid-cols-1 gap-4'>
-                                <div className='bg-white/30 border border-[#F8B259]/50 rounded-xl p-4'>
-                                    <h4 className='font-semibold text-[#C75D2C] mb-3'>Account Timeline</h4>
-                                    <div className='grid grid-cols-1 md:grid-cols-2 gap-4 text-sm'>
-                                        <div>
-                                            <p className='text-[#C75D2C]/60'>Joined</p>
-                                            <p className='font-medium text-[#C75D2C]'>
-                                                {formatDateTime(selectedUser.createdAt)}
-                                            </p>
-                                        </div>
-                                        <div>
-                                            <p className='text-[#C75D2C]/60'>Last Updated</p>
-                                            <p className='font-medium text-[#C75D2C]'>
-                                                {formatDateTime(selectedUser.updatedAt)}
-                                            </p>
-                                        </div>
-                                    </div>
+                        <div className='bg-white/60 backdrop-blur-sm border border-[#F8B259]/50 rounded-xl p-4'>
+                            <label className='block text-sm font-medium text-[#C75D2C]/70 mb-2'>User ID</label>
+                            <p className='text-[#C75D2C] font-mono text-sm bg-white/40 p-2 rounded'>
+                                {selectedUser.id}
+                            </p>
+                        </div>
+
+                        <div className='bg-white/60 backdrop-blur-sm border border-[#F8B259]/50 rounded-xl p-4'>
+                            <h4 className='font-semibold text-[#C75D2C] mb-3'>Account Timeline</h4>
+                            <div className='grid grid-cols-1 md:grid-cols-2 gap-4 text-sm'>
+                                <div>
+                                    <p className='text-[#C75D2C]/60'>Joined</p>
+                                    <p className='font-medium text-[#C75D2C]'>
+                                        {formatDateTime(selectedUser.createdAt)}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className='text-[#C75D2C]/60'>Last Updated</p>
+                                    <p className='font-medium text-[#C75D2C]'>
+                                        {formatDateTime(selectedUser.updatedAt)}
+                                    </p>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )}
+            </Modal>
         </div>
     );
 };

@@ -22,7 +22,10 @@ const MyBookings: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [cancelling, setCancelling] = useState<string | null>(null);
-    const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+
+    // Separate state for each modal
+    const [selectedBookingForDetails, setSelectedBookingForDetails] = useState<Booking | null>(null);
+    const [selectedBookingForCancel, setSelectedBookingForCancel] = useState<Booking | null>(null);
     const [showCancelModal, setShowCancelModal] = useState(false);
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -68,17 +71,19 @@ const MyBookings: React.FC = () => {
     };
 
     const handleCancelBooking = async (cancellationReason: string) => {
-        if (!selectedBooking || !user) return;
+        if (!selectedBookingForCancel || !user) return;
 
         try {
-            setCancelling(selectedBooking.id);
-            await bookingApi.cancelBooking(selectedBooking.id, cancellationReason);
-            const updatedBooking = createUpdatedBooking(selectedBooking, cancellationReason, user);
-            setBookings(prev => prev.map(booking => (booking.id === selectedBooking.id ? updatedBooking : booking)));
-            sendCancellationEmail(selectedBooking, cancellationReason);
+            setCancelling(selectedBookingForCancel.id);
+            await bookingApi.cancelBooking(selectedBookingForCancel.id, cancellationReason);
+            const updatedBooking = createUpdatedBooking(selectedBookingForCancel, cancellationReason, user);
+            setBookings(prev =>
+                prev.map(booking => (booking.id === selectedBookingForCancel.id ? updatedBooking : booking))
+            );
+            sendCancellationEmail(selectedBookingForCancel, cancellationReason);
             THToast.success('Booking Cancelled', 'Your booking has been cancelled successfully');
             setShowCancelModal(false);
-            setSelectedBooking(null);
+            setSelectedBookingForCancel(null);
         } catch (err) {
             const errorMsg = err instanceof Error ? err.message : 'Failed to cancel booking';
             setError(errorMsg);
@@ -97,24 +102,27 @@ const MyBookings: React.FC = () => {
     };
 
     const handleViewDetails = (booking: Booking) => {
-        setSelectedBooking(booking);
+        setSelectedBookingForDetails(booking);
     };
 
     const handleCancelBookingClick = (booking: Booking) => {
-        setSelectedBooking(booking);
+        setSelectedBookingForCancel(booking);
         setShowCancelModal(true);
     };
 
     const handleCloseDetailsModal = () => {
-        setSelectedBooking(null);
+        setSelectedBookingForDetails(null);
     };
 
     const handleShowCancelModalFromDetails = () => {
+        // Transfer the booking from details to cancel
+        setSelectedBookingForCancel(selectedBookingForDetails);
         setShowCancelModal(true);
     };
 
     const handleCloseCancelModal = () => {
         setShowCancelModal(false);
+        setSelectedBookingForCancel(null);
     };
 
     if (!user) {
@@ -197,7 +205,7 @@ const MyBookings: React.FC = () => {
 
             {/* Booking Details Modal */}
             <BookingDetailsModal
-                booking={selectedBooking}
+                booking={selectedBookingForDetails}
                 currentUserId={user.id}
                 userRole={user.role as UserRole}
                 onClose={handleCloseDetailsModal}
@@ -206,9 +214,9 @@ const MyBookings: React.FC = () => {
 
             {/* Cancel Booking Modal */}
             <CancelBookingModal
-                booking={selectedBooking}
+                booking={selectedBookingForCancel}
                 isOpen={showCancelModal}
-                cancelling={cancelling === selectedBooking?.id}
+                cancelling={cancelling === selectedBookingForCancel?.id}
                 onClose={handleCloseCancelModal}
                 onConfirm={handleCancelBooking}
             />

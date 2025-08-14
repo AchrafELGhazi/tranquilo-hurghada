@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Eye, Mail, X, Calendar, User, RefreshCw, AlertCircle, MessageSquare } from 'lucide-react';
+import { Eye, Mail, Calendar, User, RefreshCw, AlertCircle, MessageSquare } from 'lucide-react';
 import { THToast, THToaster } from '@/components/common/Toast';
+import {Modal } from '@/components/common/Modal';
 import contactApi from '@/api/contactApi';
 import type { Contact } from '@/utils/types';
 
@@ -245,77 +246,61 @@ const AdminContact: React.FC = () => {
                 </div>
             </div>
 
-            {/* Modal */}
-            {isModalOpen && selectedContact && (
-                <div className='fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50'>
-                    <div className='bg-white/95 backdrop-blur-md border-2 border-[#F8B259]/70 rounded-2xl max-w-2xl w-full max-h-[80vh] flex flex-col'>
-                        {/* Modal Header */}
-                        <div className='flex items-center justify-between p-6 pb-4 border-b border-[#F8B259]/30'>
-                            <h2 className='text-xl font-bold text-[#C75D2C] font-butler'>Contact Message</h2>
-                            <button
-                                onClick={closeModal}
-                                className='text-[#C75D2C]/60 hover:text-[#C75D2C] transition-colors duration-200 cursor-pointer'
+            {/* Modal using THModal Component */}
+            <Modal
+                isOpen={isModalOpen}
+                onClose={closeModal}
+                title='Contact Message'
+                actions={
+                    <button
+                        onClick={closeModal}
+                        className='px-6 py-2 bg-gradient-to-r from-[#D96F32] to-[#C75D2C] text-white rounded-xl hover:from-[#C75D2C] hover:to-[#D96F32] transition-all duration-300 font-medium cursor-pointer'
+                    >
+                        Close
+                    </button>
+                }
+            >
+                {selectedContact && (
+                    <div className='space-y-4'>
+                        <div className='bg-white/60 backdrop-blur-sm border border-[#F8B259]/50 rounded-xl p-4'>
+                            <label className='block text-sm font-medium text-[#C75D2C]/70 mb-1'>Name</label>
+                            <p className='text-[#C75D2C] font-medium'>{selectedContact.name}</p>
+                        </div>
+
+                        <div className='bg-white/60 backdrop-blur-sm border border-[#F8B259]/50 rounded-xl p-4'>
+                            <label className='block text-sm font-medium text-[#C75D2C]/70 mb-1'>Email</label>
+                            <p className='text-[#C75D2C] font-medium'>{selectedContact.email}</p>
+                        </div>
+
+                        <div className='bg-white/60 backdrop-blur-sm border border-[#F8B259]/50 rounded-xl p-4'>
+                            <label className='block text-sm font-medium text-[#C75D2C]/70 mb-1'>Date</label>
+                            <p className='text-[#C75D2C]/80'>{formatDate(selectedContact.createdAt)}</p>
+                        </div>
+
+                        <div className='bg-white/60 backdrop-blur-sm border border-[#F8B259]/50 rounded-xl p-4'>
+                            <label className='block text-sm font-medium text-[#C75D2C]/70 mb-2'>Message</label>
+                            <div className='bg-white/40 rounded-lg p-4'>
+                                <p className='text-[#C75D2C] whitespace-pre-wrap leading-relaxed'>
+                                    {selectedContact.message}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className='flex items-center justify-between bg-white/60 backdrop-blur-sm border border-[#F8B259]/50 rounded-xl p-4'>
+                            <span className='text-sm font-medium text-[#C75D2C]/70'>Status:</span>
+                            <span
+                                className={`px-3 py-1 text-xs font-medium rounded-full border ${
+                                    selectedContact.isRead
+                                        ? 'bg-green-100/80 text-green-800 border-green-200/60'
+                                        : 'bg-red-100/80 text-red-800 border-red-200/60'
+                                }`}
                             >
-                                <X className='w-6 h-6' />
-                            </button>
-                        </div>
-
-                        {/* Modal Content - Scrollable */}
-                        <div className='flex-1 overflow-y-auto p-6 pt-4'>
-                            <div className='space-y-4'>
-                                <div className='bg-white/60 backdrop-blur-sm border border-[#F8B259]/50 rounded-xl p-4'>
-                                    <label className='block text-sm font-medium text-[#C75D2C]/70 mb-1'>Name</label>
-                                    <p className='text-[#C75D2C] font-medium'>{selectedContact.name}</p>
-                                </div>
-
-                                <div className='bg-white/60 backdrop-blur-sm border border-[#F8B259]/50 rounded-xl p-4'>
-                                    <label className='block text-sm font-medium text-[#C75D2C]/70 mb-1'>Email</label>
-                                    <p className='text-[#C75D2C] font-medium'>{selectedContact.email}</p>
-                                </div>
-
-                                <div className='bg-white/60 backdrop-blur-sm border border-[#F8B259]/50 rounded-xl p-4'>
-                                    <label className='block text-sm font-medium text-[#C75D2C]/70 mb-1'>Date</label>
-                                    <p className='text-[#C75D2C]/80'>{formatDate(selectedContact.createdAt)}</p>
-                                </div>
-
-                                <div className='bg-white/60 backdrop-blur-sm border border-[#F8B259]/50 rounded-xl p-4'>
-                                    <label className='block text-sm font-medium text-[#C75D2C]/70 mb-2'>Message</label>
-                                    <div className='bg-white/40 rounded-lg '>
-                                        <p className='text-[#C75D2C] whitespace-pre-wrap leading-relaxed'>
-                                            {selectedContact.message}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div className='flex items-center justify-between bg-white/60 backdrop-blur-sm border border-[#F8B259]/50 rounded-xl p-4'>
-                                    <span className='text-sm font-medium text-[#C75D2C]/70'>Status:</span>
-                                    <span
-                                        className={`px-3 py-1 text-xs font-medium rounded-full border ${
-                                            selectedContact.isRead
-                                                ? 'bg-green-100/80 text-green-800 border-green-200/60'
-                                                : 'bg-red-100/80 text-red-800 border-red-200/60'
-                                        }`}
-                                    >
-                                        {selectedContact.isRead ? 'Read' : 'Unread'}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Modal Footer */}
-                        <div className='p-6 pt-4 border-t border-[#F8B259]/30'>
-                            <div className='flex justify-end'>
-                                <button
-                                    onClick={closeModal}
-                                    className='px-6 py-2 bg-gradient-to-r from-[#D96F32] to-[#C75D2C] text-white rounded-xl hover:from-[#C75D2C] hover:to-[#D96F32] transition-all duration-300 font-medium cursor-pointer'
-                                >
-                                    Close
-                                </button>
-                            </div>
+                                {selectedContact.isRead ? 'Read' : 'Unread'}
+                            </span>
                         </div>
                     </div>
-                </div>
-            )}
+                )}
+            </Modal>
 
             <THToaster position='bottom-right' />
         </div>
