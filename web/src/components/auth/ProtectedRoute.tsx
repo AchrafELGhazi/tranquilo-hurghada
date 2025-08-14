@@ -27,7 +27,7 @@ export function ProtectedRoute({
     // Debounce the auth state to prevent rapid re-renders
     const debouncedAuth = useDebounce({ isAuthenticated, isLoading }, 100);
 
-    const currentLang = lang || 'en';
+    const currentLang = lang;
 
     const getLocalizedPath = (path: string) => {
         const cleanPath = path.startsWith('/') ? path.slice(1) : path;
