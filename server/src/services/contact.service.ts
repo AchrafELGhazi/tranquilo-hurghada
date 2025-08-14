@@ -9,7 +9,9 @@ export const createContact = async (data: CreateContactInput): Promise<Contact> 
 };
 
 export const getAllContacts = async (query: GetContactsQuery) => {
-    const { page, limit, isRead, sortBy, sortOrder } = query;
+    let { page, limit, isRead, sortBy, sortOrder } = query;
+    limit = Number(limit)
+    page = Number(page)
     const skip = (page - 1) * limit;
 
     const where: Prisma.ContactWhereInput = {};

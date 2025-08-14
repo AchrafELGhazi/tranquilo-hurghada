@@ -5,7 +5,7 @@ import i18n from '@/utils/i18n';
 import { LoadingScreen } from '@/components/common/LoadingScreen';
 import { Layout } from './layout/public/Layout';
 import { About } from './pages/guest/About';
-import Services  from './pages/guest/Services';
+import Services from './pages/guest/Services';
 import { Contact } from './pages/guest/Contact';
 import { NotFound } from './pages/guest/NotFound';
 import { AdminLayout } from './layout/admin/AdminLayout';
@@ -29,6 +29,7 @@ import { AdminVillaDetails } from './pages/admin/AdminVillaDetails';
 import AdminEditVilla from './pages/admin/AdminEditVilla';
 import { AdminBookings } from './pages/admin/AdminBookings';
 import AdminUsers from './pages/admin/AdminUsers';
+import AdminContact from './pages/admin/AdminContact';
 
 const RootRedirect: React.FC = () => {
     const storedLang = localStorage.getItem('preferred-language');
@@ -192,6 +193,7 @@ const App: React.FC = () => {
                                     <Route path='villas/:villaId/edit' element={<AdminEditVilla />} />
                                     <Route path='bookings' element={<AdminBookings />} />
                                     <Route path='users' element={<AdminUsers />} />
+                                    <Route path='contact' element={<AdminContact />} />
                                 </Route>
 
                                 <Route path='*' element={<NotFound />} />

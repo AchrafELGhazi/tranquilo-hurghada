@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
-import { LayoutDashboard, Users, Calendar, Building2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, Users, Calendar, Building2, Mail, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export const AdminSidebar: React.FC = () => {
     const { t } = useTranslation();
@@ -32,6 +32,11 @@ export const AdminSidebar: React.FC = () => {
             name: t('admin.villas'),
             href: `/${lang}/admin/villas`,
             icon: Building2,
+        },
+        {
+            name: t('admin.contact'),
+            href: `/${lang}/admin/contact`,
+            icon: Mail,
         },
     ];
 

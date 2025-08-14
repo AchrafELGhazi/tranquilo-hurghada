@@ -33,6 +33,7 @@
         "users": "Users",
         "villas": "Villa",
         "bookings": "Bookings",
+        "contact": "Contact",
         "backToSite": "Back to Site"
     },
     "footer": {
@@ -118,7 +119,8 @@
             "subtitle": "Reserve your perfect getaway today",
             "button": "Book Now"
         }
-    },"about": {
+    },
+    "about": {
         "hero": {
             "title": "Tranquilo",
             "subtitle": "Luxury Villa with Hotel Services",

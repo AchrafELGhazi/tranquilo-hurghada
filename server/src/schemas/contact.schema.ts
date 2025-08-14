@@ -10,11 +10,11 @@ export const createContactSchema = z.object({
 
 export const getContactsSchema = z.object({
     query: z.object({
-        page: z.string().transform(Number).pipe(z.number().min(1)).default(1),
-        limit: z.string().transform(Number).pipe(z.number().min(1).max(50)).default(10),
+        page: z.string().optional().default('1').transform(val => parseInt(val, 10)).pipe(z.number().min(1)),
+        limit: z.string().optional().default('10').transform(val => parseInt(val, 10)).pipe(z.number().min(1).max(50)),
         isRead: z.string().optional().transform(val => val === 'true' ? true : val === 'false' ? false : undefined),
-        sortBy: z.enum(['createdAt', 'name', 'email']).default('createdAt'),
-        sortOrder: z.enum(['asc', 'desc']).default('desc')
+        sortBy: z.enum(['createdAt', 'name', 'email']).optional().default('createdAt'),
+        sortOrder: z.enum(['asc', 'desc']).optional().default('desc')
     })
 });
 

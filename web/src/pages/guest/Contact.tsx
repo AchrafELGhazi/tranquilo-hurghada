@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MapPin, Phone, Mail, Send, Calendar } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
+import { THToast, THToaster } from '@/components/common/Toast';
+import contactApi from '@/api/contactApi';
 
 export const Contact: React.FC = () => {
     const { t } = useTranslation();
@@ -21,16 +23,62 @@ export const Contact: React.FC = () => {
         }));
     };
 
+    // const validateForm = (): boolean => {
+    //     if (!formData.name || !formData.email || !formData.message) {
+    //         THToast.warning('Missing Fields', 'Please fill in all required fields');
+    //         return false;
+    //     }
+
+    //     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    //     if (!emailRegex.test(formData.email)) {
+    //         THToast.error('Invalid Email', 'Please enter a valid email address');
+    //         return false;
+    //     }
+
+    //     if (formData.name.trim().length < 2) {
+    //         THToast.error('Invalid Name', 'Name must be at least 2 characters long');
+    //         return false;
+    //     }
+
+    //     if (formData.message.trim().length < 10) {
+    //         THToast.error('Message Too Short', 'Message must be at least 10 characters long');
+    //         return false;
+    //     }
+
+    //     return true;
+    // };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // if (!validateForm()) {
+        //     return;
+        // }
+
         setIsSubmitting(true);
 
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        try {
+            const contactData = {
+                name: formData.name.trim(),
+                email: formData.email.trim(),
+                message: formData.message.trim(),
+            };
 
-        setFormData({ name: '', email: '', message: '' });
-        setIsSubmitting(false);
+            const contactPromise = contactApi.sendMessage(contactData);
 
-        alert('Message sent successfully!');
+            THToast.promise(contactPromise, {
+                loading: 'Sending your message...',
+                success: "Message sent successfully! We'll get back to you soon.",
+                error: (err: any) => err.message || 'Failed to send message. Please try again.',
+            });
+
+            await contactPromise;
+            setFormData({ name: '', email: '', message: '' });
+        } catch (error) {
+            console.error('Error sending contact message:', error);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -253,6 +301,9 @@ export const Contact: React.FC = () => {
                     </div>
                 </div>
             </div>
+
+            {/* THToaster component */}
+            <THToaster position='bottom-right' />
         </div>
     );
 };
