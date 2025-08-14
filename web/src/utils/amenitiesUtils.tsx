@@ -245,7 +245,7 @@ export const getAmenityIcon = (amenity: string, className: string = 'w-5 h-5 tex
         return <Thermometer className={className} />;
     }
     if (amenityLower.includes('fireplace')) {
-        return <Flame className={className} />; // Using Flame as Fire alternative
+        return <Flame className={className} />;
     }
     if (amenityLower.includes('fan')) {
         return <Fan className={className} />;
