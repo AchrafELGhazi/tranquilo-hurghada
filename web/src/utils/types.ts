@@ -145,6 +145,22 @@ export interface BookingService {
     service?: Service;
 }
 
+export interface ContactMessage {
+    name: string;
+    email: string;
+    message: string;
+}
+
+export interface Contact {
+    id: string;
+    name: string;
+    email: string;
+    message: string;
+    isRead: boolean;
+    createdAt: string;
+    updatedAt: string;
+}
+
 export interface NavigationItem {
     name: string;
     href: string;

@@ -7,6 +7,7 @@ import { env } from '../config/env';
 import generateRootResponse from '../utils/generateRootResponse';
 import serviceRouter from './service.route';
 import emailRouter from './email.route';
+import contactRouter from './contact.route';
 
 const apiRouter = Router();
 
@@ -22,6 +23,7 @@ apiRouter.use('/villas', villaRouter);
 apiRouter.use('/bookings', bookingRouter);
 apiRouter.use('/email', emailRouter);
 apiRouter.use('/service', serviceRouter);
+apiRouter.use('/contact', contactRouter);
 
 // Health check endpoint
 apiRouter.get('/health', (_req, res) => {
