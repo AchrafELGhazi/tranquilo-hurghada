@@ -238,7 +238,12 @@ const getBookingRejectedTemplate = (booking: BookingData, isAdminView: boolean =
         <h2>${isAdminView ? 'Booking Rejected - Admin Notification' : 'Booking Request Declined'}</h2>
         <p>${isAdminView ? 'You have rejected a booking request.' : 'We\'re sorry, but your booking request has been declined.'}</p>
         
-        ${booking.rejectionReason ? `<p><strong>Reason:</strong> ${booking.rejectionReason}</p>` : ''}
+        ${booking.rejectionReason ? `
+        <div class="reason-box">
+            <div class="reason-title">Reason for Decline:</div>
+            <div class="reason-text">${booking.rejectionReason}</div>
+        </div>
+        ` : ''}
         
         <div class="booking-card">
             <h3>Booking Details</h3>

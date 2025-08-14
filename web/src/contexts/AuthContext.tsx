@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import { authApi, type LoginData, type RegisterData } from '../api/authApi';
 import apiService from '@/utils/api';
 import type { User } from '@/utils/types';
+import { useParams } from 'react-router-dom';
 
 interface AuthContextType {
     user: User | null;
@@ -29,6 +30,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const { lang } = useParams();
 
     const getAccessToken = (): string | null => {
         return localStorage.getItem('accessToken');
@@ -78,11 +80,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 const accessToken = getAccessToken();
 
                 if (storedUser && accessToken) {
-                    // Set token in API service
                     apiService.setAuthToken(accessToken);
 
                     try {
-                        // Verify token is still valid by fetching current user
                         const response = await authApi.getCurrentUser();
                         setUser(response.data.user);
                         storeUser(response.data.user);
@@ -172,10 +172,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
         } finally {
             clearAuthData();
             setIsLoading(false);
+            const currentLang = lang || 'en';
+            window.location.href = `/${currentLang}/signin`;
         }
     };
 
-    // Role checking functions
     const hasRole = (role: 'GUEST' | 'HOST' | 'ADMIN'): boolean => {
         if (!user) return false;
 
@@ -201,7 +202,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         login,
         register,
         logout,
-        updateUser, // Add the new method to the context value
+        updateUser,
         hasRole,
         isGuest,
         isHost,

@@ -3,6 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useLocation, Link, useParams } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
 import { THToast, THToaster } from '@/components/common/Toast';
+import emailApi from '@/api/emailApi';
 
 export const Register = () => {
     const [formData, setFormData] = useState({
@@ -69,6 +70,19 @@ export const Register = () => {
         return true;
     };
 
+    const sendWelcomeEmail = async (email: string, name: string): Promise<void> => {
+        try {
+            await emailApi.sendWelcomeEmail({
+                email: email,
+                name: name,
+            });
+            console.log('Welcome email sent successfully');
+        } catch (error) {
+            console.error('Failed to send welcome email:', error);
+            THToast.warning('Email Notice', 'Account created but welcome email could not be sent');
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         clearError();
@@ -93,8 +107,10 @@ export const Register = () => {
             });
 
             await registerPromise;
+
+        
+            sendWelcomeEmail(formData.email, formData.fullName.trim());
         } catch (err: any) {
-            // Error is already handled by the promise toast
         }
     };
 

@@ -10,14 +10,15 @@ import {
     Shield,
     Clock,
     LogIn,
-    X,
     Plus,
     Minus,
     Utensils,
 } from 'lucide-react';
 import bookingApi, { type ServiceSelection } from '@/api/bookingApi';
 import villaApi from '@/api/villaApi';
+import emailApi from '@/api/emailApi'; // Import the email API
 import DateRangePickerModal from './DateRangePickerModal';
+import SignInModal from './SignInModal';
 import { THToast, THToaster } from '@/components/common/Toast';
 import type { PaymentMethod, User, Villa, Service } from '@/utils/types';
 import { calculateNights, calculateTotalPrice, validateBookingDates } from '@/utils/bookingUtils';
@@ -80,7 +81,6 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
         }
     }, [villa?.id]);
 
-    
     // Load form data from localStorage on mount
     useEffect(() => {
         const savedFormData = localStorage.getItem(FORM_STORAGE_KEY);
@@ -283,6 +283,81 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
         return Object.keys(errors).length === 0;
     };
 
+    // Helper function to transform booking data for email
+    const transformBookingDataForEmail = (bookingResponse: any) => {
+        // Calculate total price
+        const totalPrice = calculateTotalPrice(villa.pricePerNight, formData.checkIn, formData.checkOut);
+
+        // Transform selected services for email format
+        const bookingServices = formData.selectedServices.map(selection => ({
+            id: `${selection.serviceId}-${Date.now()}`, // Generate a unique ID
+            service: {
+                id: selection.serviceId,
+                title: availableServices.find(s => s.id === selection.serviceId)?.title || 'Unknown Service',
+                description: availableServices.find(s => s.id === selection.serviceId)?.description || '',
+                category: availableServices.find(s => s.id === selection.serviceId)?.category || 'CUSTOM',
+            },
+        }));
+
+        // Ensure all required fields are present with proper defaults
+        const emailBookingData = {
+            id: bookingResponse.id || `booking_${Date.now()}`,
+            checkIn: formData.checkIn, // Keep as string, will be converted in backend
+            checkOut: formData.checkOut, // Keep as string, will be converted in backend
+            totalAdults: Number(formData.totalAdults) || 1,
+            totalChildren: Number(formData.totalChildren) || 0,
+            totalPrice: Number(totalPrice) || 0,
+            status: 'PENDING',
+            paymentMethod: formData.paymentMethod || 'BANK_TRANSFER',
+            isPaid: false,
+            notes: formData.notes || '',
+            villa: {
+                id: villa.id,
+                title: villa.title || 'Villa',
+                description: villa.description || '',
+                address: villa.address || '',
+                city: villa.city || '',
+                country: villa.country || '',
+                pricePerNight: Number(villa.pricePerNight) || 0,
+                maxGuests: Number(villa.maxGuests) || 1,
+                bedrooms: Number(villa.bedrooms) || 1,
+                bathrooms: Number(villa.bathrooms) || 1,
+                amenities: villa.amenities || [],
+                images: villa.images || [],
+                owner: {
+                    id: villa.owner?.id || 'owner_id',
+                    fullName: villa.owner?.fullName || 'Villa Owner',
+                    email: villa.owner?.email || 'owner@tranquilo-hurghada.com',
+                    phone: villa.owner?.phone || '',
+                },
+            },
+            guest: {
+                id: user?.id || 'guest_id',
+                fullName: user?.fullName || 'Guest User',
+                email: user?.email || 'guest@example.com',
+                phone: formData.phone || '',
+            },
+            bookingServices: bookingServices.length > 0 ? bookingServices : undefined,
+        };
+
+        // Log the data being sent for debugging
+        console.log('Email booking data:', JSON.stringify(emailBookingData, null, 2));
+
+        return emailBookingData;
+    };
+
+    // Helper function to send booking notification email
+    const sendBookingNotificationEmail = async (bookingData: any): Promise<void> => {
+        try {
+            await emailApi.sendNewBookingNotification(bookingData);
+            console.log('Booking notification email sent successfully');
+        } catch (error) {
+            console.error('Failed to send booking notification email:', error);
+            // Don't throw error here - we don't want to fail booking if email fails
+            THToast.warning('Email Notice', 'Booking created but notification email could not be sent');
+        }
+    };
+
     const handleSubmit = async () => {
         if (!validateForm()) return;
 
@@ -317,7 +392,13 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
                 error: (err: any) => err.message || 'Failed to submit booking request. Please try again.',
             });
 
-            await bookingPromise;
+            const bookingResponse = await bookingPromise;
+
+            // Transform booking data for email and send notification
+            const emailBookingData = transformBookingDataForEmail(bookingResponse);
+
+            // Send booking notification email (non-blocking)
+            sendBookingNotificationEmail(emailBookingData);
 
             // Clear form data from localStorage after successful booking
             localStorage.removeItem(FORM_STORAGE_KEY);
@@ -355,10 +436,10 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
         return calculateTotalPrice(villa.pricePerNight, formData.checkIn, formData.checkOut);
     };
 
-  const getCalculatedNights = () => {
-      if (!formData.checkIn || !formData.checkOut) return 0;
-      return calculateNights(formData.checkIn, formData.checkOut);
-  };
+    const getCalculatedNights = () => {
+        if (!formData.checkIn || !formData.checkOut) return 0;
+        return calculateNights(formData.checkIn, formData.checkOut);
+    };
 
     const calculateServicesTotal = () => {
         return formData.selectedServices.reduce((total, selection) => {
@@ -822,48 +903,7 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
                 initialCheckOut={formData.checkOut}
             />
 
-            {/* Sign In Modal */}
-            {showSignInModal && (
-                <div className='fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4'>
-                    <div className='bg-white/95 backdrop-blur-md border-2 border-[#F8B259]/70 rounded-2xl p-8 max-w-md w-full shadow-2xl transform transition-all duration-300 scale-100'>
-                        <div className='flex items-center justify-between mb-6'>
-                            <h3 className='text-2xl font-bold text-[#C75D2C] font-butler'>Sign in Required</h3>
-                            <button
-                                onClick={() => setShowSignInModal(false)}
-                                className='p-2 hover:bg-[#F8B259]/20 rounded-xl transition-colors group'
-                            >
-                                <X className='w-5 h-5 text-[#C75D2C] group-hover:rotate-90 transition-transform duration-200 cursor-pointer' />
-                            </button>
-                        </div>
-
-                        <div className='text-center mb-6'>
-                            <p className='text-[#C75D2C] mb-4'>
-                                To complete your booking for <strong className='text-[#D96F32]'>{villa.title}</strong>,
-                                please sign in to your account.
-                            </p>
-                        </div>
-
-                        <div className='flex flex-col space-y-3'>
-                            <button
-                                onClick={handleSignIn}
-                                className='w-full bg-gradient-to-r from-[#D96F32] to-[#C75D2C] text-white py-3 px-6 rounded-xl font-bold hover:from-[#C75D2C] hover:to-[#D96F32] hover:transform hover:-translate-y-0.5 transition-all duration-300 shadow-lg flex items-center justify-center space-x-2'
-                            >
-                                <LogIn className='w-5 h-5' />
-                                <span>Sign In</span>
-                            </button>
-                            <button
-                                onClick={() => setShowSignInModal(false)}
-                                className='w-full bg-white/50 text-[#C75D2C] py-3 px-6 rounded-xl font-semibold border-2 border-[#F8B259]/50 hover:bg-white/70 transition-all duration-300'
-                            >
-                                Continue as Guest
-                            </button>
-                            <p className='text-sm text-center text-[#C75D2C]/70'>
-                                <strong>Note:</strong> Continuing as a guest will not allow you to complete the booking.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <SignInModal isOpen={showSignInModal} onClose={() => setShowSignInModal(false)} villaTitle={villa.title} />
 
             {/* THToaster component */}
             <THToaster position='bottom-right' />

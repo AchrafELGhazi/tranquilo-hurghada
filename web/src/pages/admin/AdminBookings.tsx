@@ -18,14 +18,18 @@ import {
     Phone,
 } from 'lucide-react';
 import { bookingApi, type BookingFilters } from '@/api/bookingApi';
+import emailApi from '@/api/emailApi';
 import { THToast, THToaster } from '@/components/common/Toast';
 import type { Booking, BookingStatus } from '@/utils/types';
 import { useAuth } from '@/contexts/AuthContext';
 import getPaymentBadge from '@/components/common/PaymentBadge';
 import { BookingStatusBadge } from '@/components/common/BookingStatusBadge';
 import { formatDate, formatDateTime } from '@/utils/date';
-import villaApi from '@/api/villaApi';
 import { canTogglePayment, formatPrice, getStayDuration } from '@/utils/bookingUtils';
+import {
+    transformBookingDataForConfirmation,
+    transformBookingDataForRejection,
+} from '@/utils/emailUtils';
 
 export const AdminBookings: React.FC = () => {
     const { user } = useAuth();
@@ -47,6 +51,58 @@ export const AdminBookings: React.FC = () => {
     const [actionReason, setActionReason] = useState('');
     const [actionLoading, setActionLoading] = useState(false);
     const [paymentToggleLoading, setPaymentToggleLoading] = useState<string | null>(null);
+
+    // Helper function to send booking confirmation email
+    const sendConfirmationEmail = async (booking: Booking): Promise<void> => {
+        try {
+            // Use the specific transformation function for confirmation
+            const emailBookingData = transformBookingDataForConfirmation(booking, user);
+
+            // Log validation data for debugging
+            console.log('Confirmation email validation:', {
+                bookingId: emailBookingData.id,
+                status: emailBookingData.status,
+                villaId: emailBookingData.villa.id,
+                villaTitle: emailBookingData.villa.title,
+                guestEmail: emailBookingData.guest.email,
+                totalAdults: emailBookingData.totalAdults,
+                totalChildren: emailBookingData.totalChildren,
+            });
+
+            await emailApi.sendBookingConfirmation(emailBookingData);
+            console.log('Booking confirmation email sent successfully');
+        } catch (error) {
+            console.error('Failed to send booking confirmation email:', error);
+            // Don't throw error here - we don't want to fail confirmation if email fails
+            THToast.warning('Email Notice', 'Booking confirmed but notification email could not be sent');
+        }
+    };
+
+    // Helper function to send booking rejection email
+    const sendRejectionEmail = async (booking: Booking, reason: string): Promise<void> => {
+        try {
+            // Use the specific transformation function for rejection with reason
+            const emailBookingData = transformBookingDataForRejection(booking, reason, user);
+
+            // Log validation data for debugging
+            console.log('Rejection email validation:', {
+                bookingId: emailBookingData.id,
+                status: emailBookingData.status,
+                rejectionReason: emailBookingData.rejectionReason,
+                villaId: emailBookingData.villa.id,
+                villaTitle: emailBookingData.villa.title,
+                guestEmail: emailBookingData.guest.email,
+                reasonProvided: reason,
+            });
+
+            await emailApi.sendBookingRejection(emailBookingData);
+            console.log('Booking rejection email sent successfully');
+        } catch (error) {
+            console.error('Failed to send booking rejection email:', error);
+            // Don't throw error here - we don't want to fail rejection if email fails
+            THToast.warning('Email Notice', 'Booking rejected but notification email could not be sent');
+        }
+    };
 
     const fetchBookings = async () => {
         try {
@@ -111,9 +167,13 @@ export const AdminBookings: React.FC = () => {
                 switch (actionType) {
                     case 'confirm':
                         await bookingApi.confirmBooking(selectedBooking.id);
+                        // Send confirmation email (non-blocking)
+                        sendConfirmationEmail(selectedBooking);
                         break;
                     case 'reject':
                         await bookingApi.rejectBooking(selectedBooking.id, actionReason);
+                        // Send rejection email (non-blocking)
+                        sendRejectionEmail(selectedBooking, actionReason);
                         break;
                     case 'complete':
                         await bookingApi.completeBooking(selectedBooking.id);
@@ -171,8 +231,6 @@ export const AdminBookings: React.FC = () => {
         THToast.info('Refreshing', 'Updating bookings list...');
         await fetchBookings();
     };
-
-
 
     const filteredBookings = bookings.filter(
         booking =>
@@ -453,30 +511,25 @@ export const AdminBookings: React.FC = () => {
                                                     <td className='px-6 py-4'>
                                                         <div className='flex items-center space-x-2'>
                                                             {getPaymentBadge(booking.isPaid)}
-                                                            {user &&
-                                                                canTogglePayment(
-                                                                    booking,
-                                                                    user.id,
-                                                                    user.role
-                                                                ) && (
-                                                                    <button
-                                                                        onClick={() => handleTogglePayment(booking)}
-                                                                        disabled={paymentToggleLoading === booking.id}
-                                                                        className={`px-2 py-1 rounded-lg text-xs font-medium transition-colors ${
-                                                                            booking.isPaid
-                                                                                ? 'bg-red-100 text-red-700 hover:bg-red-200'
-                                                                                : 'bg-green-100 text-green-700 hover:bg-green-200'
-                                                                        } disabled:opacity-50`}
-                                                                    >
-                                                                        {paymentToggleLoading === booking.id ? (
-                                                                            <div className='w-3 h-3 border border-current/30 border-t-current rounded-full animate-spin'></div>
-                                                                        ) : booking.isPaid ? (
-                                                                            'Mark Unpaid'
-                                                                        ) : (
-                                                                            'Mark Paid'
-                                                                        )}
-                                                                    </button>
-                                                                )}
+                                                            {user && canTogglePayment(booking, user.id, user.role) && (
+                                                                <button
+                                                                    onClick={() => handleTogglePayment(booking)}
+                                                                    disabled={paymentToggleLoading === booking.id}
+                                                                    className={`px-2 py-1 rounded-lg text-xs font-medium transition-colors ${
+                                                                        booking.isPaid
+                                                                            ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                                                                            : 'bg-green-100 text-green-700 hover:bg-green-200'
+                                                                    } disabled:opacity-50`}
+                                                                >
+                                                                    {paymentToggleLoading === booking.id ? (
+                                                                        <div className='w-3 h-3 border border-current/30 border-t-current rounded-full animate-spin'></div>
+                                                                    ) : booking.isPaid ? (
+                                                                        'Mark Unpaid'
+                                                                    ) : (
+                                                                        'Mark Paid'
+                                                                    )}
+                                                                </button>
+                                                            )}
                                                         </div>
                                                     </td>
                                                     <td className='px-6 py-4'>
@@ -521,99 +574,6 @@ export const AdminBookings: React.FC = () => {
                                             ))}
                                         </tbody>
                                     </table>
-                                </div>
-
-                                {/* Mobile Cards */}
-                                <div className='lg:hidden space-y-4 p-4'>
-                                    {filteredBookings.map(booking => (
-                                        <div
-                                            key={booking.id}
-                                            className='bg-white/30 border border-[#F8B259]/50 rounded-xl p-4 space-y-4'
-                                        >
-                                            <div className='flex justify-between items-start'>
-                                                <div>
-                                                    <h3 className='font-semibold text-[#C75D2C]'>
-                                                        {booking.guest?.fullName || 'Guest'}
-                                                    </h3>
-                                                    <p className='text-sm text-[#C75D2C]/60'>
-                                                        {booking.villa?.title || 'Villa'}
-                                                    </p>
-                                                    <p className='text-xs text-[#C75D2C]/60'>#{booking.id.slice(-8)}</p>
-                                                </div>
-                                                <BookingStatusBadge status={booking.status} />
-                                            </div>
-
-                                            <div className='grid grid-cols-2 gap-4 text-sm'>
-                                                <div>
-                                                    <p className='text-[#C75D2C]/60'>Check-in</p>
-                                                    <p className='font-medium text-[#C75D2C]'>
-                                                        {formatDate(booking.checkIn)}
-                                                    </p>
-                                                </div>
-                                                <div>
-                                                    <p className='text-[#C75D2C]/60'>Check-out</p>
-                                                    <p className='font-medium text-[#C75D2C]'>
-                                                        {formatDate(booking.checkOut)}
-                                                    </p>
-                                                </div>
-                                                <div>
-                                                    <p className='text-[#C75D2C]/60'>Guests</p>
-                                                    <div className='flex items-center space-x-2'>
-                                                        <div className='flex items-center space-x-1'>
-                                                            <Users className='w-4 h-4 text-[#D96F32]' />
-                                                            <span className='font-medium text-[#C75D2C]'>
-                                                                {booking.totalAdults}
-                                                            </span>
-                                                        </div>
-                                                        {booking.totalChildren > 0 && (
-                                                            <div className='flex items-center space-x-1'>
-                                                                <Baby className='w-4 h-4 text-[#D96F32]' />
-                                                                <span className='font-medium text-[#C75D2C]'>
-                                                                    {booking.totalChildren}
-                                                                </span>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                                <div>
-                                                    <p className='text-[#C75D2C]/60'>Total</p>
-                                                    <p className='font-bold text-[#C75D2C]'>
-                                                        {formatPrice(booking.totalPrice, 'EUR')}
-                                                    </p>
-                                                </div>
-                                            </div>
-
-                                            <div className='flex justify-between items-center pt-2 border-t border-[#F8B259]/30'>
-                                                <div className='flex items-center space-x-2'>
-                                                    {getPaymentBadge(booking.isPaid)}
-                                                </div>
-                                                <div className='flex items-center space-x-2'>
-                                                    <button
-                                                        onClick={() => setSelectedBooking(booking)}
-                                                        className='p-2 bg-[#D96F32]/20 text-[#D96F32] rounded-lg hover:bg-[#D96F32]/30 transition-colors'
-                                                    >
-                                                        <Eye className='w-4 h-4' />
-                                                    </button>
-                                                    {canPerformAction(booking, 'confirm') && (
-                                                        <button
-                                                            onClick={() => openActionModal(booking, 'confirm')}
-                                                            className='p-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors'
-                                                        >
-                                                            <CheckCircle className='w-4 h-4' />
-                                                        </button>
-                                                    )}
-                                                    {canPerformAction(booking, 'reject') && (
-                                                        <button
-                                                            onClick={() => openActionModal(booking, 'reject')}
-                                                            className='p-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors'
-                                                        >
-                                                            <XCircle className='w-4 h-4' />
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
                                 </div>
 
                                 {/* Pagination */}
@@ -773,10 +733,7 @@ export const AdminBookings: React.FC = () => {
                                         <div className='bg-white/30 rounded-lg p-3 text-center'>
                                             <p className='text-sm text-[#C75D2C]/60'>Duration</p>
                                             <p className='font-medium text-[#C75D2C]'>
-                                                {getStayDuration(
-                                                    selectedBooking.checkIn,
-                                                    selectedBooking.checkOut
-                                                )}{' '}
+                                                {getStayDuration(selectedBooking.checkIn, selectedBooking.checkOut)}{' '}
                                                 nights
                                             </p>
                                         </div>
@@ -828,30 +785,25 @@ export const AdminBookings: React.FC = () => {
                                             <span className='text-[#C75D2C]/60'>Payment Status</span>
                                             <div className='flex items-center space-x-2'>
                                                 {getPaymentBadge(selectedBooking.isPaid)}
-                                                {user &&
-                                                    canTogglePayment(
-                                                        selectedBooking,
-                                                        user.id,
-                                                        user.role
-                                                    ) && (
-                                                        <button
-                                                            onClick={() => handleTogglePayment(selectedBooking)}
-                                                            disabled={paymentToggleLoading === selectedBooking.id}
-                                                            className={`px-2 py-1 rounded-lg text-xs font-medium transition-colors ${
-                                                                selectedBooking.isPaid
-                                                                    ? 'bg-red-100 text-red-700 hover:bg-red-200'
-                                                                    : 'bg-green-100 text-green-700 hover:bg-green-200'
-                                                            } disabled:opacity-50`}
-                                                        >
-                                                            {paymentToggleLoading === selectedBooking.id ? (
-                                                                <div className='w-3 h-3 border border-current/30 border-t-current rounded-full animate-spin'></div>
-                                                            ) : selectedBooking.isPaid ? (
-                                                                'Mark Unpaid'
-                                                            ) : (
-                                                                'Mark Paid'
-                                                            )}
-                                                        </button>
-                                                    )}
+                                                {user && canTogglePayment(selectedBooking, user.id, user.role) && (
+                                                    <button
+                                                        onClick={() => handleTogglePayment(selectedBooking)}
+                                                        disabled={paymentToggleLoading === selectedBooking.id}
+                                                        className={`px-2 py-1 rounded-lg text-xs font-medium transition-colors ${
+                                                            selectedBooking.isPaid
+                                                                ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                                                                : 'bg-green-100 text-green-700 hover:bg-green-200'
+                                                        } disabled:opacity-50`}
+                                                    >
+                                                        {paymentToggleLoading === selectedBooking.id ? (
+                                                            <div className='w-3 h-3 border border-current/30 border-t-current rounded-full animate-spin'></div>
+                                                        ) : selectedBooking.isPaid ? (
+                                                            'Mark Unpaid'
+                                                        ) : (
+                                                            'Mark Paid'
+                                                        )}
+                                                    </button>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
