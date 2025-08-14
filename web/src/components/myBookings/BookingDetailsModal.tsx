@@ -208,7 +208,7 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
                                 <span
                                     className={`font-medium ${booking.isPaid ? 'text-green-600' : 'text-orange-600'}`}
                                 >
-                                    {booking.isPaid ? 'Paid' : 'Pending'}
+                                    {booking.isPaid ? 'Paid' : 'Not Paid'}
                                 </span>
                             }
                         />
@@ -249,13 +249,9 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
                                         <p className='font-medium text-[#C75D2C]'>
                                             {service.service?.title || 'Service'}
                                         </p>
-                                        <p className='text-sm text-[#C75D2C]/60'>
-                                            Qty: {service.quantity} × {formatPrice(service.unitPrice, 'EUR')}
-                                        </p>
+                                       
                                     </div>
-                                    <span className='font-bold text-[#C75D2C]'>
-                                        {formatPrice(service.totalPrice, 'EUR')}
-                                    </span>
+                                    
                                 </div>
                             ))}
                         </div>

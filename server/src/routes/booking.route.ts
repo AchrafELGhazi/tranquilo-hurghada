@@ -6,14 +6,13 @@ import { createBookingSchema, updateBookingServicesSchema, bookingActionSchema, 
 
 const bookingRouter = Router();
 
-bookingRouter.use(authenticate);
-
 /**
  * @route   POST /api/bookings
  * @desc    Create a new booking request with services
  * @access  Private (Guests)
  */
 bookingRouter.post('/',
+    authenticate,
     requireGuest,
     validateRequest(createBookingSchema),
     createBookingRequest
@@ -25,6 +24,7 @@ bookingRouter.post('/',
  * @access  Private (Role-based)
  */
 bookingRouter.get('/',
+    authenticate,
     validateRequest(bookingQuerySchema),
     getAllBookings
 );
@@ -35,6 +35,7 @@ bookingRouter.get('/',
  * @access  Private (All roles)
  */
 bookingRouter.get('/my',
+    authenticate,
     validateRequest(bookingQuerySchema),
     getMyBookings
 );
@@ -58,6 +59,7 @@ bookingRouter.get('/villa/:villaId/booked-dates',
  * @access  Private (Booking participants)
  */
 bookingRouter.get('/:bookingId',
+    authenticate,
     validateRequest(bookingParamsSchema),
     getBookingDetails
 );
@@ -68,6 +70,7 @@ bookingRouter.get('/:bookingId',
  * @access  Private (Booking participants)
  */
 bookingRouter.put('/:bookingId/services',
+    authenticate,
     validateRequest(updateBookingServicesSchema),
     updateBookingServicesEndpoint
 );
@@ -78,6 +81,7 @@ bookingRouter.put('/:bookingId/services',
  * @access  Private (Hosts, Admins)
  */
 bookingRouter.put('/:bookingId/confirm',
+    authenticate,
     requireHost,
     validateRequest(bookingParamsSchema),
     confirmBookingRequest
@@ -89,6 +93,7 @@ bookingRouter.put('/:bookingId/confirm',
  * @access  Private (Hosts, Admins)
  */
 bookingRouter.put('/:bookingId/reject',
+    authenticate,
     requireHost,
     validateRequest(bookingActionSchema),
     rejectBookingRequest
@@ -100,6 +105,7 @@ bookingRouter.put('/:bookingId/reject',
  * @access  Private (Guests, Hosts, Admins)
  */
 bookingRouter.put('/:bookingId/cancel',
+    authenticate,
     validateRequest(bookingActionSchema),
     cancelBookingRequest
 );
@@ -110,6 +116,7 @@ bookingRouter.put('/:bookingId/cancel',
  * @access  Private (Hosts, Admins)
  */
 bookingRouter.put('/:bookingId/toggle-payment',
+    authenticate,
     validateRequest(bookingParamsSchema),
     toggleBookingPaidStatus
 );
@@ -120,6 +127,7 @@ bookingRouter.put('/:bookingId/toggle-payment',
  * @access  Private (Admins only)
  */
 bookingRouter.put('/:bookingId/complete',
+    authenticate,
     requireAdmin,
     validateRequest(bookingParamsSchema),
     completeBookingRequest
