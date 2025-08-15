@@ -1,76 +1,26 @@
-// whatsapp.controller.ts
-import { Response } from 'express';
-import { ApiResponse } from '../utils/apiResponse';
-import { sendBookingNotificationMessage } from '../services/whatsapp.service';
-import { AuthenticatedRequest } from '../middleware/auth.middleware';
-import { validatePhoneNumber } from '../utils/whatsapp.utils';
+import { Request, Response } from "express";
+import { sendWhatsAppMessage, sendWhatsAppLocation, buildBookingMessage } from "../utils/whatsapp.utils";
 
-export const sendBookingNotification = async (req: AuthenticatedRequest, res: Response) => {
+export async function sendBookingWhatsApp(req: Request, res: Response) {
+    const { phone, name, checkIn, checkOut, bookingId, villaTitle } = req.body;
+    const message = buildBookingMessage(name, villaTitle, checkIn, checkOut, bookingId);
+
     try {
-        const {
-            phoneNumber,
-            guestName,
-            checkInDate,
-            checkOutDate,
-            bookingRef,
-            villaTitle
-        } = req.body;
+        // Send the booking confirmation message
+        await sendWhatsAppMessage(phone, message);
 
-        // Validate required fields
-        if (!phoneNumber || !guestName || !checkInDate || !checkOutDate || !bookingRef) {
-            return ApiResponse.badRequest(
-                res,
-                'Missing required fields: phoneNumber, guestName, checkInDate, checkOutDate, bookingRef'
-            );
-        }
-
-        // Validate phone number format
-        if (!validatePhoneNumber(phoneNumber)) {
-            return ApiResponse.badRequest(res, 'Invalid phone number format. Use international format (+1234567890)');
-        }
-
-        // Validate dates
-        const checkIn = new Date(checkInDate);
-        const checkOut = new Date(checkOutDate);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        if (isNaN(checkIn.getTime()) || isNaN(checkOut.getTime())) {
-            return ApiResponse.badRequest(res, 'Invalid date format. Use YYYY-MM-DD');
-        }
-
-        if (checkOut <= checkIn) {
-            return ApiResponse.badRequest(res, 'Check-out date must be after check-in date');
-        }
-
-        // Send WhatsApp notification
-        const result = await sendBookingNotificationMessage({
-            phoneNumber,
-            guestName: guestName.trim(),
-            checkInDate,
-            checkOutDate,
-            bookingRef: bookingRef.trim(),
-            villaTitle: villaTitle?.trim() || 'Tranquilo Hurghada villa'
-        });
-
-        if (result.success) {
-            return ApiResponse.success(
-                res,
-                result.data,
-                'WhatsApp booking notification sent successfully'
-            );
-        } else {
-            return ApiResponse.serverError(
-                res,
-                result.error || 'Failed to send WhatsApp notification'
-            );
-        }
-
-    } catch (error: any) {
-        console.error('Error in sendBookingNotification:', error);
-        return ApiResponse.serverError(
-            res,
-            'An error occurred while sending WhatsApp notification'
+        // Send the villa location as a separate location attachment
+        // Coordinates for 7QG7+RP (more precise than general Hurghada coordinates)
+        await sendWhatsAppLocation(
+            phone,
+            27.2764,  // Updated latitude for Plus Code 7QG7+RP
+            33.8366,  // Updated longitude for Plus Code 7QG7+RP
+            "Tranquilo Hurghada Villa location",
+            "7QG7+RP, Hurghada 2, Red Sea Governorate 1981111, Egypt"
         );
+
+        res.json({ success: true, message: "WhatsApp message and location sent" });
+    } catch (error: any) {
+        res.status(500).json({ error: error.response?.data || error.message });
     }
-};
+}
