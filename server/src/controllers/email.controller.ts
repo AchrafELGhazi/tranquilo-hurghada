@@ -3,6 +3,7 @@ import { sendNewBookingNotification, sendBookingConfirmation, sendBookingRejecti
 import { ApiResponse } from '../utils/apiResponse';
 import { validateBookingDates } from '../utils/booking.utils';
 import toDate from '../utils/toDate';
+import { checkSenderVerification } from '../utils/email.utils';
 
 // Helper function to convert date strings to Date objects using existing utility
 const convertDatesToDateObjects = (bookingData: any): BookingData => {
@@ -180,5 +181,13 @@ export const sendBookingCancellationHandler = async (req: Request, res: Response
     } catch (error) {
         console.error('Booking cancellation error:', error);
         ApiResponse.serverError(res, error instanceof Error ? error.message : 'Failed to send booking cancellation');
+    }
+};
+export const debugEmailHandler = async (req: Request, res: Response): Promise<void> => {
+    try {
+        await checkSenderVerification();
+        ApiResponse.success(res, null, 'Check your logs for sender verification status');
+    } catch (error) {
+        ApiResponse.serverError(res, error instanceof Error ? error.message : 'Debug failed');
     }
 };

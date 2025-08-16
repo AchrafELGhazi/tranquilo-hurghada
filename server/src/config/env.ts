@@ -19,13 +19,16 @@ const envSchema = z.object({
     ADMIN_EMAIL: z.string().email(),
     ADMIN_PASSWORD: z.string().min(8),
     ADMIN_NAME: z.string().default('Tranquilo Hurghada'),
-    SMTP_HOST: z.string().optional(),
-    SMTP_PORT: z.string().transform(Number).optional(),
+    SMTP_HOST: z.string(),
+    SMTP_PORT: z.string().transform(Number),
     SMTP_SECURE: z.string().transform((val) => val === 'true').optional(),
     SMTP_USER: z.string().optional(),
     SMTP_PASS: z.string().optional(),
-    SMTP_FROM: z.string().email().optional(),
+    MAILERSEND_SMTP_USER: z.string(),
+    MAILERSEND_SMTP_PASS: z.string(),
+    MAIL_FROM: z.string(),
     JWT_EXPIRES_IN: z.string(),
+    BREVO_API_KEY: z.string(),
     JWT_REFRESH_EXPIRES_IN:z.string()
 });
 
