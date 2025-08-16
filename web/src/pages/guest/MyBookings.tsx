@@ -15,6 +15,7 @@ import { BookingDetailsModal } from '@/components/myBookings/BookingDetailsModal
 import { CancelBookingModal } from '@/components/myBookings/CancelBookingModal';
 
 import { transformBookingDataForEmail, createUpdatedBooking } from '@/utils/emailUtils';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const MyBookings: React.FC = () => {
     const { user } = useAuth();
@@ -23,7 +24,6 @@ const MyBookings: React.FC = () => {
     const [error, setError] = useState('');
     const [cancelling, setCancelling] = useState<string | null>(null);
 
-    // Separate state for each modal
     const [selectedBookingForDetails, setSelectedBookingForDetails] = useState<Booking | null>(null);
     const [selectedBookingForCancel, setSelectedBookingForCancel] = useState<Booking | null>(null);
     const [showCancelModal, setShowCancelModal] = useState(false);
@@ -36,6 +36,9 @@ const MyBookings: React.FC = () => {
         sortBy: 'createdAt',
         sortOrder: 'desc',
     });
+
+    const { lang } = useParams();
+    const navigate = useNavigate();
 
     const fetchBookings = async () => {
         try {
@@ -56,10 +59,14 @@ const MyBookings: React.FC = () => {
     useEffect(() => {
         if (user) {
             fetchBookings();
+        } else {
+            navigate(`/${lang}/signin`);
         }
-    }, [user, filters]);
+    }, [user, filters, lang, navigate]);
 
     const sendCancellationEmail = async (booking: Booking, cancellationReason: string): Promise<void> => {
+        if (!user) return;
+
         try {
             const emailBookingData = transformBookingDataForEmail(booking, cancellationReason, user);
             await emailApi.sendBookingCancellation(emailBookingData);
@@ -115,7 +122,6 @@ const MyBookings: React.FC = () => {
     };
 
     const handleShowCancelModalFromDetails = () => {
-        // Transfer the booking from details to cancel
         setSelectedBookingForCancel(selectedBookingForDetails);
         setShowCancelModal(true);
     };
@@ -126,15 +132,7 @@ const MyBookings: React.FC = () => {
     };
 
     if (!user) {
-        return (
-            <div className='min-h-screen bg-[#E8DCC6] flex items-center justify-center'>
-                <div className='bg-white/40 backdrop-blur-md border-2 border-[#F8B259]/70 rounded-2xl p-8 text-center'>
-                    <AlertCircle className='w-12 h-12 text-[#D96F32] mx-auto mb-4' />
-                    <h2 className='text-xl font-bold text-[#C75D2C] mb-2'>Please Sign In</h2>
-                    <p className='text-[#C75D2C]/70'>You need to be signed in to view your bookings.</p>
-                </div>
-            </div>
-        );
+        return null;
     }
 
     return (

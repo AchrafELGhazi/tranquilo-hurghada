@@ -8,6 +8,8 @@ import generateRootResponse from '../utils/generateRootResponse';
 import serviceRouter from './service.route';
 import emailRouter from './email.route';
 import contactRouter from './contact.route';
+import statsRouter from './stats.route';
+import whatsappRouter from './whatsapp.route';
 
 const apiRouter = Router();
 
@@ -24,6 +26,8 @@ apiRouter.use('/bookings', bookingRouter);
 apiRouter.use('/email', emailRouter);
 apiRouter.use('/service', serviceRouter);
 apiRouter.use('/contact', contactRouter);
+apiRouter.use('/stats', statsRouter);
+apiRouter.use('/whatsapp', whatsappRouter);
 
 // Health check endpoint
 apiRouter.get('/health', (_req, res) => {

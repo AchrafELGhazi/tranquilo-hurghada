@@ -190,19 +190,7 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
         saveFormDataToStorage(newFormData);
     };
 
-    const updateServiceQuantity = (serviceId: string, quantity: number) => {
-        const newSelectedServices = formData.selectedServices.map(service =>
-            service.serviceId === serviceId ? { ...service, quantity: Math.max(1, quantity) } : service
-        );
 
-        const newFormData = {
-            ...formData,
-            selectedServices: newSelectedServices,
-        };
-
-        setFormData(newFormData);
-        saveFormDataToStorage(newFormData);
-    };
 
     // Handle date selection from modal
     const handleDateSelect = (checkIn: string, checkOut: string) => {
@@ -416,15 +404,6 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
         }
     };
 
-    const handleSignIn = () => {
-        // Get current language from URL or default to 'en'
-        const currentPath = window.location.pathname;
-        const langMatch = currentPath.match(/^\/([a-z]{2})\//);
-        const lang = langMatch ? langMatch[1] : 'en';
-
-        // Redirect to sign in page
-        window.location.href = `/${lang}/signin`;
-    };
 
     const calculateTotal = () => {
         if (!formData.checkIn || !formData.checkOut) return 0;
@@ -455,17 +434,7 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
         });
     };
 
-    const getServiceCategoryColor = (category: string) => {
-        const colorMap: Record<string, string> = {
-            INCLUDED: 'bg-green-100 text-green-800',
-            ADVENTURE: 'bg-orange-100 text-orange-800',
-            WELLNESS: 'bg-purple-100 text-purple-800',
-            CULTURAL: 'bg-blue-100 text-blue-800',
-            TRANSPORT: 'bg-gray-100 text-gray-800',
-            CUSTOM: 'bg-indigo-100 text-indigo-800',
-        };
-        return colorMap[category] || 'bg-gray-100 text-gray-800';
-    };
+
 
     const servicesTotal = calculateServicesTotal();
     const totalWithFees = calculateTotal();

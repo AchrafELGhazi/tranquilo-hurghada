@@ -10,8 +10,8 @@ interface SignInModalProps {
 
 const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, villaTitle }) => {
 
-    const {lang} = useParams()
-    const handleSignIn = () => {
+    const { lang } = useParams()
+    const handleSignIn = () => { 
         window.location.href = `/${lang}/signin`;
     };
 
