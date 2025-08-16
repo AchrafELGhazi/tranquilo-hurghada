@@ -40,6 +40,56 @@ export const formatDateForApi = (date: Date | string): string => {
     return date.toISOString();
 };
 
+
+export const validateAge = (dateOfBirth: string): { isValid: boolean; error?: string; age?: number } => {
+    if (!dateOfBirth) {
+        return { isValid: false, error: 'Date of birth is required' };
+    }
+
+    const today = new Date();
+    const dobDate = new Date(dateOfBirth);
+
+    // Check if the date is valid
+    if (isNaN(dobDate.getTime())) {
+        return { isValid: false, error: 'Please enter a valid date' };
+    }
+
+    // Check if date is in the future
+    if (dobDate > today) {
+        return { isValid: false, error: 'Date of birth cannot be in the future' };
+    }
+
+    // Calculate age more accurately
+    let age = today.getFullYear() - dobDate.getFullYear();
+    const monthDiff = today.getMonth() - dobDate.getMonth();
+
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dobDate.getDate())) {
+        age--;
+    }
+
+    // Check minimum age requirement
+    if (age < 18) {
+        return {
+            isValid: false,
+            error: `You must be 18 or older to make a booking. Current age: ${age} years`,
+            age
+        };
+    }
+
+    // Check maximum reasonable age (optional safeguard)
+    if (age > 120) {
+        return {
+            isValid: false,
+            error: 'Please enter a valid date of birth',
+            age
+        };
+    }
+
+    return { isValid: true, age };
+};
+
+
+
 /**
  * Utility method to validate booking dates
  */

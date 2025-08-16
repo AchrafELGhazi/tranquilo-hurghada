@@ -20,7 +20,7 @@ import DateRangePickerModal from './DateRangePickerModal';
 import SignInModal from './SignInModal';
 import { THToast, THToaster } from '@/components/common/Toast';
 import type { PaymentMethod, User, Villa, Service } from '@/utils/types';
-import { calculateNights, calculateTotalPrice, validateBookingDates } from '@/utils/bookingUtils';
+import { calculateNights, calculateTotalPrice, validateAge, validateBookingDates } from '@/utils/bookingUtils';
 
 interface FormData {
     checkIn: string;
@@ -190,8 +190,6 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
         saveFormDataToStorage(newFormData);
     };
 
-
-
     // Handle date selection from modal
     const handleDateSelect = (checkIn: string, checkOut: string) => {
         const newFormData = {
@@ -230,6 +228,12 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
         if (!formData.dateOfBirth) {
             errors.dateOfBirth = 'Date of birth required';
             THToast.error('Missing Date of Birth', 'Please enter your date of birth');
+        } else {
+            const ageValidation = validateAge(formData.dateOfBirth);
+            if (!ageValidation.isValid) {
+                errors.dateOfBirth = ageValidation.error;
+                THToast.error('Age Requirement', ageValidation.error || 'Invalid date of birth');
+            }
         }
 
         if (formData.checkIn && formData.checkOut) {
@@ -264,6 +268,36 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
 
         setFormErrors(errors);
         return Object.keys(errors).length === 0;
+    };
+
+    const handleDateOfBirthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        const newFormData = {
+            ...formData,
+            [name]: value,
+        };
+
+        setFormData(newFormData);
+        saveFormDataToStorage(newFormData);
+
+        // Clear existing error
+        if (formErrors.dateOfBirth) {
+            setFormErrors(prev => ({
+                ...prev,
+                dateOfBirth: '',
+            }));
+        }
+
+        // Real-time validation for date of birth
+        if (value && name === 'dateOfBirth') {
+            const ageValidation = validateAge(value);
+            if (!ageValidation.isValid) {
+                setFormErrors(prev => ({
+                    ...prev,
+                    dateOfBirth: ageValidation.error,
+                }));
+            }
+        }
     };
 
     // Helper function to transform booking data for email
@@ -404,7 +438,6 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
         }
     };
 
-
     const calculateTotal = () => {
         if (!formData.checkIn || !formData.checkOut) return 0;
         return calculateTotalPrice(villa.pricePerNight, formData.checkIn, formData.checkOut);
@@ -433,8 +466,6 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
             day: 'numeric',
         });
     };
-
-
 
     const servicesTotal = calculateServicesTotal();
     const totalWithFees = calculateTotal();
@@ -635,9 +666,7 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
                                                                         <h4 className='font-medium text-[#C75D2C] text-sm'>
                                                                             {service.title}
                                                                         </h4>
-                                                                       
                                                                     </div>
-                                                                  
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -686,24 +715,39 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
                                 <div className='bg-white/30 border-2 border-[#F8B259]/50 rounded-xl p-4'>
                                     <label className='block text-xs font-bold text-[#C75D2C] mb-2 uppercase tracking-wider'>
                                         <Calendar className='w-4 h-4 inline mr-2' />
-                                        Date of Birth *
+                                        Date of Birth * (Must be 18+)
                                     </label>
                                     <input
                                         type='date'
                                         name='dateOfBirth'
                                         value={formData.dateOfBirth}
-                                        onChange={handleInputChange}
+                                        onChange={handleDateOfBirthChange}
                                         max={
-                                            new Date(Date.now() - 18 * 365 * 24 * 60 * 60 * 1000)
+                                            new Date(Date.now() - 18 * 365.25 * 24 * 60 * 60 * 1000)
                                                 .toISOString()
                                                 .split('T')[0]
                                         }
-                                        className='w-full text-sm text-[#C75D2C] bg-transparent focus:outline-none font-medium'
+                                        min={
+                                            new Date(Date.now() - 120 * 365.25 * 24 * 60 * 60 * 1000)
+                                                .toISOString()
+                                                .split('T')[0]
+                                        }
+                                        className={`w-full text-sm text-[#C75D2C] bg-transparent focus:outline-none font-medium ${
+                                            formErrors.dateOfBirth ? 'border-red-500' : ''
+                                        }`}
+                                        aria-describedby={formErrors.dateOfBirth ? 'dob-error' : undefined}
                                     />
                                     {formErrors.dateOfBirth && (
-                                        <p className='text-red-600 text-xs mt-2 font-medium'>
+                                        <p
+                                            id='dob-error'
+                                            className='text-red-600 text-xs mt-2 font-medium'
+                                            role='alert'
+                                        >
                                             {formErrors.dateOfBirth}
                                         </p>
+                                    )}
+                                    {formData.dateOfBirth && !formErrors.dateOfBirth && (
+                                        <p className='text-green-600 text-xs mt-2 font-medium'>✓ Age verified (18+)</p>
                                     )}
                                 </div>
                             </div>
