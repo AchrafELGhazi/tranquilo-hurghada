@@ -391,7 +391,6 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
             console.log('Booking WhatsApp message sent successfully');
         } catch (error) {
             console.error('Failed to send booking WhatsApp message:', error);
-            // Don't throw error here - we don't want to fail booking if WhatsApp fails
             THToast.warning('WhatsApp Notice', 'Booking created but WhatsApp message could not be sent');
         }
     };
