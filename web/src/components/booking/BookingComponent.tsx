@@ -21,6 +21,7 @@ import SignInModal from './SignInModal';
 import { THToast, THToaster } from '@/components/common/Toast';
 import type { PaymentMethod, User, Villa, Service } from '@/utils/types';
 import { calculateNights, calculateTotalPrice, validateAge, validateBookingDates } from '@/utils/bookingUtils';
+import whatsappApi from '@/api/whatsappApi';
 
 interface FormData {
     checkIn: string;
@@ -375,13 +376,32 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
         }
     };
 
+    const sendBookingWhatsAppMessage = async (bookingData: any): Promise<void> => {
+        try {
+            const whatsappData = {
+                phone: formData.phone,
+                name: user?.fullName || 'Guest User',
+                checkIn: formData.checkIn,
+                checkOut: formData.checkOut,
+                bookingId: bookingData.id,
+                villaTitle: villa.title,
+            };
+
+            await whatsappApi.sendBookingWhatsApp(whatsappData);
+            console.log('Booking WhatsApp message sent successfully');
+        } catch (error) {
+            console.error('Failed to send booking WhatsApp message:', error);
+            // Don't throw error here - we don't want to fail booking if WhatsApp fails
+            THToast.warning('WhatsApp Notice', 'Booking created but WhatsApp message could not be sent');
+        }
+    };
+
     const handleSubmit = async () => {
         if (!validateForm()) return;
 
-        // Check if user is authenticated
         if (!user) {
             setShowSignInModal(true);
-            THToast.warning('Sign In Required', 'Please sign in to complete your booking');
+            // THToast.warning('Sign In Required', 'Please sign in to complete your booking');
             return;
         }
 
@@ -411,13 +431,9 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
 
             const bookingResponse = await bookingPromise;
 
-            // Transform booking data for email and send notification
             const emailBookingData = transformBookingDataForEmail(bookingResponse);
-
-            // Send booking notification email (non-blocking)
             sendBookingNotificationEmail(emailBookingData);
-
-            // Clear form data from localStorage after successful booking
+            sendBookingWhatsAppMessage(bookingResponse);
             localStorage.removeItem(FORM_STORAGE_KEY);
 
             setFormData(prev => ({
@@ -432,7 +448,6 @@ const BookingComponent: React.FC<BookingComponentProps> = ({ villa, user, onBook
 
             onBookingSuccess?.();
         } catch (err: any) {
-            // Error is already handled by THToast.promise
         } finally {
             setSubmitting(false);
         }
