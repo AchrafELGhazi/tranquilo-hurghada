@@ -8,8 +8,8 @@ export const sendEmail = async (to: string, subject: string, html: string): Prom
             'https://api.brevo.com/v3/smtp/email',
             {
                 sender: {
-                    name: "Tranquilo Hurghada",
-                    email: env.MAIL_FROM || "admin@tranquilo-hurghada.com"
+                    name: env.ADMIN_NAME,
+                    email: env.MAIL_FROM
                 },
                 to: [{ email: to }],
                 subject: subject,
