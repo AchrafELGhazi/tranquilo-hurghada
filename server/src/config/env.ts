@@ -24,8 +24,6 @@ const envSchema = z.object({
     SMTP_SECURE: z.string().transform((val) => val === 'true').optional(),
     SMTP_USER: z.string().optional(),
     SMTP_PASS: z.string().optional(),
-    MAILERSEND_SMTP_USER: z.string(),
-    MAILERSEND_SMTP_PASS: z.string(),
     MAIL_FROM: z.string(),
     JWT_EXPIRES_IN: z.string(),
     BREVO_API_KEY: z.string(),
